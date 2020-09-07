@@ -29,31 +29,7 @@ return [
                 // 'enableSchemaCache' => true, // 是否开启缓存, 请了解其中机制在开启，不了解谨慎
                 // 'schemaCacheDuration' => 3600, // 缓存时间
                 // 'schemaCache' => 'cache', // 缓存名称
-        ],
-        //BDD正式erp
-        'db2' => [
-                'class' => 'yii\db\Connection',
-                'dsn' => 'mysql:host=47.75.210.123;port=3306;dbname=bdd_erp;',
-                'username' => 'super',
-                'password' => 'Bdd123o123',
-                'charset' => 'utf8',
-                'tablePrefix'=>'',
-                'attributes' => [
-
-                ],
-        ], 
-        //BDD官网
-        'bddDb' => [
-                'class' => 'yii\db\Connection',
-                'dsn' => 'mysql:host=47.75.210.123;port=3306;dbname=bdd;',
-                'username' => 'super',
-                'password' => 'Bdd123o123',
-                'charset' => 'utf8',
-                'tablePrefix'=>'',
-                'attributes' => [
-                        
-                ],
-        ],
+        ],  
         /** ------ 缓存 ------ **/
         'cache' => [
             'class' => 'yii\redis\Cache',
@@ -144,13 +120,6 @@ return [
         'area' => ['class' => 'common\components\Area'],
 		'attr' => ['class' => 'common\components\Attribute'],
         'trans'=> ['class'=>'common\components\Transaction'],
-        'goldTool'=> ['class'=>'common\components\GoldTool'],
-        'shopAttr'=> ['class'=>'common\components\ShopAttribute'],
-        'jdSdk' => [
-                'class' => 'common\components\JdSdk',
-                'appKey' => '600FE385E066028D2A1B30C46C54E54C',
-                'appSecret' => '1a693572f25440d8905672fac4611a6a',
-                'refreshToken'=>'e5a3eb79e4b64dfd9efa4f42fd9883dfm2vi',
-        ],
+        'goldTool'=> ['class'=>'common\components\GoldTool'],        
     ],
 ];
