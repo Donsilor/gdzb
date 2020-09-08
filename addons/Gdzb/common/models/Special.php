@@ -63,4 +63,22 @@ class Special extends BaseModel
     {
         return $this->hasOne(Member::class, ['id'=>'creator_id'])->alias('creator');
     }
+
+    /**
+     * 推广客户列表
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClient()
+    {
+        return $this->hasMany(Client::class, ['special_id'=>'id']);
+    }
+
+    /**
+     * 推广数据列表
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPromotional()
+    {
+        return $this->hasMany(Promotional::class, ['special_id'=>'id']);
+    }
 }
