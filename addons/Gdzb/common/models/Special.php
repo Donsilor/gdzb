@@ -5,9 +5,13 @@ namespace addons\Gdzb\common\models;
 use Yii;
 
 /**
- * This is the model class for table "gdzb_client.
+ * This is the model class for table "gdzb_special.
  *
  * @property int $id
+ * @property string $title 专题名称
+ * @property string $url 专题URL
+ * @property int $creator_id 创建人ID
+ * @property int $status 状态：0禁用，1启用
  * @property int $created_at 创建时间
  * @property int $updated_at 更新时间
  */
@@ -18,7 +22,7 @@ class Special extends BaseModel
      */
     public static function tableName()
     {
-        return self::tableFullName('client');
+        return self::tableFullName('special');
     }
 
     /**
@@ -28,8 +32,9 @@ class Special extends BaseModel
     {
         return [
             [['id'], 'required'],
-            [['id', 'creator_id', 'created_at', 'updated_at'], 'integer'],
-            [['nickname','sex','phone','qq','area','intention','budget'], 'string', 'max' => 45],
+            [['id', 'creator_id', 'status', 'created_at', 'updated_at'], 'integer'],
+            [['title'], 'string', 'max' => 45],
+            [['url'], 'string', 'max' => 255],
         ];
     }
 
@@ -40,6 +45,10 @@ class Special extends BaseModel
     {
         return [
             'id' => 'ID',
+            'title' => '专题名称',
+            'url' => '专题URL',
+            'creator_id' => '创建人ID',
+            'status' => '状态',
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
         ];
