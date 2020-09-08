@@ -72,4 +72,13 @@ class Client extends BaseModel
     {
         return $this->hasOne(Member::class, ['id'=>'creator_id'])->alias('creator');
     }
+
+    /**
+     * 专题
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSpecial()
+    {
+        return $this->hasOne(Special::class, ['id'=>'special_id']);
+    }
 }
