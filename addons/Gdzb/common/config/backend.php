@@ -61,9 +61,13 @@ return [
             ],
         [
             'title' => '专题管理',
-            'route' => 'indexSpecial',
+            'route' => 'indexOrder',
             'icon' => 'fa fa-superpowers',
             'child' => [
+                [
+                    'title' => '专题列表',
+                    'route' => 'special/index',
+                ],
                 [
                     'title' => '推广列表',
                     'route' => 'promotional/index',
