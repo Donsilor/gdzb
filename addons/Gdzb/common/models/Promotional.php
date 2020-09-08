@@ -2,6 +2,7 @@
 
 namespace addons\Gdzb\common\models;
 
+use common\models\backend\Member;
 use Yii;
 
 /**
@@ -61,5 +62,14 @@ class Promotional extends BaseModel
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
         ];
+    }
+
+    /**
+     * 创建人
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreator()
+    {
+        return $this->hasOne(Member::class, ['id'=>'creator_id'])->alias('creator');
     }
 }
