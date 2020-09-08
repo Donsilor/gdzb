@@ -34,8 +34,9 @@ class Special extends BaseModel
         return [
             [['id'], 'required'],
             [['id', 'creator_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['title'], 'string', 'max' => 45],
+            [['name', 'title', 'keywords', 'description'], 'string', 'max' => 120],
             [['url'], 'string', 'max' => 255],
+            [['data'], 'safe'],
         ];
     }
 
@@ -46,7 +47,11 @@ class Special extends BaseModel
     {
         return [
             'id' => 'ID',
-            'title' => '专题名称',
+            'name' => '专题名称',
+            'title' => 'Title',
+            'keywords' => 'Keywords',
+            'description' => 'Description',
+            'data' => 'data',
             'url' => '专题URL',
             'creator_id' => '创建人ID',
             'status' => '状态',
