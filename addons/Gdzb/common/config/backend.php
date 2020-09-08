@@ -57,8 +57,24 @@ return [
                                     'route' => 'customer/index',
                             ],
                     ],
-                    
+
             ],
+        [
+            'title' => '专题管理',
+            'route' => 'indexSpecial',
+            'icon' => 'fa fa-superpowers',
+            'child' => [
+                [
+                    'title' => '推广列表',
+                    'route' => 'promotional/index',
+                ],
+                [
+                    'title' => '客户列表',
+                    'route' => 'client/index',
+                ],
+            ],
+
+        ],
     ],
 
     // ----------------------- 权限配置 ----------------------- //
