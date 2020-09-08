@@ -6,7 +6,7 @@ use yii\grid\GridView;
 use common\helpers\Html;
 use common\helpers\ImageHelper;
 
-$this->title = '客户列表';
+$this->title = '专题列表';
 $this->params['breadcrumbs'][] = ['label' => $this->title];
 
 ?>
@@ -35,6 +35,12 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         [
                             'attribute' => 'id',
                             'headerOptions' => [],
+                        ],
+                        [
+                            'attribute' => 'name',
+                        ],
+                        [
+                            'attribute' => 'url',
                         ],
                         [
                             'label' => '创建人',
@@ -67,8 +73,11 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                                 return Yii::$app->formatter->asDatetime($model->created_at);
                             }
                         ],
-//                        [
-//                            'attribute' => 'status',
+                        [
+                            'attribute'=>'updated_at',
+                        ],
+                        [
+                            'attribute' => 'status',
 //                            'format' => 'raw',
 //                            'headerOptions' => ['class' => 'col-md-1'],
 //                            'value' => function ($model){
@@ -79,7 +88,14 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
 //                                'class' => 'form-control',
 //                                'style'=> 'width:60px;',
 //                            ]),
-//                        ],
+                        ],
+                        [
+                            'label'=>'数据',
+//                            'attribute'=>'date',
+                            'value'=>function($row) {
+                                return '';
+                            }
+                        ],
                         [
                             'header' => "操作",
                             'class' => 'yii\grid\ActionColumn',
