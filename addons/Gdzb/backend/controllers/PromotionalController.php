@@ -2,6 +2,7 @@
 
 namespace addons\Gdzb\backend\controllers;
 
+use addons\Gdzb\common\models\Promotional;
 use addons\Sales\common\enums\ChannelIdEnum;
 use addons\Sales\common\forms\OrderForm;
 use addons\Sales\common\models\Order;
@@ -25,9 +26,9 @@ class PromotionalController extends BaseController
     use Curd;
 
     /**
-     * @var Customer
+     * @var Promotional
      */
-    public $modelClass = Customer::class;
+    public $modelClass = Promotional::class;
 
     /**
      * 首页

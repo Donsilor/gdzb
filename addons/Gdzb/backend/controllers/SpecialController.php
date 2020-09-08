@@ -2,6 +2,7 @@
 
 namespace addons\Gdzb\backend\controllers;
 
+use addons\Gdzb\common\models\Special;
 use addons\Sales\common\enums\ChannelIdEnum;
 use addons\Sales\common\forms\OrderForm;
 use addons\Sales\common\models\Order;
@@ -25,9 +26,9 @@ class SpecialController extends BaseController
     use Curd;
 
     /**
-     * @var Customer
+     * @var Special
      */
-    public $modelClass = Customer::class;
+    public $modelClass = Special::class;
 
     /**
      * 首页
