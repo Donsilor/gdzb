@@ -6,7 +6,8 @@ use yii\grid\GridView;
 use common\helpers\Html;
 use common\helpers\ImageHelper;
 
-$this->title = '客户列表';
+$this->title = '客户数据列表';
+$this->params['breadcrumbs'][] = ['label' => '专题列表'];
 $this->params['breadcrumbs'][] = ['label' => $this->title];
 
 ?>

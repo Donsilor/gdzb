@@ -20,6 +20,7 @@ use Yii;
  * @property int $creator_id 创建人ID
  * @property int $created_at 创建时间
  * @property int $updated_at 更新时间
+ * @property int $special_id 专题ID
  */
 class Promotional extends BaseModel
 {
@@ -38,7 +39,7 @@ class Promotional extends BaseModel
     {
         return [
             [['id'], 'required'],
-            [['id', 'show_times', 'hits_times', 'visit_length', 'dialogue_times', 'client_times', 'order_times ', 'creator_id', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'special_id', 'show_times', 'hits_times', 'visit_length', 'dialogue_times', 'client_times', 'order_times ', 'creator_id', 'created_at', 'updated_at'], 'integer'],
             [['budget_cost', 'actual_cost'], 'number'],
         ];
     }
@@ -61,6 +62,7 @@ class Promotional extends BaseModel
             'creator_id' => '创建人ID',
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
+            'special_id' => '专题ID'
         ];
     }
 

@@ -19,6 +19,7 @@ use Yii;
  * @property int $creator_id 创建人ID
  * @property int $created_at 创建时间
  * @property int $updated_at 更新时间
+ * @property int $special_id 专题ID
  */
 class Client extends BaseModel
 {
@@ -37,7 +38,7 @@ class Client extends BaseModel
     {
         return [
             [['id'], 'required'],
-            [['id', 'creator_id', 'created_at', 'updated_at'], 'integer'],
+            [['id', 'special_id', 'creator_id', 'created_at', 'updated_at'], 'integer'],
             [['nickname','sex','phone','qq','area','intention','budget'], 'string', 'max' => 45],
         ];
     }
@@ -59,6 +60,7 @@ class Client extends BaseModel
             'creator_id' => '',
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
+            'special_id' => '专题ID'
         ];
     }
 
