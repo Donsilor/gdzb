@@ -275,22 +275,6 @@ DOM;
             data[attr] = value;
         });
 
-        // if(value===oldValue) {
-        //
-        //     if(id!=="") {
-        //         parent.text(value)
-        //     }
-        //
-        //     return false;
-        // }
-        //
-        // if(value!==oldValue && id!=="") {
-        //     parent.text(value)
-        // }
-        // else {
-        //     return false;
-        // }
-
         if(id!=="") {
             parent.text(value)
         }
