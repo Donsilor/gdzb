@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                     'tableOptions' => ['class' => 'table table-hover rf-table'],
                     'rowOptions' => [
                         'class' => 'input-edit',
-                        'data-url' => Url::to('product/edit-column')
+                        'data-url' => Url::to('ajax-edit')
                     ],
                     'options' => ['style' => 'white-space:nowrap;'],
                     'showFooter' => true,
@@ -41,6 +41,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         [
                             'attribute' => 'id',
                             'headerOptions' => [],
+                            'filter' => false,
                         ],
                         [
                             'attribute' => 'nickname',
@@ -129,6 +130,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
 //                        ],
                         [
                             'attribute' => 'created_at',
+                            'filter' => false,
 //                            'filter' => DateRangePicker::widget([    // 日期组件
 //                                'model' => $searchModel,
 //                                'attribute' => 'created_at',
@@ -206,8 +208,10 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
 </div>
 <script>
     $(function () {
-        $(".input-edit .input-edit-item").each(function () {
-            $(this).click(function () {
+        $(".input-edit .input-edit-item")
+            // .each(function () {
+            // $(this)
+                .click(function () {
 
                 if ($(this).find("input").length > 0) {
                     return;
@@ -217,6 +221,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                 var inputBox = $("<input type='text'>");
                 inputBox.attr('name', "item");
                 inputBox.attr('class', "form-control");
+                inputBox.css('height', '30px')
 
                 $(this).empty()
                 $(this).append(inputBox)
@@ -225,33 +230,40 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
 
                 return true;
             });
-        });
+        // });
     });
 
     $(".input-edit .input-edit-item").on('blur', '.form-control', function (e) {
         var parent = $(this).parent();
         var value = $(this).val();
+        var oldValue = parent.attr('data-value');
 
         parent.attr('data-value', value);
         parent.text(value)
 
-        // var oldValue = parent.attr('data-value');
-        // var postUrl = parent.attr('data-url');
-        // var attr = parent.attr('data-attribute');
+        if(value===oldValue) {
+            return false;
+        }
+
+        var inputEdit = parent.parent();
+        var postUrl = inputEdit.attr('data-url');
+        var id = inputEdit.attr('data-key');
+        var attr = parent.attr('data-attribute');
+
         // postUrl = baseBackend + '/' + postUrl;
-        // $.ajax({
-        //     type: "POST",
-        //     url: postUrl,
-        //     dataType: 'json',
-        //     data: "_csrf-backend=" + $('meta[name=csrf-token]') + '&value=' + value + '&old_value=' + oldValue + '&attr=' + attr,
-        //     success: function(msg){
-        //         if(msg.error == 0) {
-        //             //window.location.reload();
-        //         } else {
-        //             alert(msg.msg);
-        //         }
-        //     }
-        // });
+        $.ajax({
+            type: "POST",
+            url: postUrl+'?id='+id,
+            dataType: 'json',
+            data: "_csrf-backend=" + $('meta[name=csrf-token]').attr("content") + '&Client['+attr+']=' + value,
+            success: function(msg){
+                if(msg.error == 0) {
+                    //window.location.reload();
+                } else {
+                    alert(msg.msg);
+                }
+            }
+        });
         // $(this).parent().html(value);
 
     });

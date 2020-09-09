@@ -69,48 +69,25 @@ class ClientController extends BaseController
     }
 
     /**
-     * 创建客户
-     * @return array|mixed
-     * @throws
+     * ajax编辑/创建
+     *
+     * @return mixed|string|\yii\web\Response
+     * @throws \yii\base\ExitException
      */
     public function actionAjaxEdit()
     {
-        $id = \Yii::$app->request->get('id');
-        $model = $this->findModel($id) ?? new Customer();
-        // ajax 校验
-        $this->activeFormValidate($model);
-        if ($model->load(\Yii::$app->request->post())) {
-            $isNewRecord = $model->isNewRecord;
-            try{
-                $trans = \Yii::$app->trans->beginTransaction();
-                if($model->channel_id == ChannelIdEnum::GP && !$model->email){
-                    throw new \Exception("渠道为国际批发，客户邮箱为必填");
-                }
-                if($model->channel_id != ChannelIdEnum::GP && !$model->mobile){
-                    throw new \Exception("非国际批发客户手机号必填");
-                }
-                if($model->birthday){
-                    $model->age = DateHelper::getYearByDate($model->birthday);
-                }
-                if(false === $model->save()) {
-                    throw new \Exception($this->getError($model));
-                }
-                \Yii::$app->salesService->customer->createCustomerNo($model);
-                $trans->commit();
-                \Yii::$app->getSession()->setFlash('success','保存成功');
-                return $isNewRecord
-                    ? $this->message("保存成功", $this->redirect(['edit', 'id' => $model->id]), 'success')
-                    : $this->message("保存成功", $this->redirect(\Yii::$app->request->referrer), 'success');
-            }catch (\Exception $e) {
-                $trans->rollback();
-                return $this->message($e->getMessage(), $this->redirect(\Yii::$app->request->referrer), 'error');
-            }
+        $id = Yii::$app->request->get('id');
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post())) {
+            return $model->save()
+                ? null//$this->redirect(Yii::$app->request->referrer)
+                : $this->message($this->getError($model), $this->redirect(Yii::$app->request->referrer), 'error');
         }
 
         return $this->renderAjax($this->action->id, [
             'model' => $model,
         ]);
-
     }
 
     /**
@@ -123,7 +100,7 @@ class ClientController extends BaseController
     {
         $id = Yii::$app->request->get('id');
         $model = $this->findModel($id);
-        $model = $model ?? new Customer();
+        $model = $model ?? new Client();
 
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
