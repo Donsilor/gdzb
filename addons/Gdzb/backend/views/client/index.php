@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'contentOptions' => function ($model) {
                                 return [
                                     'class' => 'input-edit-item',
-                                    'data-attribute' => 'nickname',
+                                    'data-attribute' => 'Client[nickname]',
                                     'data-value' => $model->nickname,
                                 ];
                             },
@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'contentOptions' => function ($model) {
                                 return [
                                     'class' => 'input-edit-item',
-                                    'data-attribute' => 'sex',
+                                    'data-attribute' => 'Client[sex]',
                                     'data-value' => $model->sex,
                                 ];
                             },
@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'contentOptions' => function ($model) {
                                 return [
                                     'class' => 'input-edit-item',
-                                    'data-attribute' => 'phone',
+                                    'data-attribute' => 'Client[phone]',
                                     'data-value' => $model->phone,
                                 ];
                             },
@@ -82,7 +82,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'contentOptions' => function ($model) {
                                 return [
                                     'class' => 'input-edit-item',
-                                    'data-attribute' => 'qq',
+                                    'data-attribute' => 'Client[qq]',
                                     'data-value' => $model->qq,
                                 ];
                             },
@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'contentOptions' => function ($model) {
                                 return [
                                     'class' => 'input-edit-item',
-                                    'data-attribute' => 'area',
+                                    'data-attribute' => 'Client[area]',
                                     'data-value' => $model->area,
                                 ];
                             },
@@ -104,7 +104,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'contentOptions' => function ($model) {
                                 return [
                                     'class' => 'input-edit-item',
-                                    'data-attribute' => 'intention',
+                                    'data-attribute' => 'Client[intention]',
                                     'data-value' => $model->intention,
                                 ];
                             },
@@ -115,7 +115,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'contentOptions' => function ($model) {
                                 return [
                                     'class' => 'input-edit-item',
-                                    'data-attribute' => 'budget',
+                                    'data-attribute' => 'Client[budget]',
                                     'data-value' => $model->budget,
                                 ];
                             },
@@ -218,8 +218,11 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                 }
 
                 var dataValue = $(this).attr('data-value');
+                var dataAttribute = $(this).attr('data-attribute');
+
                 var inputBox = $("<input type='text'>");
-                inputBox.attr('name', "item");
+                inputBox.attr('type', "text");
+                inputBox.attr('name', dataAttribute);
                 inputBox.attr('class', "form-control");
                 inputBox.css('height', '30px')
 
@@ -255,7 +258,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
             type: "POST",
             url: postUrl+'?id='+id,
             dataType: 'json',
-            data: "_csrf-backend=" + $('meta[name=csrf-token]').attr("content") + '&Client['+attr+']=' + value,
+            data: "_csrf-backend=" + $('meta[name=csrf-token]').attr("content") + '&'+attr+'=' + value,
             success: function(msg){
                 if(msg.error == 0) {
                     //window.location.reload();
