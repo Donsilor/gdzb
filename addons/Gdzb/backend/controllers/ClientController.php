@@ -56,11 +56,11 @@ class ClientController extends BaseController
 
         $created_at = $searchModel->created_at;
         if (!empty($created_at)) {
-            $dataProvider->query->andFilterWhere(['>=',Customer::tableName().'.created_at', strtotime(explode('/', $created_at)[0])]);//起始时间
-            $dataProvider->query->andFilterWhere(['<',Customer::tableName().'.created_at', (strtotime(explode('/', $created_at)[1]) + 86400)] );//结束时间
+            $dataProvider->query->andFilterWhere(['>=',$this->modelClass::tableName().'.created_at', strtotime(explode('/', $created_at)[0])]);//起始时间
+            $dataProvider->query->andFilterWhere(['<',$this->modelClass::tableName().'.created_at', (strtotime(explode('/', $created_at)[1]) + 86400)] );//结束时间
         }
 
-        //$dataProvider->query->andWhere(['>',Customer::tableName().'.status',-1]);
+        $dataProvider->query->andWhere(['>',$this->modelClass::tableName().'.status',-1]);
 
         return $this->render($this->action->id, [
             'dataProvider' => $dataProvider,
