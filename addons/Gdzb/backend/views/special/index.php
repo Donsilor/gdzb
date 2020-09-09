@@ -35,63 +35,71 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         [
                             'attribute' => 'id',
                             'headerOptions' => [],
+                            'filter' => false,
                         ],
                         [
                             'attribute' => 'name',
+                            'filter' => false,
                         ],
                         [
                             'attribute' => 'url',
+                            'filter' => false,
                         ],
                         [
                             'label' => '创建人',
                             'attribute' => 'creator.username',
                             'headerOptions' => ['class' => 'col-md-1'],
-                            'filter' => Html::activeTextInput($searchModel, 'creator.username', [
-                                'class' => 'form-control',
-                            ]),
+//                            'filter' => Html::activeTextInput($searchModel, 'creator.username', [
+//                                'class' => 'form-control',
+//                            ]),
+                            'filter' => false,
                         ],
                         [
                             'attribute'=>'created_at',
-                            'filter' => DateRangePicker::widget([    // 日期组件
-                                'model' => $searchModel,
-                                'attribute' => 'created_at',
-                                'value' => $searchModel->created_at,
-                                'options' => ['readonly' => false,'class'=>'form-control','style'=>'background-color:#fff;width:200px;'],
-                                'pluginOptions' => [
-                                    'format' => 'yyyy-mm-dd',
-                                    'locale' => [
-                                        'separator' => '/',
-                                    ],
-                                    'endDate' => date('Y-m-d',time()),
-                                    'todayHighlight' => true,
-                                    'autoclose' => true,
-                                    'todayBtn' => 'linked',
-                                    'clearBtn' => true,
-                                ],
-                            ]),
+//                            'filter' => DateRangePicker::widget([    // 日期组件
+//                                'model' => $searchModel,
+//                                'attribute' => 'created_at',
+//                                'value' => $searchModel->created_at,
+//                                'options' => ['readonly' => false,'class'=>'form-control','style'=>'background-color:#fff;width:200px;'],
+//                                'pluginOptions' => [
+//                                    'format' => 'yyyy-mm-dd',
+//                                    'locale' => [
+//                                        'separator' => '/',
+//                                    ],
+//                                    'endDate' => date('Y-m-d',time()),
+//                                    'todayHighlight' => true,
+//                                    'autoclose' => true,
+//                                    'todayBtn' => 'linked',
+//                                    'clearBtn' => true,
+//                                ],
+//                            ]),
+                            'filter' => false,
                             'value'=>function($model){
                                 return Yii::$app->formatter->asDatetime($model->created_at);
                             }
                         ],
                         [
                             'attribute'=>'updated_at',
+                            'filter' => false,
                         ],
                         [
                             'attribute' => 'status',
-//                            'format' => 'raw',
+                            'format' => 'raw',
 //                            'headerOptions' => ['class' => 'col-md-1'],
-//                            'value' => function ($model){
-//                                return \common\enums\StatusEnum::getValue($model->status);
-//                            },
+                            'value' => function ($model){
+                                return Html::status($model->status);
+                            },
 //                            'filter' => Html::activeDropDownList($searchModel, 'status',\common\enums\StatusEnum::getMap(), [
 //                                'prompt' => '全部',
 //                                'class' => 'form-control',
 //                                'style'=> 'width:60px;',
 //                            ]),
+                            'filter' => false,
                         ],
                         [
                             'label'=>'数据',
 //                            'attribute'=>'date',
+                            'filter' => false,
                             'value'=>function($row) {
                                 return '';
                             }
@@ -100,35 +108,14 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'header' => "操作",
                             'class' => 'yii\grid\ActionColumn',
                             'contentOptions' => ['style' => ['white-space' => 'nowrap']],
-                            'template' => '{edit} {view} {status}',
+                            'template' => '{edit} {view}',
                             'buttons' => [
-//                                'ajax-edit' => function ($url, $model, $key) {
-//                                    return Html::linkButton(['ajax-edit', 'id' => $model->id], '账号密码', [
-//                                        'data-toggle' => 'modal',
-//                                        'data-target' => '#ajaxModal',
-//                                    ]);
-//                                },
-//                                'address' => function ($url, $model, $key) {
-//                                    return Html::linkButton(['address/index', 'member_id' => $model->id], '收货地址');
-//                                },
-//                                'recharge' => function ($url, $model, $key) {
-//                                    return Html::linkButton(['recharge', 'id' => $model->id], '充值', [
-//                                        'data-toggle' => 'modal',
-//                                        'data-target' => '#ajaxModal',
-//                                    ]);
-//                                },
-//                                'edit' => function ($url, $model, $key) {
-//                                    return Html::edit(['edit', 'id' => $model->id]);
-//                                },
-//                                'view' => function ($url, $model, $key) {
-//                                    return Html::a('查看', ['view', 'id' => $model->id,'returnUrl'=>Url::getReturnUrl()], ['class' => 'btn btn-warning btn-sm']);
-//                                },
-                                'status' => function ($url, $model, $key) {
-                                    return Html::status($model->status);
+                                'edit' => function ($url, $model, $key) {
+                                    return Html::edit(['edit', 'id' => $model->id]);
                                 },
-//                                'destroy' => function ($url, $model, $key) {
-//                                    return Html::delete(['destroy', 'id' => $model->id]);
-//                                },
+                                'view' => function ($url, $model, $key) {
+                                    return Html::a('预览', ['view', 'id' => $model->id,'returnUrl'=>Url::getReturnUrl()], ['class' => 'btn btn-warning btn-sm']);
+                                },
                             ],
                         ],
                     ],
