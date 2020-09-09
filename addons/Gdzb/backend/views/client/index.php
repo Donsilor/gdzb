@@ -32,7 +32,26 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         'data-url' => Url::to('ajax-edit')
                     ],
                     'options' => ['style' => 'white-space:nowrap;'],
-                    'showFooter' => true,
+                    'beforeRow' => function($row, $key, $index, $grid) {
+                    if($index!==0) {
+                        return null;
+                    }
+                    $row = <<<DOM
+<tr class="input-edit input-add" data-url="ajax-edit" data-key="">
+<td></td>
+<td class="input-edit-item" data-attribute="Client[nickname]" data-value="">&nbsp;</td>
+<td class="input-edit-item" data-attribute="Client[sex]" data-value="">&nbsp;</td>
+<td class="input-edit-item" data-attribute="Client[phone]" data-value="">&nbsp;</td>
+<td class="input-edit-item" data-attribute="Client[qq]" data-value="">&nbsp;</td>
+<td class="input-edit-item" data-attribute="Client[area]" data-value="">&nbsp;</td>
+<td class="input-edit-item" data-attribute="Client[intention]" data-value="">&nbsp;</td>
+<td class="input-edit-item" data-attribute="Client[budget]" data-value="">&nbsp;</td>
+<td><input type="button" class="btn btn-success btn-sm" value="保存"/></td>
+<td>&nbsp;</td>
+</tr>
+DOM;
+                    return $row;
+                    },
                     'columns' => [
                         [
                             'class' => 'yii\grid\SerialColumn',
@@ -207,58 +226,86 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
     </div>
 </div>
 <script>
-    $(function () {
-        $(".input-edit .input-edit-item")
-            // .each(function () {
-            // $(this)
-                .click(function () {
+    function generateInput() {
+        if ($(this).find("input").length > 0) {
+            return;
+        }
 
-                if ($(this).find("input").length > 0) {
-                    return;
-                }
+        var dataValue = $(this).attr('data-value');
+        var dataAttribute = $(this).attr('data-attribute');
 
-                var dataValue = $(this).attr('data-value');
-                var dataAttribute = $(this).attr('data-attribute');
+        var inputBox = $("<input type='text'>");
+        inputBox.attr('type', "text");
+        inputBox.attr('name', dataAttribute);
+        inputBox.attr('class', "form-control");
+        inputBox.css('height', '30px')
 
-                var inputBox = $("<input type='text'>");
-                inputBox.attr('type', "text");
-                inputBox.attr('name', dataAttribute);
-                inputBox.attr('class', "form-control");
-                inputBox.css('height', '30px')
+        $(this).empty()
+        $(this).append(inputBox)
 
-                $(this).empty()
-                $(this).append(inputBox)
+        inputBox.trigger('focus').val(dataValue)
 
-                inputBox.trigger('focus').val(dataValue)
+        return true;
+    }
 
-                return true;
-            });
-        // });
-    });
-
-    $(".input-edit .input-edit-item").on('blur', '.form-control', function (e) {
+    function editInput(e) {
         var parent = $(this).parent();
         var value = $(this).val();
         var oldValue = parent.attr('data-value');
 
-        parent.attr('data-value', value);
-        parent.text(value)
-
-        if(value===oldValue) {
-            return false;
+        var add = false
+        if(value==="保存") {
+            add = true;
         }
+
+        parent.attr('data-value', value);
 
         var inputEdit = parent.parent();
         var postUrl = inputEdit.attr('data-url');
         var id = inputEdit.attr('data-key');
-        var attr = parent.attr('data-attribute');
 
-        // postUrl = baseBackend + '/' + postUrl;
+        var data = {};
+        data['_csrf-backend'] = $('meta[name=csrf-token]').attr("content");
+
+        inputEdit.find('input').each(function () {
+
+            var attr = $(this).attr('name');
+            var value = $(this).val();
+
+            data[attr] = value;
+        });
+
+        // if(value===oldValue) {
+        //
+        //     if(id!=="") {
+        //         parent.text(value)
+        //     }
+        //
+        //     return false;
+        // }
+        //
+        // if(value!==oldValue && id!=="") {
+        //     parent.text(value)
+        // }
+        // else {
+        //     return false;
+        // }
+
+        if(id!=="") {
+            parent.text(value)
+        }
+        if(value===oldValue) {
+            return false;
+        }
+        if(add===false && id==="") {
+            return false;
+        }
+
         $.ajax({
             type: "POST",
             url: postUrl+'?id='+id,
             dataType: 'json',
-            data: "_csrf-backend=" + $('meta[name=csrf-token]').attr("content") + '&'+attr+'=' + value,
+            data: data,
             success: function(msg){
                 if(msg.error == 0) {
                     //window.location.reload();
@@ -268,6 +315,22 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
             }
         });
         // $(this).parent().html(value);
+    }
 
+    $(function () {
+        $(".input-edit .input-edit-item")
+            .click(generateInput)
+            .on('blur', '.form-control', editInput);
+
+        //添加
+        $(".input-add .input-edit-item").trigger("click");
+
+        $(".input-add .btn").click(editInput);
+
+        // $(".input-edit .input-edit-item")
+        // $(this).parent().html(value);
     });
+
+
+
 </script>

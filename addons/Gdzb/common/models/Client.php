@@ -37,7 +37,7 @@ class Client extends BaseModel
     public function rules()
     {
         return [
-            [['id'], 'required'],
+//            [['id'], 'required'],
             [['id', 'special_id', 'creator_id', 'created_at', 'updated_at'], 'integer'],
             [['nickname','sex','phone','qq','area','intention','budget'], 'string', 'max' => 45],
         ];

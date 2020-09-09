@@ -79,9 +79,14 @@ class ClientController extends BaseController
         $id = Yii::$app->request->get('id');
         $model = $this->findModel($id);
 
+        if(!$id) {
+            $model->special_id = 1;
+            $model->creator_id = Yii::$app->user->getId();
+        }
+
         if ($model->load(Yii::$app->request->post())) {
             return $model->save()
-                ? null//$this->redirect(Yii::$app->request->referrer)
+                ? ($id?null:$this->redirect(Yii::$app->request->referrer))
                 : $this->message($this->getError($model), $this->redirect(Yii::$app->request->referrer), 'error');
         }
 
