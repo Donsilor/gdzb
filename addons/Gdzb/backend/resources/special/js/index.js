@@ -684,7 +684,6 @@ function closeClone() {
 function save() {
   var param = {};
 
-  param['_csrf-backend'] = $('meta[name=csrf-token]').attr("content");
   param['data'] = data['attrs'];
   param['name'] = $('#special-name').val()
   param['url'] = $('#special-url').val()
@@ -696,7 +695,7 @@ function save() {
     type: "POST",
     url: 'edit',
     dataType: 'json',
-    data: param,
+    data: {'Special': param, '_csrf-backend': $('meta[name=csrf-token]').attr("content")},
     success: function(msg) {
       // if(msg.error == 0) {
       //   //window.location.reload();
