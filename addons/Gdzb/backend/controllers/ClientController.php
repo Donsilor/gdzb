@@ -38,6 +38,12 @@ class ClientController extends BaseController
      */
     public function actionIndex()
     {
+        $special_id = Yii::$app->request->get('special_id', null);
+
+        if(empty($special_id)) {
+            return '';
+        }
+
         $searchModel = new SearchModel([
             'model' => $this->modelClass,
             'scenario' => 'default',
@@ -53,6 +59,8 @@ class ClientController extends BaseController
 
         $dataProvider = $searchModel
             ->search(Yii::$app->request->queryParams,['created_at']);
+
+        $dataProvider->query->andWhere(['=',$this->modelClass::tableName().'.special_id', $special_id]);
 
         $created_at = $searchModel->created_at;
         if (!empty($created_at)) {
