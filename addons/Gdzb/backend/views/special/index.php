@@ -103,8 +103,12 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'label'=>'数据',
 //                            'attribute'=>'date',
                             'filter' => false,
+                            'format' => 'raw',
                             'value'=>function($row) {
-                                return '';
+                                $html =  Html::a('推广数据', ['promotional/index', 'special_id' => $row->id, 'returnUrl'=>Url::getReturnUrl()], ['style'=>"text-decoration:underline;color:#3c8dbc"]);
+                                $html .= '</br>';
+                                $html .=  Html::a('客户数据', ['client/index', 'special_id' => $row->id, 'returnUrl'=>Url::getReturnUrl()], ['style'=>"text-decoration:underline;color:#3c8dbc"]);
+                                return $html;
                             }
                         ],
                         [
