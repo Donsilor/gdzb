@@ -682,13 +682,27 @@ function closeClone() {
 
 // 保存发送数据
 function save() {
-    data['special-name'] = $('#special-name').val()
-    data['special=url'] = $('#special-url').val()
-    data.tdk.title = $('#title').val()
-    data.tdk.description = $('#description').val()
-    data.tdk.keywords = $('#keyword').val()
+  var param = {};
+  param['data'] = data['attrs'];
+  param['name'] = $('#special-name').val()
+  param['url'] = $('#special-url').val()
+  param['title'] = $('#title').val()
+  param['keywords'] = $('#keyword').val()
+  param['description'] = $('#description').val()
     
-    console.log('data =====>',data)
+  $.ajax({
+    type: "POST",
+    url: 'edit',
+    dataType: 'json',
+    data: data,
+    success: function(msg) {
+      // if(msg.error == 0) {
+      //   //window.location.reload();
+      // } else {
+      //   alert(msg.msg);
+      // }
+    }
+  });
 }
 
 $('body').click(function () {
