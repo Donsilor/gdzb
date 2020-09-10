@@ -68,50 +68,6 @@ class SpecialController extends BaseController
         ]);
     }
 
-    /**
-     * 创建客户
-     * @return array|mixed
-     * @throws
-     */
-    public function actionAjaxEdit()
-    {
-        $id = \Yii::$app->request->get('id');
-        $model = $this->findModel($id) ?? new Customer();
-        // ajax 校验
-        $this->activeFormValidate($model);
-        if ($model->load(\Yii::$app->request->post())) {
-            $isNewRecord = $model->isNewRecord;
-            try{
-                $trans = \Yii::$app->trans->beginTransaction();
-                if($model->channel_id == ChannelIdEnum::GP && !$model->email){
-                    throw new \Exception("渠道为国际批发，客户邮箱为必填");
-                }
-                if($model->channel_id != ChannelIdEnum::GP && !$model->mobile){
-                    throw new \Exception("非国际批发客户手机号必填");
-                }
-                if($model->birthday){
-                    $model->age = DateHelper::getYearByDate($model->birthday);
-                }
-                if(false === $model->save()) {
-                    throw new \Exception($this->getError($model));
-                }
-                \Yii::$app->salesService->customer->createCustomerNo($model);
-                $trans->commit();
-                \Yii::$app->getSession()->setFlash('success','保存成功');
-                return $isNewRecord
-                    ? $this->message("保存成功", $this->redirect(['edit', 'id' => $model->id]), 'success')
-                    : $this->message("保存成功", $this->redirect(\Yii::$app->request->referrer), 'success');
-            }catch (\Exception $e) {
-                $trans->rollback();
-                return $this->message($e->getMessage(), $this->redirect(\Yii::$app->request->referrer), 'error');
-            }
-        }
-
-        return $this->renderAjax($this->action->id, [
-            'model' => $model,
-        ]);
-
-    }
 
     /**
      * 编辑客户
@@ -122,27 +78,16 @@ class SpecialController extends BaseController
     public function actionEdit()
     {
         $id = Yii::$app->request->get('id');
+
         $model = $this->findModel($id);
-        $model = $model ?? new Customer();
 
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
-            if(!$model->validate()) {
+
+            if(!$model->save()) {
                 return ResultHelper::json(422, $this->getError($model));
             }
-            try{
-                $trans = Yii::$app->db->beginTransaction();
-                if(false === $model->save()){
-                    throw new Exception($this->getError($model));
-                }
-                if(!$model->customer_no){
-                    \Yii::$app->salesService->customer->createCustomerNo($model);
-                }
-                $trans->commit();
-            }catch (Exception $e){
-                $trans->rollBack();
-                return $this->message("保存失败:".$e->getMessage(), $this->redirect([$this->action->id,'id'=>$model->id]), 'error');
-            }
+
             return $this->message("保存成功", $this->redirect(['view','id'=>$model->id]), 'success');
         }
         return $this->render($this->action->id, [
