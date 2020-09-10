@@ -633,7 +633,7 @@ function changeFile(obj) {
   fq.append('file', file[0], file[0].name)
 
   $.ajax({
-　　　　"url": "https://bdd.bddco.cn/backend/index.php/file/images",
+　　　　"url": "/backend/file/images",
 　　　　"type": "post",
 　　　　"processData": false, // 将数据转换成对象，不对数据做处理，故 processData: false 
 　　　　"contentType": false,    // 不设置数据类型
@@ -643,7 +643,7 @@ function changeFile(obj) {
 　　　　　　console.log('success',data)
 　　　　},
 　　　　error: function(err) {
-        var imgUrl = './img/icon/icon-A.png';
+        var imgUrl = baseStaticUrl+'/img/icon/icon-A.png';
         $(obj.target).parent().html("<img src='"+imgUrl+"'/>")
         // console.log(1111,$(obj.target).parent())
         // $(obj.target).parent('.img-box').css('border','2px solid red');
