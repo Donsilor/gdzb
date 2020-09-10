@@ -77,6 +77,9 @@ class SpecialController extends BaseController
      */
     public function actionEdit()
     {
+        $this->layout = false;
+
+
         $id = Yii::$app->request->get('id');
 
         $model = $this->findModel($id);

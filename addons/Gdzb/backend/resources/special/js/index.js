@@ -288,7 +288,7 @@ $('.classify-img').on('mousedown', function() {
             +';left:'+attr.left
             +';width:'+attr.width
             +';height:'+attr.height
-            +';background:#fff url(img/icon/load.png) no-repeat center'
+            +';background:#fff url('+baseStaticUrl+'/img/icon/load.png) no-repeat center'
             +';background-size:60% 60%'
             +';z-index:'+attr['z-index']
             +';cursor:pointer'
