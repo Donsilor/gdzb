@@ -21,6 +21,8 @@ use Yii;
  * @property int $created_at 创建时间
  * @property int $updated_at 更新时间
  * @property int $special_id 专题ID
+ * @property int $start_time 开始时间
+ * @property int $end_time 结束时间
  */
 class Promotional extends BaseModel
 {
@@ -38,8 +40,8 @@ class Promotional extends BaseModel
     public function rules()
     {
         return [
-            [['id'], 'required'],
-            [['id', 'special_id', 'show_times', 'hits_times', 'visit_length', 'dialogue_times', 'client_times', 'order_times ', 'creator_id', 'created_at', 'updated_at'], 'integer'],
+//            [['id'], 'required'],
+            [['id', 'special_id', 'show_times', 'hits_times', 'visit_length', 'dialogue_times', 'client_times', 'order_times', 'creator_id', 'created_at', 'updated_at', 'start_time', 'end_time'], 'integer'],
             [['budget_cost', 'actual_cost'], 'number'],
         ];
     }
@@ -62,7 +64,9 @@ class Promotional extends BaseModel
             'creator_id' => '创建人ID',
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
-            'special_id' => '专题ID'
+            'special_id' => '专题ID',
+            'start_time' => '开始时间',
+            'end_time' => '结束时间',
         ];
     }
 
