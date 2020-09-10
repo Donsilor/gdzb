@@ -83,7 +83,7 @@ class SpecialController extends BaseController
         $id = Yii::$app->request->get('id');
 
         $model = $this->findModel($id);
-//var_dump($model);exit;
+//var_dump($model->data);exit;
 //        $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
 

@@ -16,6 +16,7 @@ $this->beginPage()
     <?php $this->head() ?>
     <script type="text/javascript">
         var baseStaticUrl = '<?= $baseStaticUrl; ?>';
+        var attrs = <?= \GuzzleHttp\json_encode($model->data) ?>
     </script>
 </head>
 <body onselectstart="return false">
@@ -28,13 +29,13 @@ $this->beginPage()
                 <div class="basics-name fl clf">
                     <div class="title fl">*专题名称</div>
                     <div class="value fl">
-                        <input type="text" id="special-name">
+                        <input type="text" id="special-name" value="<?= $model->name ?>">
                     </div>
                 </div>
                 <div class="basics-url fl clf">
                     <div class="title fl">*URL设置</div>
                     <div class="value fl">
-                        <input type="text" id="special-url">
+                        <input type="text" id="special-url" value="<?= $model->url ?>">
                     </div>
                 </div>
             </div>
@@ -44,14 +45,14 @@ $this->beginPage()
                     <div class="tdk-t clf">
                         <div class="title fl">Title</div>
                         <div class="value fl">
-                            <textarea name="" id="title"></textarea>
+                            <textarea name="" id="title"><?= $model->title ?></textarea>
                         </div>
                     </div>
 
                     <div class="tdk-k clf">
                         <div class="title fl">Keywords</div>
                         <div class="value fl">
-                            <textarea name="" id="keyword"></textarea>
+                            <textarea name="" id="keyword"><?= $model->keywords ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -60,7 +61,7 @@ $this->beginPage()
                     <div class="tdk-d clf">
                         <div class="title fl">Description</div>
                         <div class="value fl">
-                            <textarea name="" id="description"></textarea>
+                            <textarea name="" id="description"><?= $model->description ?></textarea>
                         </div>
                     </div>
                 </div>
