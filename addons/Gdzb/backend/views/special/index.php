@@ -81,6 +81,9 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                         [
                             'attribute'=>'updated_at',
                             'filter' => false,
+                            'value'=>function($model){
+                                return Yii::$app->formatter->asDatetime($model->updated_at);
+                            }
                         ],
                         [
                             'attribute' => 'status',

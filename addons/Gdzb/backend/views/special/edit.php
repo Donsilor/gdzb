@@ -24,6 +24,7 @@ $this->beginPage()
     <div class="top-box clf">
         <div class="top-box-l fl">
             <div class="top-box-l-basics clf">
+                <input type="hidden" id="special-id" name="special-id" value="<?= $model->id ?>">
                 <div class="basics-name fl clf">
                     <div class="title fl">*专题名称</div>
                     <div class="value fl">

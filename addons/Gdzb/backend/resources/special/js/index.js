@@ -682,6 +682,8 @@ function closeClone() {
 
 // 保存发送数据
 function save() {
+  var id = $('#special-id').val();
+
   var param = {};
 
   param['data'] = data['attrs'];
@@ -690,10 +692,10 @@ function save() {
   param['title'] = $('#title').val()
   param['keywords'] = $('#keyword').val()
   param['description'] = $('#description').val()
-    
+
   $.ajax({
     type: "POST",
-    url: 'edit',
+    url: 'edit?id='+id,
     dataType: 'json',
     data: {'Special': param, '_csrf-backend': $('meta[name=csrf-token]').attr("content")},
     success: function(msg) {
