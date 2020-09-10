@@ -683,6 +683,8 @@ function closeClone() {
 // 保存发送数据
 function save() {
   var param = {};
+
+  param['_csrf-backend'] = $('meta[name=csrf-token]').attr("content");
   param['data'] = data['attrs'];
   param['name'] = $('#special-name').val()
   param['url'] = $('#special-url').val()
@@ -694,7 +696,7 @@ function save() {
     type: "POST",
     url: 'edit',
     dataType: 'json',
-    data: data,
+    data: param,
     success: function(msg) {
       // if(msg.error == 0) {
       //   //window.location.reload();

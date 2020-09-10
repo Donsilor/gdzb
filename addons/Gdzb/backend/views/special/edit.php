@@ -12,6 +12,7 @@ $this->beginPage()
 <html>
 <head>
     <meta charset="utf-8">
+    <?php $this->registerCsrfMetaTags() ?>
     <?php $this->head() ?>
     <script type="text/javascript">
         var baseStaticUrl = '<?= $baseStaticUrl; ?>';
