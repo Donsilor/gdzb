@@ -14,6 +14,10 @@ use Yii;
  */
 class SpecialController extends OnAuthController
 {
+    protected $authOptional = ['details'];
+
+    public $modelClass = Special::class;
+
     /**
     * 首页
     *
