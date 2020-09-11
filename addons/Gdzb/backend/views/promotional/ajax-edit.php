@@ -14,11 +14,13 @@ $form = ActiveForm::begin([
 ?>
 
 <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">×</span>
     </button>
     <h4 class="modal-title">创建推广数据</h4>
 </div>
 <div class="modal-body">
+    <?= $form->field($model, 'special_id')->hiddenInput()?>
     <div class="row">
         <div class="col-lg-6">
             <?= $form->field($model, 'start_time')->textInput()?>

@@ -21,22 +21,8 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                     <?= Html::create(['edit'], '创建'); ?>
                 </div>
             </div>
-            <div class="box-body table-responsive">
-                <?= GridView::widget([
-                    'dataProvider' => $dataProvider,
-                    'filterModel' => $searchModel,
-                    //重新定义分页样式
-                    'tableOptions' => ['class' => 'table table-hover rf-table'],
-                    'rowOptions' => [
-                        'class' => 'input-edit',
-                        'data-url' => Url::to('ajax-edit')
-                    ],
-                    'options' => ['style' => 'white-space:nowrap;'],
-                    'beforeRow' => function($row, $key, $index, $grid) {
-                    if($index!==0) {
-                        return null;
-                    }
-                    $row = <<<DOM
+            <?php
+            $rowstr = <<<DOM
 <tr class="input-edit input-add" data-url="ajax-edit" data-key="">
 <td></td>
 <td class="input-edit-item" data-attribute="Client[nickname]" data-value="">&nbsp;</td>
@@ -50,7 +36,24 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
 <td>&nbsp;</td>
 </tr>
 DOM;
-                    return $row;
+            ?>
+            <div class="box-body table-responsive">
+                <?= GridView::widget([
+                    'dataProvider' => $dataProvider,
+                    'filterModel' => $searchModel,
+                    //重新定义分页样式
+                    'tableOptions' => ['class' => 'table table-hover rf-table'],
+                    'rowOptions' => [
+                        'class' => 'input-edit',
+                        'data-url' => Url::to('ajax-edit')
+                    ],
+                    'options' => ['style' => 'white-space:nowrap;'],
+                    'emptyText' => $rowstr,
+                    'beforeRow' => function($row, $key, $index, $grid) use($rowstr) {
+                    if($index!==0) {
+                        return null;
+                    }
+                    return $rowstr;
                     },
                     'columns' => [
                         [
@@ -274,6 +277,8 @@ DOM;
 
             data[attr] = value;
         });
+
+        data['Client[special_id]'] = '<?= $special_id ?>';
 
         if(id!=="") {
             parent.text(value)

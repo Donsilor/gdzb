@@ -40,7 +40,7 @@ class Promotional extends BaseModel
     public function rules()
     {
         return [
-//            [['id'], 'required'],
+            [['special_id', 'creator_id'], 'required'],
             [['id', 'special_id', 'show_times', 'hits_times', 'visit_length', 'dialogue_times', 'client_times', 'order_times', 'creator_id', 'created_at', 'updated_at', 'start_time', 'end_time'], 'integer'],
             [['budget_cost', 'actual_cost'], 'number'],
         ];

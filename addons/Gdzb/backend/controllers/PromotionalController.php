@@ -73,6 +73,7 @@ class PromotionalController extends BaseController
         return $this->render($this->action->id, [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'special_id' => $special_id
         ]);
     }
 
@@ -87,13 +88,18 @@ class PromotionalController extends BaseController
     public function actionAjaxEdit()
     {
         $id = Yii::$app->request->get('id');
+        $special_id = Yii::$app->request->get('special_id', null);
+
         $model = $this->findModel($id);
+
+        if(!$model->id) {
+            $model->special_id = $special_id;
+            $model->creator_id = Yii::$app->user->getId();
+        }
 
         // ajax 校验
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
-            $model->creator_id = 1;
-            $model->special_id = 1;
             return $model->save()
                 ? $this->redirect(Yii::$app->request->referrer)
                 : $this->message($this->getError($model), $this->redirect(Yii::$app->request->referrer), 'error');

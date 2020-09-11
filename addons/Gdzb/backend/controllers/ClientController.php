@@ -73,6 +73,7 @@ class ClientController extends BaseController
         return $this->render($this->action->id, [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'special_id' => $special_id,
         ]);
     }
 

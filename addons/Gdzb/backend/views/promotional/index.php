@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
             <div class="box-header">
                 <h3 class="box-title"><?= Html::encode($this->title) ?></h3>
                 <div class="box-tools">
-                    <?= Html::create(['ajax-edit'], '创建', [
+                    <?= Html::create(['ajax-edit', 'special_id'=>$special_id], '创建', [
                         'data-toggle' => 'modal',
                         'data-target' => '#ajaxModalLg'
                     ]); ?>
