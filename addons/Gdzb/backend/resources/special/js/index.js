@@ -48,6 +48,10 @@ function colorOnBlur(e) {
     $(e.target).val('');
     $(e.target).focus();
   }
+
+  if(val && reg.test(val)){
+    $('.colorBlock').css('background-color', val)
+  }
 }
 
 // 加粗、斜体、下划线
@@ -57,14 +61,20 @@ $('.control-text .attr-2').click(function() {
 
 // 对齐方式
 function alignType(e) {
-  $(e.target).addClass('active').siblings().removeClass('active')
+  $(e.target).toggleClass('active').siblings().removeClass('active')
 }
 
 // 删除元素
 $('.del').click(function() {
-  $('.'+editElementClass).hide()
-  var i = $('.'+editElementClass).css('z-index');
-  data.attrs.splice(i,1)
+  $('.'+elementActive).remove()
+  for(var i in data.attrs){
+    if(data.attrs[i].element == elementActive){
+      data.attrs.splice(i,1)
+      elementActive = '';
+      elementActiveZIndex = 0;
+      break
+    }
+  }
 })
 
 // 要添加的位置
@@ -77,6 +87,7 @@ tem = $('.template-text'),
 
 // 添加文本的属性
 textAttr = {
+  element: '',
   type: '',
   top: '',
   left: '',
@@ -94,8 +105,22 @@ textAttr = {
   link: ''
 },
 
-// 添加图片、视频的属性{
+// 添加图片的属性{
 imgAttr = {
+  element: '',
+  type: '',
+  top: '',
+  'z-index': 0,
+  left: '',
+  width: '',
+  height: '',
+  url: '',
+  link: ''
+},
+
+// 添加视频的属性{
+videoAttr = {
+  element: '',
   type: '',
   top: '',
   'z-index': 0,
@@ -108,8 +133,12 @@ imgAttr = {
 
 // 编辑时临时属性集合
 editObj = {},
-oldIndex = '',
-editElementClass = '',
+// 正在编辑时在data数组中的位置
+editIndex = '',
+// 正在编辑的元素
+elementActive = '',
+// 正在编辑元素的z-index
+elementActiveZIndex = 0,
 
 // 鼠标位置
 mouseX = '',
@@ -140,8 +169,8 @@ $('.classify-text').on('mousedown', function() {
   $('.control-text').show().siblings().hide();
   
   ;
-  textObj.width = '160px';
-  textObj.height = '24px';
+  textObj.width = '180px';
+  textObj.height = '30px';
   tem.css({'width': textObj.width, 'height': textObj.height})
 
   $('.content').on('mousemove', function(e) {
@@ -178,21 +207,19 @@ $('.classify-text').on('mousedown', function() {
     $('.template-text').hide()
     textObj['z-index'] = idNum;
     textObj.type = 'text';
-    textObj.link = $('.control-text .ipt-link').val();
-    if(textObj.link){
-      textObj.type = 'text-A'
-    }
+    textObj.link = $('.control-text .text-link').val();
+
+    textObj.element = 'text-box-'+idNum;
 
     divStyle ='position:'+'absolute'
             +';top:'+textObj.top
             +';left:'+textObj.left
             +';width:'+textObj.width
             +';height:'+textObj.height
-            +';background-color:#fff'
             +';z-index:'+textObj['z-index'];
 
     div = `<div style='${divStyle}' class='text-box text-box-${idNum}'>
-              <div class='direction-box' onmousedown='moveImg(event)'>
+              <div class='direction-box' onmousedown='moveImg(event, "text-box-${idNum}")'>
                 <div class='direction top' onmousedown='move(event, "top")'></div>
                 <div class='direction down' onmousedown='move(event, "down")'></div>
                 <div class='direction left' onmousedown='move(event, "left")'></div>
@@ -202,8 +229,8 @@ $('.classify-text').on('mousedown', function() {
                 <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
                 <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
               </div>
-              <textarea type='text' class='ipt-text' onInput='inputText(event)' onfocus='onFocus(event)' onblur='onBlur(event)'></textarea>
-              <pre class='pre' onclick='addMove(event, "text-box-${idNum}")' ondblclick='edit(event)'></pre>
+              <textarea type='text' class='ipt-text' onInput='inputText(event)' onfocus='onFocus(event)' onblur='onBlur(event, "text-box-${idNum}")'></textarea>
+              <pre class='pre' onclick='addMove(event, "text-box-${idNum}")' ondblclick='edit(event, "text-box-${idNum}")'></pre>
           </div>`;
     $('.middle-layer').append(div)
 
@@ -216,19 +243,26 @@ $('.classify-text').on('mousedown', function() {
 })
 
 // 编辑文本
-function edit(e) {
+function edit(e, className) {
   e.stopPropagation();
   clearTimeout(timer);
 
-  var index = $(e.target).css('z-index'),
-      ar = data.attrs[index];
-      oldIndex = index;
-  
-  for(var q in ar){
-    editObj[q] = ar[q]
+  var clas = className;
+
+  for(var at in data.attrs){
+    if(data.attrs[at].element == clas){
+      editIndex = at;
+    }
+  }
+
+  if(editIndex){
+    for(var q in data.attrs[editIndex]){
+      editObj[q] = data.attrs[editIndex][q]
+    }
   }
   
-  $(e.target).hide().prev('.ipt-text').show().focus();
+  $(e.target).hide().prev('.ipt-text').css('display', 'block').focus();
+  // $(e.target).hide().prev('.ipt-text').show().focus();
 }
 
 // 获取光标
@@ -255,13 +289,13 @@ function inputText(e) {
 
 // 结束编辑
 function onBlur(e,className) {
-  var index = $(e.target).parent().css('z-index');
   var text = $(e.target).val();
-  data.attrs[index].content = text;
-  data.attrs[index].color = editObj['color'];
-  data.attrs[index]['font-size'] = editObj['font-size'];
-  data.attrs[index]['font-weight'] = editObj['font-weight'];
-  data.attrs[index]['text-decoration'] = editObj['text-decoration'];
+  data.attrs[editIndex].content = text;
+  data.attrs[editIndex].color = editObj['color'];
+  data.attrs[editIndex]['font-size'] = editObj['font-size'];
+  data.attrs[editIndex]['font-weight'] = editObj['font-weight'];
+  data.attrs[editIndex]['font-style'] = editObj['font-style'];
+  data.attrs[editIndex]['text-decoration'] = editObj['text-decoration'];
 
   $(e.target).hide().next('.pre').show().text(text);
   if(text){
@@ -284,6 +318,9 @@ $('.classify-img').on('mousedown', function() {
 
   imgObj.width = '140px';
   imgObj.height = '140px';
+
+  $('.img-width').val(parseInt(imgObj.width))
+  $('.img-height').val(parseInt(imgObj.height))
 
   var imgWidth = $('.img-width').val(),imgHeight = $('.img-height').val();
   if(imgWidth && imgWidth>0){
@@ -333,14 +370,21 @@ $('.classify-img').on('mousedown', function() {
     imgObj['z-index'] = idNum;
     imgObj.type = 'img';
 
+    imgObj.link = $('.control-img .img-link').val();
+    imgObj.element = 'img-box-'+idNum;
+
+    $('.img-width').val(parseInt(imgObj.width))
+    $('.img-height').val(parseInt(imgObj.height))
+
     divStyle =
             'top:'+imgObj.top
             +';left:'+imgObj.left
             +';z-index:'+imgObj['z-index']
             +';width:'+imgObj.width
             +';height:'+imgObj.height
-            +';background:#fff url('+baseStaticUrl+'img/icon/load.png) no-repeat center'
+            +';background:#fff url('+baseStaticUrl+'img/icon/icon-load.jpg) no-repeat center'
             +';background-size:60% 60%'
+            +';border:1px solid #ccc'
             +';cursor:pointer';
 
     div = `<div style='${divStyle}' class='img-box img-box-${idNum}'>
@@ -355,7 +399,7 @@ $('.classify-img').on('mousedown', function() {
               <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
             </div>
             <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event)'/>
-            <img class='img' srt='' onclick='addMove(event, "img-box-${idNum}")' ondblclick='loadImg(event)'/>
+            <img class='img' src='' onclick='addMove(event, "img-box-${idNum}")' ondblclick='loadImg(event, "img-box-${idNum}")'/>
           </div>`;
     $('.middle-layer').append(div)
 
@@ -368,21 +412,85 @@ $('.classify-img').on('mousedown', function() {
 })
 
 // 单击显示移动缩放工具
-function addMove(e, eleClass) {
+function addMove(e, className) {
+  if(!elementActive){
+    elementActive = className;
+    elementActiveZIndex = $('.'+className).css('z-index');
+    $('.'+className).css('z-index', 9999);
+  }else{
+    $('.'+elementActive).css('z-index', elementActiveZIndex)
+    elementActive = className;
+    elementActiveZIndex = $('.'+className).css('z-index');
+    $('.'+className).css('z-index', 9999)
+  }
+
   clearTimeout(timer);
   timer = setTimeout(function () {
     $('.direction-box').hide()
-    $(e.target).siblings('.direction-box').show();
+    $(e.target).siblings('.direction-box').show().removeClass('no-border');
+    // $(e.target).parent().removeClass('no-border');
 
-    editElementClass = eleClass;
-    var index = $(e.target).parent().css('z-index'),
-        ar = data.attrs[index];
-    
-    for(var q in ar){
-      editObj[q] = ar[q]
+    for(var at in data.attrs){
+      if(data.attrs[at].element == className){
+        editIndex = at;
+      }
     }
 
-    console.log(123123,editObj)
+    if(editIndex){
+      for(var q in data.attrs[editIndex]){
+        editObj[q] = data.attrs[editIndex][q]
+      }
+    }
+
+    if(editObj.type == 'text'){
+      $('.colorBlock').css('background-color', editObj.color)
+      $('.colorIpt').val(' ')
+
+      if(editObj['font-size']){
+        $('.font-size').text(parseInt(editObj['font-size']))
+      }
+
+      if(editObj['font-weight']){
+        $('.attr-bold').addClass('active')
+      }else{
+        $('.attr-bold').removeClass('active')
+      }
+
+      if(editObj['font-style']){
+        $('.attr-i').addClass('active')
+      }else{
+        $('.attr-i').removeClass('active')
+      }
+
+      if(editObj['text-decoration']){
+        $('.attr-underline').addClass('active')
+      }else{
+        $('.attr-underline').removeClass('active')
+      }
+
+      var align = editObj['text-align'];
+      if(align == 'left'){
+        $('.align-left').addClass('active')
+      }
+      if(align == 'right'){
+        $('.align-right').addClass('active')
+      }
+      if(align == 'center'){
+        $('.align-center').addClass('active')
+      }
+      if(align == 'justify'){
+        $('.align-justify').addClass('active')
+      }
+
+
+      // $('.text-link').val(editObj.link)
+    }
+
+    if(editObj.type == 'img'){
+      $('.img-width').val(parseInt(editObj.width))
+      $('.img-height').val(parseInt(editObj.height))
+      // $('.img-link').val(parseInt(editObj.link))
+    }
     
     var type = editObj.type;
     if(type == 'text'){
@@ -404,10 +512,21 @@ function addMove(e, eleClass) {
 }
 
 // 拖拽移动
-function moveImg(e) {
+function moveImg(e, className) {
   if($(e.target).hasClass('direction-box')){
+    for(var at in data.attrs){
+      if(data.attrs[at].element == className){
+        editIndex = at;
+      }
+    }
+
+    if(editIndex){
+      for(var q in data.attrs[editIndex]){
+        editObj[q] = data.attrs[editIndex][q]
+      }
+    }
+
     var box = $(e.target).parent(),
-        index = box.css('z-index'),
         clientX = parseInt(e.pageX - box.offset().left);
         clientY = parseInt(e.pageY - box.offset().top);
         
@@ -438,8 +557,8 @@ function moveImg(e) {
     })
 
     $(e.target).mouseup(function () {
-      data.attrs[index].left = editObj.left;
-      data.attrs[index].top = editObj.top;
+      data.attrs[editIndex].left = editObj.left;
+      data.attrs[editIndex].top = editObj.top;
 
       $(e.target).off('mousemove')
     })
@@ -454,15 +573,20 @@ function move(e,direction) {
       posY = parseInt(box.css('top')),
       posW = parseInt(box.css('width')),
       posH = parseInt(box.css('height')),
-      index = box.css('z-index'),
       posYH = posY + posH,
       posXW = posX + posW;
 
+      // 返回结果
       function returnData() {
-        data.attrs[index].left = editObj.left;
-        data.attrs[index].top = editObj.top;
-        data.attrs[index].width = editObj.width;
-        data.attrs[index].height = editObj.height;
+        data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
+        data.attrs[editIndex].top = editObj.top;
+        data.attrs[editIndex].width = editObj.width;
+        data.attrs[editIndex].height = editObj.height;
+
+        $('.img-width').val(parseInt(editObj.width))
+        $('.img-height').val(parseInt(editObj.height))
+
+        return
       }
       
   switch (direction) {
@@ -537,11 +661,11 @@ function move(e,direction) {
       $('.content').mousemove(function(e) {
         mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
 
-        editObj.width = (mouseX-parseInt(editObj.left));
-        if(editObj.width > (contentWidth - parseInt(editObj.left))){
-          editObj.width = (contentWidth - parseInt(editObj.left)) + 'px'
+        editObj.width = (mouseX-parseInt(posX)) + 'px';
+        if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
+          editObj.width = (contentWidth - parseInt(posX)) + 'px'
         }
-
+        
         box.css({'width':editObj.width})
       })
 
@@ -564,14 +688,14 @@ function move(e,direction) {
           editObj.top = 0
         }
         if(editObj.top > posYH){
-          editObj.top = posYH-4
+          editObj.top = posYH
         }
 
         if(editObj.left < 0){
           editObj.left = 0
         }
-        if(editObj.left+4 > posXW){
-          editObj.left = posXW -4
+        if(editObj.left > posXW){
+          editObj.left = posXW
         }
 
         editObj.width = (posXW-parseInt(editObj.left))+'px';
@@ -579,7 +703,7 @@ function move(e,direction) {
         editObj.top = editObj.top + 'px';
         editObj.left = editObj.left + 'px';
 
-        box.css({'left':editObj.left,'top':editObj.top,'width':editObj.width,'height':editObj.width})
+        box.css({'left':editObj.left,'top':editObj.top,'width':editObj.width,'height':editObj.height})
       })
 
       $('.content').mouseup(function () {
@@ -603,11 +727,15 @@ function move(e,direction) {
           editObj.top = posYH
         }
         
-        var width = (mouseX-parseInt(editObj.left))+'px';
-        var height = (posYH-editObj.top)+'px';
+        editObj.width = (mouseX-parseInt(posX)) + 'px';
+        if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
+          editObj.width = (contentWidth - parseInt(posX)) + 'px'
+        }
+
+        editObj.height = (posYH-editObj.top)+'px';
         editObj.top = editObj.top + 'px';
 
-        box.css({'top':editObj.top,'width':width,'height':height})
+        box.css({'top':editObj.top,'width':editObj.width,'height':editObj.height})
       })
 
       $('.content').mouseup(function () {
@@ -650,10 +778,14 @@ function move(e,direction) {
         mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
         mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
-        var width = (mouseX-parseInt(editObj.left))+'px';
-        var height = (mouseY-parseInt(editObj.top))+'px';
+        editObj.width = (mouseX-parseInt(posX)) + 'px';
+        if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
+          editObj.width = (contentWidth - parseInt(posX)) + 'px'
+        }
 
-        box.css({'width':width,'height':height})
+        editObj.height = (mouseY-parseInt(editObj.top))+'px';
+
+        box.css({'width':editObj.width,'height':editObj.height})
       })
 
       $('.content').mouseup(function () {
@@ -674,33 +806,38 @@ function loadImg(e) {
 
 function changeFile(obj,className) {
   var that = this,
-      file = obj.target.files,
-      index = $(obj.target).parent().css('z-index');
-  
-  // const isJPG =
-  // file.type == 'image/jpeg'||
-    // file.type == 'image/png'||
-    // file.type == 'image/jpg'||
-    // file.type == 'image/gif'||
-    // file.type == 'image/tiff'||
-    // file.type == 'image/raw'||
-    // file.type == 'image/pcx'||
-    // file.type == 'image/tga'||
-    // file.type == 'image/exif'||
-    // file.type == 'image/fpx'||
-    // file.type == 'image/svg'||
-    // file.type == 'image/psd'||
-    // file.type == 'image/cdr'||
-    // file.type == 'image/pcd'||
-    // file.type == 'image/dxf'||
-    // file.type == 'image/ufo'||
-    // file.type == 'image/eps'||
-    // file.type == 'image/ai'||
-    // file.type == 'image/WMF'||
-    // file.type == 'image/webp'||
-    // file.type == 'image/bmp';
+      file = obj.target.files;
 
-  // const isLt2M = file.size / 1024 / 1024 < 2;
+  for(var at in data.attrs){
+    if(data.attrs[at].element == className){
+      editIndex = at;
+    }
+  }
+  
+  const isJPG =
+  file.type == 'image/jpeg'||
+    file.type == 'image/png'||
+    file.type == 'image/jpg'||
+    file.type == 'image/gif'||
+    file.type == 'image/tiff'||
+    file.type == 'image/raw'||
+    file.type == 'image/pcx'||
+    file.type == 'image/tga'||
+    file.type == 'image/exif'||
+    file.type == 'image/fpx'||
+    file.type == 'image/svg'||
+    file.type == 'image/psd'||
+    file.type == 'image/cdr'||
+    file.type == 'image/pcd'||
+    file.type == 'image/dxf'||
+    file.type == 'image/ufo'||
+    file.type == 'image/eps'||
+    file.type == 'image/ai'||
+    file.type == 'image/WMF'||
+    file.type == 'image/webp'||
+    file.type == 'image/bmp';
+
+  const isLt2M = file.size / 1024 / 1024 < 2;
 
   // if (!isJPG) {
     // this.$message.error(this.$t(`${lang}.imgFomat`));
@@ -725,24 +862,116 @@ function changeFile(obj,className) {
 
 　　　　success: function(data) {
 　　　　　　console.log('success',data)
+
+          var imgUrl = data.data.url;
+          $(obj.target).siblings('.img').attr('src', imgUrl)
+          $('.'+className).addClass('no-bg')
+          data.attrs[editIndex].link = imgUrl;
 　　　　},
 　　　　error: function(err) {
-        var imgUrl = baseStaticUrl+'/img/icon/icon-A.png';
-        $(obj.target).siblings('.img').attr('src', imgUrl)
-        $('.'+className).addClass('no-bg')
-        data.attrs[index].url = imgUrl;
-
-        console.log('err',err)
+          console.log('err',err)
 　　　　}
-　　  })
+　 })
 }
 
 
 // 增加视频
 $('.classify-video').on('mousedown', function() {
+  return
+  var videoObj = {};
+  for(var attr in videoAttr){
+    videoObj[attr] = videoAttr[attr];
+  }
+  
   $(this).addClass('active').siblings().removeClass('active')
   $('.control-video').show().siblings('.content-r-child').hide();
 
+  videoObj.width = '140px';
+  videoObj.height = '140px';
+
+  var vidWidth = $('.video-width').val(),vidHeight = $('.video-height').val();
+  if(vidWidth && vidWidth>0){
+    videoObj.width = parseInt(vidWidth)+'px';
+  }
+
+  if(vidHeight && vidHeight>0){
+    videoObj.height = parseInt(vidHeight)+'px';
+  }
+
+  tem.css({'width': videoObj.width, 'height': videoObj.height})
+
+  $('.content').on('mousemove', function(e) {
+    mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+    mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+    videoObj.left=mouseX - parseInt(videoObj.width)/2;
+    videoObj.top=mouseY - parseInt(videoObj.height)/2;
+    
+    if(videoObj.left < 0){
+      videoObj.left = 0
+    }
+    if(videoObj.left > (parseInt(contentWidth) - parseInt(videoObj.width))){
+      videoObj.left = parseInt(contentWidth) - parseInt(videoObj.width)
+    }
+    if(videoObj.top < 0){
+      videoObj.top = 0
+    }
+    if(videoObj.top > (parseInt(contentHeight) - parseInt(videoObj.height))){
+      videoObj.top = parseInt(contentHeight) - parseInt(videoObj.height)
+    }
+    if(mouseX > 0){
+      tem.show()
+    }
+
+    videoObj.left = (videoObj.left/contentWidth*100).toFixed(2) + '%';
+    videoObj.top = videoObj.top + 'px';
+    
+    tem.css({'left': videoObj.left, 'top': videoObj.top})
+
+  })
+
+  $('.content').on('mouseup', function(e) {
+    $('.content').off('mousemove')
+    $('.template-text').hide()
+
+    videoObj['z-index'] = idNum;
+    videoObj.type = 'img';
+
+    // videoObj.link = $('.control-img .ipt-link').val();
+
+    divStyle =
+            'top:'+videoObj.top
+            +';left:'+videoObj.left
+            +';z-index:'+videoObj['z-index']
+            +';width:'+videoObj.width
+            +';height:'+videoObj.height
+            +';background:#fff url('+baseStaticUrl+'img/icon/icon-load.jpg) no-repeat center'
+            +';background-size:60% 60%'
+            +';border:1px solid #ccc'
+            +';cursor:pointer';
+
+    div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
+            <div class='direction-box' onmousedown='moveImg(event)'>
+              <div class='direction top' onmousedown='move(event, "top")'></div>
+              <div class='direction down' onmousedown='move(event, "down")'></div>
+              <div class='direction left' onmousedown='move(event, "left")'></div>
+              <div class='direction right' onmousedown='move(event, "right")'></div>
+              <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
+              <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
+              <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
+              <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
+            </div>
+            <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event)'/>
+            <video class='video' src=''  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
+          </div>`;
+    $('.middle-layer').append(div)
+
+    idNum++;
+    $('.content').off('mouseup')
+
+    data.attrs.push(videoObj)
+    return false
+  })
 })
 
 // 打开收起tdk
@@ -781,6 +1010,7 @@ function save() {
     dataType: 'json',
     data: {'Special': param, '_csrf-backend': $('meta[name=csrf-token]').attr("content")},
     success: function(msg) {
+      alert('保存成功')
       // if(msg.error == 0) {
       //   //window.location.reload();
       // } else {
@@ -790,6 +1020,14 @@ function save() {
   });
 }
 
-$('body').click(function () {
+$('body').click(function (e) {
   $('.direction-box').hide()
+
+  if(elementActive){
+    if(!$(e.target).parent().hasClass(elementActive)){
+      $('.'+elementActive).css('z-index', elementActiveZIndex)
+      elementActive = '';
+      elementActiveZIndex = 0;
+    }
+  }
 })

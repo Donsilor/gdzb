@@ -71,7 +71,7 @@ html{
   width: 18px;
   height: 20px;
   box-sizing: border-box;
-  background: url(../img/icon/down-2.png) no-repeat center;
+  background: url(../img/icon/icon-down-2.png) no-repeat center;
   background-size: 100% 100%;
 }
 
@@ -201,7 +201,7 @@ html{
   right: 60px;
   width: 20px;
   height: 20px;
-  background: url(../img/icon/down.png) no-repeat center;
+  background: url(../img/icon/icon-down.png) no-repeat center;
   background-size: 100% 100%;
   cursor: pointer;
 }
@@ -287,12 +287,15 @@ html{
 .middle-layer .text-box .ipt-text{
   z-index: 8;
   display: none;
+  border: 1px solid #ccc;
 }
 
-.img-box{
+.img-box,
+.video-box{
   position: absolute;
 }
-.img-box .ipt-img{
+.img-box .ipt-img,
+.video-box .ipt-img{
   position: absolute;
   top: 0;
   left: 0;
@@ -303,7 +306,8 @@ html{
   display: none;
 }
 
-.middle-layer .img-box .img{
+.middle-layer .img-box .img,
+.middle-layer .video-box .video{
   position: absolute;
   top: 0;
   left: 0;
@@ -327,6 +331,7 @@ html{
 
 .middle-layer .no-bg{
   background: #fff !important;
+  border: none;
 }
 
 .switch{
