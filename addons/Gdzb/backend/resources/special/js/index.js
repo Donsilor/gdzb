@@ -866,7 +866,7 @@ function changeFile(obj,className) {
           var imgUrl = data.data.url;
           $(obj.target).siblings('.img').attr('src', imgUrl)
           $('.'+className).addClass('no-bg')
-          data.attrs[editIndex].link = imgUrl;
+          data.attrs[editIndex].url = imgUrl;
 　　　　},
 　　　　error: function(err) {
           console.log('err',err)
