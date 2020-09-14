@@ -71,7 +71,7 @@ html{
   width: 18px;
   height: 20px;
   box-sizing: border-box;
-  background: url(../img/icon/down-2.png) no-repeat center;
+  background: url(../img/icon/icon-down-2.png) no-repeat center;
   background-size: 100% 100%;
 }
 
@@ -201,7 +201,7 @@ html{
   right: 60px;
   width: 20px;
   height: 20px;
-  background: url(../img/icon/down.png) no-repeat center;
+  background: url(../img/icon/icon-down.png) no-repeat center;
   background-size: 100% 100%;
   cursor: pointer;
 }
@@ -257,14 +257,18 @@ html{
   overflow: hidden;
   height: 666px;
 }
-.middle-layer>div{
+.middle-layer.mobile{
+  width: 375px;
+  margin: 0 auto;
+}
+
+.middle-layer .text-box{
   position: absolute;
-  width: 100px;
-  height: 20px;
   border: 1px solid #333;
 }
-.middle-layer div .ipt-text,
-.middle-layer div textarea{
+.middle-layer .text-box .ipt-text,
+.middle-layer .text-box .pre{
+  position: absolute;
   width: 100%;
   height: 100%;
   color: inherit;
@@ -273,7 +277,61 @@ html{
   font-weight: inherit;
   font-style: inherit;
   text-decoration: inherit;
+  overflow: hidden;
+}
+
+.middle-layer .text-box .pre{
+  z-index: 6;
+}
+
+.middle-layer .text-box .ipt-text{
+  z-index: 8;
   display: none;
+  border: 1px solid #ccc;
+}
+
+.img-box,
+.video-box{
+  position: absolute;
+}
+.img-box .ipt-img,
+.video-box .ipt-img{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  display: none;
+}
+
+.middle-layer .img-box .img,
+.middle-layer .video-box .video{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+.template-text{
+  position: absolute;
+  border: 1px solid #333;
+  background-color: #fff;
+  display: none;
+  z-index: 99;
+}
+
+.middle-layer .no-border{
+  border: none;
+  height: auto;
+}
+
+.middle-layer .no-bg{
+  background: #fff !important;
+  border: none;
 }
 
 .switch{
@@ -322,20 +380,6 @@ html{
   padding-top: 18px;
   box-sizing: border-box;
   line-height: 16px;
-}
-
-.template-text{
-  width: 100px;
-  height: 20px;
-  border: 1px solid #333;
-  background-color: #fff;
-  display: none;
-  z-index: 999;
-}
-
-.middle-layer.mobile{
-  width: 375px;
-  margin: 0 auto;
 }
 
 .content-r{
@@ -568,6 +612,14 @@ html{
   background-size: 100%;
 }
 
+.del{
+  width: 24px;
+  height: 24px;
+  background: url(../img/icon/icon-del.png) no-repeat center;
+  background-size: 100% 100%;
+  margin-top: 30px;
+  display: none;
+}
 
 .control-img .attr,
 .control-video .attr{
@@ -604,21 +656,6 @@ html{
 
 .control-video .attr .width50{
   width: 54px;
-}
-
-.img-box{
-  position: relative;
-  background-color: #fff;
-  /* overflow: hidden; */
-}
-.img-box .ipt-img{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
 }
 
 .popup{

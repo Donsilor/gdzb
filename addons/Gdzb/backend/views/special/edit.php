@@ -204,60 +204,78 @@ $this->beginPage()
                             </div>
                         </div>
 
-                        <div class="attr-3 clf">
-                            <div class="text fl">链接</div>
-                            <input type="text fl" class="ipt">
-                        </div>
+                  <div class="attr-3 clf">
+                    <div class="text fl">链接</div>
+                    <input type="text fl" class="ipt text-link">
+                  </div>
+
+                  <div class="attr-child">
+                    <div class="align clf">
+                      <div class="del"></div>
                     </div>
+                  </div>
                 </div>
+              </div>
 
 
-                <div class="content-r-child control-img">
-                    <div class="align">
-                        <div class="attr clf">
-                            <div class="text fl">长</div>
-                            <input type="number" class="ipt img-width fl">
-                            <div class="px fl">px</div>
-                        </div>
+              <div class="content-r-child control-img">
+                <div class="align">
+                  <div class="attr clf">
+                    <div class="text fl">长</div>
+                    <input type="number" class="ipt img-width fl">
+                    <div class="px fl">px</div>
+                  </div>
 
-                        <div class="attr clf">
-                            <div class="text fl">宽</div>
-                            <input type="number" class="ipt img-height fl">
-                            <div class="px fl">px</div>
-                        </div>
+                  <div class="attr clf">
+                    <div class="text fl">宽</div>
+                    <input type="number" class="ipt img-height fl">
+                    <div class="px fl">px</div>
+                  </div>
 
-                        <div class="attr clf">
-                            <div class="text fl">链接</div>
-                            <input type="text" class="ipt fl width">
-                        </div>
+                  <div class="attr clf">
+                    <div class="text fl">链接</div>
+                    <input type="text" class="ipt fl width img-link">
+                  </div>
+
+                  <div class="attr">
+                    <div class="align clf">
+                      <div class="del"></div>
                     </div>
+                  </div>
                 </div>
+              </div>
+              
+              <div class="content-r-child control-video">
+                <div class="align">
+                  <div class="attr clf">
+                    <div class="text fl">长</div>
+                    <input type="number" class="ipt video-width fl">
+                    <div class="px fl">px</div>
+                  </div>
 
-                <div class="content-r-child control-video">
-                    <div class="align">
-                        <div class="attr clf">
-                            <div class="text fl">长</div>
-                            <input type="number" class="ipt fl">
-                            <div class="px fl">px</div>
-                        </div>
+                  <div class="attr clf">
+                    <div class="text fl">宽</div>
+                    <input type="number" class="ipt video-height fl">
+                    <div class="px fl">px</div>
+                  </div>
 
-                        <div class="attr clf">
-                            <div class="text fl">宽</div>
-                            <input type="number" class="ipt fl">
-                            <div class="px fl">px</div>
-                        </div>
+                  <div class="attr clf">
+                    <div class="text fl">链接</div>
+                    <input type="text" class="ipt fl width video-link">
+                  </div>
 
-                        <div class="attr clf">
-                            <div class="text fl">链接</div>
-                            <input type="text" class="ipt fl width">
-                        </div>
+                  <div class="attr clf">
+                    <div class="text fl width50">视频链接</div>
+                    <input type="text" class="ipt fl width">
+                  </div>
 
-                        <div class="attr clf">
-                            <div class="text fl width50">视频链接</div>
-                            <input type="text" class="ipt fl width">
-                        </div>
+                  <div class="attr">
+                    <div class="align clf">
+                      <div class="del"></div>
                     </div>
+                  </div>
                 </div>
+              </div>
             </div>
 
             <div class="save" onclick="save()">保存网页</div>
