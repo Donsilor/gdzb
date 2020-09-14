@@ -398,7 +398,7 @@ $('.classify-img').on('mousedown', function() {
               <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
               <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
             </div>
-            <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event)'/>
+            <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event, "img-box-${idNum}")'/>
             <img class='img' src='' onclick='addMove(event, "img-box-${idNum}")' ondblclick='loadImg(event, "img-box-${idNum}")'/>
           </div>`;
     $('.middle-layer').append(div)
@@ -860,10 +860,10 @@ function changeFile(obj,className) {
 　　　　"contentType": false,    // 不设置数据类型
 　　　　"data": fq,
 
-　　　　success: function(data) {
-　　　　　　console.log('success',data)
+　　　　success: function(res) {
+　　　　　　console.log('success',res)
 
-          var imgUrl = data.data.url;
+          var imgUrl = res.data.url;
           $(obj.target).siblings('.img').attr('src', imgUrl)
           $('.'+className).addClass('no-bg')
           data.attrs[editIndex].url = imgUrl;
@@ -961,7 +961,7 @@ $('.classify-video').on('mousedown', function() {
               <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
               <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
             </div>
-            <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event)'/>
+            <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event, "video-box-${idNum}")'/>
             <video class='video' src=''  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
           </div>`;
     $('.middle-layer').append(div)
