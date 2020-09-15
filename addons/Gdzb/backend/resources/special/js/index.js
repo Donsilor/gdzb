@@ -158,6 +158,104 @@ data = {
 },
 timer;
 
+// 编辑展示
+if(attrs){
+  var divStyle = {},div;
+  for(var i in attrs){
+    data.attrs[i] = attrs[i];
+
+    idNum = (attrs[i]['z-index']-0) > idNum ? attrs[i]['z-index']-0 : idNum;
+    
+    if(attrs[i].type == 'text'){
+      divStyle ='position:'+'absolute'
+            +';top:'+attrs[i].top
+            +';left:'+attrs[i].left
+            +';z-index:'+attrs[i]['z-index']
+            +';width:'+attrs[i].width
+            +';height:'+attrs[i].height
+            +';font-size:'+attrs[i]['font-size']
+            +';font-style:'+attrs[i]['font-style']
+            +';font-face:'+attrs[i]['font-face']
+            +';font-weight:'+attrs[i]['font-weight']
+            +';text-align:'+attrs[i]['text-align']
+            +';text-decoration:'+attrs[i]['text-decoration']
+            +';color:'+attrs[i].left
+            +';link:'+attrs[i].link;
+
+      div = `<div style='${divStyle}' class='text-box text-box-${idNum}'>
+                <div class='direction-box' onmousedown='moveImg(event, "text-box-${idNum}")'>
+                  <div class='direction top' onmousedown='move(event, "top")'></div>
+                  <div class='direction down' onmousedown='move(event, "down")'></div>
+                  <div class='direction left' onmousedown='move(event, "left")'></div>
+                  <div class='direction right' onmousedown='move(event, "right")'></div>
+                  <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
+                  <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
+                  <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
+                  <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
+                </div>
+                <textarea type='text' class='ipt-text' onInput='inputText(event)' onfocus='onFocus(event)' onblur='onBlur(event, "text-box-${idNum}")'></textarea>
+                <pre class='pre' onclick='addMove(event, "text-box-${idNum}")' ondblclick='edit(event, "text-box-${idNum}")'></pre>
+            </div>`;
+      content.append(div)
+      $('.text-box-'+idNum+ ' .pre').text(attrs[i].content)
+
+    }else if(attrs[i].type == 'img'){
+      divStyle ='position:'+'absolute'
+            +';top:'+attrs[i].top
+            +';left:'+attrs[i].left
+            +';z-index:'+attrs[i]['z-index']
+            +';width:'+attrs[i].width
+            +';height:'+attrs[i].height
+            +';link:'+attrs[i].link;
+
+      div = `<div style='${divStyle}' class='img-box img-box-${idNum}'>
+              <div class='direction-box' onmousedown='moveImg(event)'>
+                <div class='direction top' onmousedown='move(event, "top")'></div>
+                <div class='direction down' onmousedown='move(event, "down")'></div>
+                <div class='direction left' onmousedown='move(event, "left")'></div>
+                <div class='direction right' onmousedown='move(event, "right")'></div>
+                <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
+                <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
+                <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
+                <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
+              </div>
+              <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event, "img-box-${idNum}")'/>
+              <img class='img' src='' onclick='addMove(event, "img-box-${idNum}")' ondblclick='loadImg(event, "img-box-${idNum}")'/>
+            </div>`;
+      content.append(div)
+      $('.img-box-'+idNum+ ' .img').attr('src', attrs[i].url)
+
+    }else if(attrs[i].type == 'video'){
+      divStyle ='position:'+'absolute'
+            +';top:'+attrs[i].top
+            +';left:'+attrs[i].left
+            +';z-index:'+attrs[i]['z-index']
+            +';width:'+attrs[i].width
+            +';height:'+attrs[i].height
+            +';link:'+attrs[i].link;
+
+      div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
+              <div class='direction-box' onmousedown='moveImg(event)'>
+                <div class='direction top' onmousedown='move(event, "top")'></div>
+                <div class='direction down' onmousedown='move(event, "down")'></div>
+                <div class='direction left' onmousedown='move(event, "left")'></div>
+                <div class='direction right' onmousedown='move(event, "right")'></div>
+                <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
+                <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
+                <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
+                <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
+              </div>
+              <input type='file' class='ipt-img' accept='video/*' onchange='changeFile(event, "video-box-${idNum}")'/>
+              <video class='video' src='' width="100%" height="100%" controls="controls" autoplay="autoplay"  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
+            </div>`;
+      content.append(div)
+      $('.video-box-'+idNum+ ' .video').attr('src', attrs[i].url)
+    }
+  }
+
+  console.log(889,idNum)
+}
+
 // 添加文本
 $('.classify-text').on('mousedown', function() {
   var textObj = {};
@@ -407,6 +505,112 @@ $('.classify-img').on('mousedown', function() {
     $('.content').off('mouseup')
 
     data.attrs.push(imgObj)
+    return false
+  })
+})
+
+
+// 增加视频
+$('.classify-video').on('mousedown', function() {
+  return
+  var videoObj = {};
+  for(var attr in videoAttr){
+    videoObj[attr] = videoAttr[attr];
+  }
+  
+  $(this).addClass('active').siblings().removeClass('active')
+  $('.control-video').show().siblings('.content-r-child').hide();
+
+  videoObj.width = '140px';
+  videoObj.height = '140px';
+
+  var vidWidth = $('.video-width').val(),vidHeight = $('.video-height').val();
+  if(vidWidth && vidWidth>0){
+    videoObj.width = parseInt(vidWidth)+'px';
+  }
+
+  if(vidHeight && vidHeight>0){
+    videoObj.height = parseInt(vidHeight)+'px';
+  }
+
+  tem.css({'width': videoObj.width, 'height': videoObj.height})
+
+  $('.content').on('mousemove', function(e) {
+    mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+    mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+    videoObj.left=mouseX - parseInt(videoObj.width)/2;
+    videoObj.top=mouseY - parseInt(videoObj.height)/2;
+    
+    if(videoObj.left < 0){
+      videoObj.left = 0
+    }
+    if(videoObj.left > (parseInt(contentWidth) - parseInt(videoObj.width))){
+      videoObj.left = parseInt(contentWidth) - parseInt(videoObj.width)
+    }
+    if(videoObj.top < 0){
+      videoObj.top = 0
+    }
+    if(videoObj.top > (parseInt(contentHeight) - parseInt(videoObj.height))){
+      videoObj.top = parseInt(contentHeight) - parseInt(videoObj.height)
+    }
+    if(mouseX > 0){
+      tem.show()
+    }
+
+    videoObj.left = (videoObj.left/contentWidth*100).toFixed(2) + '%';
+    videoObj.top = videoObj.top + 'px';
+    
+    tem.css({'left': videoObj.left, 'top': videoObj.top})
+
+  })
+
+  $('.content').on('mouseup', function(e) {
+    $('.content').off('mousemove')
+    $('.template-text').hide()
+
+    videoObj['z-index'] = idNum;
+    videoObj.type = 'video';
+
+    videoObj.link = $('.control-video .video-link').val();
+    videoObj.element = 'video-box-'+idNum;
+
+    $('.video-width').val(parseInt(videoObj.width))
+    $('.video-height').val(parseInt(videoObj.height))
+
+    // videoObj.link = $('.control-img .ipt-link').val();
+
+    divStyle =
+            'top:'+videoObj.top
+            +';left:'+videoObj.left
+            +';z-index:'+videoObj['z-index']
+            +';width:'+videoObj.width
+            +';height:'+videoObj.height
+            +';background:#fff url('+baseStaticUrl+'img/icon/icon-load.jpg) no-repeat center'
+            +';background-size:60% 60%'
+            +';border:1px solid #ccc'
+            +';cursor:pointer';
+
+    div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
+            <div class='direction-box' onmousedown='moveImg(event)'>
+              <div class='direction top' onmousedown='move(event, "top")'></div>
+              <div class='direction down' onmousedown='move(event, "down")'></div>
+              <div class='direction left' onmousedown='move(event, "left")'></div>
+              <div class='direction right' onmousedown='move(event, "right")'></div>
+              <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
+              <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
+              <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
+              <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
+            </div>
+            <input type='file' class='ipt-img' accept='video/*' onchange='changeFile(event, "video-box-${idNum}")'/>
+            <video class='video' src='' width="100%" height="100%" controls="controls" autoplay="autoplay"  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
+          </div>`;
+    $('.middle-layer').append(div)
+
+    idNum++;
+    $('.content').off('mouseup')
+
+    data.attrs.push(videoObj)
     return false
   })
 })
@@ -811,168 +1015,111 @@ function changeFile(obj,className) {
   for(var at in data.attrs){
     if(data.attrs[at].element == className){
       editIndex = at;
+      break
     }
   }
   
-  const isJPG =
-  file.type == 'image/jpeg'||
-    file.type == 'image/png'||
-    file.type == 'image/jpg'||
-    file.type == 'image/gif'||
-    file.type == 'image/tiff'||
-    file.type == 'image/raw'||
-    file.type == 'image/pcx'||
-    file.type == 'image/tga'||
-    file.type == 'image/exif'||
-    file.type == 'image/fpx'||
-    file.type == 'image/svg'||
-    file.type == 'image/psd'||
-    file.type == 'image/cdr'||
-    file.type == 'image/pcd'||
-    file.type == 'image/dxf'||
-    file.type == 'image/ufo'||
-    file.type == 'image/eps'||
-    file.type == 'image/ai'||
-    file.type == 'image/WMF'||
-    file.type == 'image/webp'||
-    file.type == 'image/bmp';
+  var type = data.attrs[editIndex].type;
 
-  const isLt2M = file.size / 1024 / 1024 < 2;
+  if(type == 'img'){
+    const isJPG =
+    file.type == 'image/jpeg'||
+      file.type == 'image/png'||
+      file.type == 'image/jpg'||
+      file.type == 'image/gif'||
+      file.type == 'image/tiff'||
+      file.type == 'image/raw'||
+      file.type == 'image/pcx'||
+      file.type == 'image/tga'||
+      file.type == 'image/exif'||
+      file.type == 'image/fpx'||
+      file.type == 'image/svg'||
+      file.type == 'image/psd'||
+      file.type == 'image/cdr'||
+      file.type == 'image/pcd'||
+      file.type == 'image/dxf'||
+      file.type == 'image/ufo'||
+      file.type == 'image/eps'||
+      file.type == 'image/ai'||
+      file.type == 'image/WMF'||
+      file.type == 'image/webp'||
+      file.type == 'image/bmp';
 
-  // if (!isJPG) {
-    // this.$message.error(this.$t(`${lang}.imgFomat`));
-    // return isJPG
-  // }
-  // if (!isLt2M) {
-    // this.$message.error(this.$t(`${lang}.imgSize`));
-    // return isLt2M
-  // }
-  // return isJPG && isLt2M;
+    const isLt2M = file.size / 1024 / 1024 < 2;
 
-  var fq = new window.FormData();
+    // if (!isJPG) {
+      // this.$message.error(this.$t(`${lang}.imgFomat`));
+      // return isJPG
+    // }
+    // if (!isLt2M) {
+      // this.$message.error(this.$t(`${lang}.imgSize`));
+      // return isLt2M
+    // }
+    // return isJPG && isLt2M;
 
-  fq.append('file', file[0], file[0].name)
+    var fq = new window.FormData();
 
-  $.ajax({
-　　　　"url": "/backend/file/images",
-　　　　"type": "post",
-　　　　"processData": false, // 将数据转换成对象，不对数据做处理，故 processData: false 
-　　　　"contentType": false,    // 不设置数据类型
-　　　　"data": fq,
+    fq.append('file', file[0], file[0].name)
 
-　　　　success: function(res) {
-　　　　　　console.log('success',res)
+    $.ajax({
+  　　　　"url": "/backend/file/images",
+  　　　　"type": "post",
+  　　　　"processData": false, // 将数据转换成对象，不对数据做处理，故 processData: false 
+  　　　　"contentType": false,    // 不设置数据类型
+  　　　　"data": fq,
 
-          var imgUrl = res.data.url;
-          $(obj.target).siblings('.img').attr('src', imgUrl)
-          $('.'+className).addClass('no-bg')
-          data.attrs[editIndex].url = imgUrl;
-　　　　},
-　　　　error: function(err) {
-          console.log('err',err)
-　　　　}
-　 })
+  　　　　success: function(res) {
+            var imgUrl = res.data.url;
+            $('.'+className).children('.img').attr('src', imgUrl)
+            $('.'+className).addClass('no-bg')
+            data.attrs[editIndex].url = imgUrl;
+  　　　　},
+  　　　　error: function(err) {
+            console.log('err',err)
+  　　　　}
+  　 })
+  }else if(type == 'video'){
+    const isJPG =
+      file.type == 'video/mp4'||
+      file.type == 'video/raw'
+
+    const isLt2M = file.size / 1024 / 1024 < 2;
+
+    // if (!isJPG) {
+      // this.$message.error(this.$t(`${lang}.imgFomat`));
+      // return isJPG
+    // }
+    // if (!isLt2M) {
+      // this.$message.error(this.$t(`${lang}.imgSize`));
+      // return isLt2M
+    // }
+    // return isJPG && isLt2M;
+
+    var fq = new window.FormData();
+  
+    fq.append('file', file[0], file[0].name)
+  
+    $.ajax({
+  　　　　"url": "/backend/file/videos",
+  　　　　"type": "post",
+  　　　　"processData": false, // 将数据转换成对象，不对数据做处理，故 processData: false 
+  　　　　"contentType": false,    // 不设置数据类型
+  　　　　"data": fq,
+  
+  　　　　success: function(res) {
+            var videoUrl = res.data.url;
+
+            $('.'+className).children('.video').attr('src', videoUrl)
+            $('.'+className).addClass('no-bg')
+            data.attrs[editIndex].url = videoUrl;
+  　　　　},
+  　　　　error: function(err) {
+            console.log('err',err)
+  　　　　}
+  　 })
+  }
+
 }
-
-
-// 增加视频
-$('.classify-video').on('mousedown', function() {
-  return
-  var videoObj = {};
-  for(var attr in videoAttr){
-    videoObj[attr] = videoAttr[attr];
-  }
-  
-  $(this).addClass('active').siblings().removeClass('active')
-  $('.control-video').show().siblings('.content-r-child').hide();
-
-  videoObj.width = '140px';
-  videoObj.height = '140px';
-
-  var vidWidth = $('.video-width').val(),vidHeight = $('.video-height').val();
-  if(vidWidth && vidWidth>0){
-    videoObj.width = parseInt(vidWidth)+'px';
-  }
-
-  if(vidHeight && vidHeight>0){
-    videoObj.height = parseInt(vidHeight)+'px';
-  }
-
-  tem.css({'width': videoObj.width, 'height': videoObj.height})
-
-  $('.content').on('mousemove', function(e) {
-    mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
-    mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-
-    videoObj.left=mouseX - parseInt(videoObj.width)/2;
-    videoObj.top=mouseY - parseInt(videoObj.height)/2;
-    
-    if(videoObj.left < 0){
-      videoObj.left = 0
-    }
-    if(videoObj.left > (parseInt(contentWidth) - parseInt(videoObj.width))){
-      videoObj.left = parseInt(contentWidth) - parseInt(videoObj.width)
-    }
-    if(videoObj.top < 0){
-      videoObj.top = 0
-    }
-    if(videoObj.top > (parseInt(contentHeight) - parseInt(videoObj.height))){
-      videoObj.top = parseInt(contentHeight) - parseInt(videoObj.height)
-    }
-    if(mouseX > 0){
-      tem.show()
-    }
-
-    videoObj.left = (videoObj.left/contentWidth*100).toFixed(2) + '%';
-    videoObj.top = videoObj.top + 'px';
-    
-    tem.css({'left': videoObj.left, 'top': videoObj.top})
-
-  })
-
-  $('.content').on('mouseup', function(e) {
-    $('.content').off('mousemove')
-    $('.template-text').hide()
-
-    videoObj['z-index'] = idNum;
-    videoObj.type = 'img';
-
-    // videoObj.link = $('.control-img .ipt-link').val();
-
-    divStyle =
-            'top:'+videoObj.top
-            +';left:'+videoObj.left
-            +';z-index:'+videoObj['z-index']
-            +';width:'+videoObj.width
-            +';height:'+videoObj.height
-            +';background:#fff url('+baseStaticUrl+'img/icon/icon-load.jpg) no-repeat center'
-            +';background-size:60% 60%'
-            +';border:1px solid #ccc'
-            +';cursor:pointer';
-
-    div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
-            <div class='direction-box' onmousedown='moveImg(event)'>
-              <div class='direction top' onmousedown='move(event, "top")'></div>
-              <div class='direction down' onmousedown='move(event, "down")'></div>
-              <div class='direction left' onmousedown='move(event, "left")'></div>
-              <div class='direction right' onmousedown='move(event, "right")'></div>
-              <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
-              <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
-              <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
-              <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
-            </div>
-            <input type='file' class='ipt-img' accept='image/*' onchange='changeFile(event, "video-box-${idNum}")'/>
-            <video class='video' src=''  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
-          </div>`;
-    $('.middle-layer').append(div)
-
-    idNum++;
-    $('.content').off('mouseup')
-
-    data.attrs.push(videoObj)
-    return false
-  })
-})
 
 // 打开收起tdk
 function openTdk() {
