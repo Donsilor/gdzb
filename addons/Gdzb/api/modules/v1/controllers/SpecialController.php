@@ -27,7 +27,11 @@ class SpecialController extends OnAuthController
     {
         $url = Yii::$app->request->get('url', null);
 
-        $result = Special::findOne(['url' => $url]);
+        $where = [];
+        $where['url'] = $url;
+        $where['status'] = 1;
+
+        $result = Special::findOne($where);
 
         return $result;
     }
