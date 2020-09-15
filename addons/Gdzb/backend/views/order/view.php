@@ -35,77 +35,78 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ：
                             </td>
                             <td class="col-xs-3 no-border-top"><?= $model->order_sn ?></td>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('sale_channel_id') ?>：</td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('channel_id') ?>：</td>
                             <td><?= $model->saleChannel->name ?? '' ?></td>
-                            <td class="col-xs-1 text-right no-border-top">语言/货币：</td>
-                            <td class="col-xs-3 no-border-top"><?= common\enums\LanguageEnum::getValue($model->language) ?>
-                                （<?= common\enums\CurrencyEnum::getValue($model->currency) ?>）
-                            </td>
-
-                        </tr>
-                        <tr>
-
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('order_type') ?>：</td>
-                            <td><?= addons\Sales\common\enums\OrderTypeEnum::getValue($model->order_type) ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('order_status') ?>：</td>
                             <td><?= addons\Sales\common\enums\OrderStatusEnum::getValue($model->order_status) ?></td>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('pay_type') ?>：</td>
-                            <td><?= $model->payType->name ?? '' ?></td>
+
                         </tr>
                         <tr>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('distribute_status') ?>：</td>
-                            <td><?= addons\Sales\common\enums\DistributeStatusEnum::getValue($model->distribute_status) ?></td>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('delivery_status') ?>：</td>
-                            <td><?= addons\Sales\common\enums\DeliveryStatusEnum::getValue($model->delivery_status) ?></td>
+                            <td class="col-xs-1 text-right"></td>
+                            <td></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('warehouse_id') ?>：</td>
+                            <td><?= $model->warehouse->name ?? '' ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('pay_status') ?>：</td>
                             <td><?= addons\Sales\common\enums\PayStatusEnum::getValue($model->pay_status) ?></td>
                         </tr>
                         <tr>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_name') ?>：</td>
-                            <td><?= $model->customer_name ?></td>
+
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('order_from') ?>：</td>
+                            <td><?= \addons\Gdzb\common\enums\OrderFromEnum::getValue($model->order_from) ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('express_id') ?>：</td>
                             <td><?= $model->express->name ?? '' ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('refund_status') ?>：</td>
                             <td><?= addons\Sales\common\enums\RefundStatusEnum::getValue($model->refund_status) ?></td>
                         </tr>
                         <tr>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_email') ?>：</td>
-                            <td><?= $model->customer_email ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_name') ?>：</td>
+                            <td><?= $model->customer_name ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('express_no') ?>：</td>
-                            <td><?= $model->express_no ?>
-                                <?php if ($model->express_no) {
-                                    echo Html::a("(物流轨迹)", ['logistics', 'id' => $model->id],
-                                        [
-                                            'style' => "text-decoration:underline;color:#3c8dbc",
-                                            'class' => 'openIframe',
-                                            'data-width' => '60%',
-                                            'data-height' => '80%',
-                                            'data-offset' => '20px',
-                                        ]);
-                                } ?></td>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('pay_sn') ?>：</td>
-                            <td><?= $model->pay_sn ?></td>
+                            <td><?= $model->express_no ?? '' ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('pay_time') ?>：</td>
+                            <td><?= $model->pay_time ? Yii::$app->formatter->asDate($model->pay_time) : '' ?></td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_weixin') ?>：</td>
+                            <td><?= $model->customer_weixin ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('delivery_time') ?>：</td>
+                            <td><?= $model->delivery_time ? Yii::$app->formatter->asDate($model->delivery_time) : '' ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('follower_id') ?>：</td>
+                            <td><?= $model->follower->username ?? '' ?></td>
                         </tr>
                         <tr>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_mobile') ?>：</td>
                             <td><?= $model->customer_mobile ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('is_invoice') ?>：</td>
+                            <td><?= \common\enums\ConfirmEnum::getValue($model->is_invoice); ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('created_at') ?>：</td>
+                            <td><?= $model->pay_time ? Yii::$app->formatter->asDate($model->created_at) : '' ?></td>
 
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('out_trade_no') ?>：</td>
-                            <td><?= $model->out_trade_no ?></td>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('out_pay_no') ?>：</td>
-                            <td><?= $model->out_pay_no ?></td>
                         </tr>
                         <tr>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_account') ?>：</td>
-                            <td><?= $model->customer_account ?></td>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('store_account') ?>：</td>
-                            <td><?= $model->store_account ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('order_amount') ?>：</td>
+                            <td><?= $model->order_amount ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('refund_no') ?>：</td>
+                            <td><?//= $model->refund_no ?></td>
                             <td class="col-xs-1 text-right"></td>
                             <td></td>
+
                         </tr>
                         <tr>
-                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('pay_remark') ?>：</td>
-                            <td colspan="5"><?= $model->pay_remark ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('goods_num') ?>：</td>
+                            <td><?= $model->goods_num ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('collect_type') ?>：</td>
+                            <td><?= \addons\Gdzb\common\enums\PayTypeEnum::getValue($model->collect_type) ?></td>
+                            <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('collect_no') ?>：</td>
+                            <td><?= $model->collect_no ?></td>
+                        </tr>
+                        <tr>
+                            <td class="col-xs-1 text-right">供应商微信号：</td>
+                            <td><?= $model->supplier->wechat ?? '' ?></td>
+                            <td class="col-xs-1 text-right">供应商姓名：</td>
+                            <td><?= $model->supplier->contactor ?? '' ?></td>
+                            <td class="col-xs-1 text-right"></td>
+                            <td></td>
                         </tr>
                         <tr>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('remark') ?>：</td>
@@ -116,22 +117,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="box-footer text-center">
                     <?php
                     if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
-                        echo Html::edit(['ajax-edit', 'id' => $model->id], '编辑', [
-                            'data-toggle' => 'modal',
-                            'class' => 'btn btn-primary btn-ms',
-                            'data-target' => '#ajaxModalLg',
+                        echo Html::edit(['edit', 'id' => $model->id], '编辑', ['class' => 'btn btn-primary btn-ms',
+
                         ]);
                     }
                     ?>
-                    <?php
-                    if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
-                        echo Html::edit(['ajax-edit-fee', 'id' => $model->id], '编辑费用', [
-                            'data-toggle' => 'modal',
-                            'class' => 'btn btn-primary btn-ms',
-                            'data-target' => '#ajaxModalLg',
-                        ]);
-                    }
-                    ?>
+
                     <?php
                     if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
                         echo Html::edit(['ajax-apply', 'id' => $model->id], '提审', [
@@ -141,12 +132,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                     ?>
                     <?php
-                    if ($model->targetType) {
-                        $isAudit = Yii::$app->services->flowType->isAudit($model->targetType, $model->id);
-                    } else {
-                        $isAudit = true;
-                    }
-                    if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::PENDING && $isAudit) {
+
+                    if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::PENDING ) {
                         echo Html::edit(['ajax-audit', 'id' => $model->id], '审核', [
                             'class' => 'btn btn-success btn-ms',
                             'data-toggle' => 'modal',
@@ -173,18 +160,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     }
                     ?>
-                    <?php
-                    if ($model->distribute_status == DistributeStatusEnum::ALLOWED) {
-                        echo Html::edit(['distribution/account-sales', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()], '配货', [
-                            'class' => 'btn btn-primary btn-ms',
-                        ]);
-                    }
-                    ?>
-                    <?php
-                    if ($model->distribute_status == DistributeStatusEnum::HAS_PEIHUO && $model->delivery_status == \addons\Sales\common\enums\DeliveryStatusEnum::SAVE) {
-                        echo Html::a('发货质检', ['order-fqc/view', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()], ['class' => 'btn btn-primary btn-ms']);
-                    }
-                    ?>
+
                     <?php
                     if ($model->delivery_status == \addons\Sales\common\enums\DeliveryStatusEnum::TO_SEND) {
                         echo Html::a('发货', ['shipping/view', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()], ['class' => 'btn btn-primary btn-ms']);
@@ -742,37 +718,3 @@ $this->params['breadcrumbs'][] = $this->title;
     <!-- tab-content end -->
 </div>
 
-<script>
-    function batchBuchan() {
-        appConfirm("提交布产", '确定布产吗', function (value) {
-            switch (value) {
-                case "defeat":
-                    var ids = $("#order-goods").yiiGridView("getSelectedRows");
-                    if (ids == '') {
-                        rfMsg('请选中商品明细')
-                        return false;
-                    }
-                    var url = "<?= Url::to(['order-goods/buchan'])?>?ids=" + ids;
-                    window.location = url;
-
-                    break;
-                default:
-            }
-        });
-    }
-
-</script>
-<script>
-    $("#flow").load("<?= \common\helpers\Url::to(['../common/flow/audit-view', 'flow_type_id' => $model->targetType, 'target_id' => $model->id])?>");
-
-    $('#order-goods table tbody tr').each(function () {
-        var id = Number($(this).attr('data-key'));
-        var arr = <?= $return ?? []?>;
-        if ($.inArray(id, arr) != -1) {
-            $(this).children().each(function () {
-                $(this).attr('style', "position:relative;");
-                $(this).append('<div style="width:100%;position:absolute;top:14px;left:-1px;border-bottom:solid 1px red;"></div><div style="width:100%;position:absolute;top:19px;left:-1px;border-bottom:solid 1px red;"></div>');
-            });
-        }
-    });
-</script>

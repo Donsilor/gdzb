@@ -11,6 +11,7 @@ use common\components\Service;
  * @property \addons\Gdzb\services\OrderService $order 订单
  * @property \addons\Gdzb\services\SupplierService $supplier 供应商
  * @property \addons\Gdzb\services\CustomerService $customer 客户
+ * @property \addons\Gdzb\services\OrderLogService $orderLog 订单日志
  * @var array
  */
 class Application extends Service
@@ -21,5 +22,6 @@ class Application extends Service
             'order' => 'addons\Gdzb\services\OrderService',            
             'supplier' => 'addons\Gdzb\services\SupplierService',
             'customer' => 'addons\Gdzb\services\CustomerService',
+            'orderLog' => 'addons\Gdzb\services\OrderLogService',
     ];
 }

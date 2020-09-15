@@ -16,10 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="box-header">
                 <h3 class="box-title"><?= Html::encode($this->title) ?></h3>
                 <div class="box-tools">
-                    <?= Html::create(['ajax-edit'], '创建', [
-                        'data-toggle' => 'modal',
-                        'data-target' => '#ajaxModalLg',
-                    ]); ?>
+                    <?= Html::create(['edit'], '创建'); ?>
                     <?= Html::button('导出', [
                         'class'=>'btn btn-success btn-xs',
                         'onclick' => 'batchExport()',
@@ -117,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => function($model){
                           $str = '';
                           $str .= $model->customer_mobile ? $model->customer_mobile."<br/>":'';
-                          $str .= $model->customer_email ? $model->customer_email."<br/>":'';
+                          $str .= $model->customer_weixin ? $model->customer_weixin."<br/>":'';
                           return $str;
                     },
                     'filter' => false,
@@ -256,11 +253,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'edit' => function($url, $model, $key){
                      if($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
-                         return Html::edit(['ajax-edit', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()], '编辑', [
-                             'data-toggle' => 'modal',
-                             'data-target' => '#ajaxModalLg',
-                             'class' => 'btn btn-primary btn-sm',
-                         ]);
+                         return Html::edit(['edit', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()], '编辑');
                      }
                     },
                     'ajax-apply' => function($url, $model, $key){
@@ -272,13 +265,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     },
                     'audit' => function($url, $model, $key){
-                        $model->getTargetType();
-                        if($model->targetType){
-                            $isAudit = Yii::$app->services->flowType->isAudit($model->targetType,$model->id);
-                        }else{
-                            $isAudit = true;
-                        }
-                        if($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::PENDING && $isAudit) {
+                        if($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::PENDING) {
                             return Html::edit(['ajax-audit', 'id' => $model->id], '审核', [
                                 'class' => 'btn btn-success btn-sm',
                                 'data-toggle' => 'modal',
