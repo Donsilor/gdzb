@@ -13,8 +13,7 @@ use addons\Sales\common\models\OrderAccount;
 use addons\Sales\common\models\SalesReturn;
 use common\enums\AuditStatusEnum;
 use common\enums\ConfirmEnum;
-use common\enums\FlowStatusEnum;
-use common\helpers\ArrayHelper;
+use common\helpers\Url;
 use Yii;
 use common\traits\Curd;
 use addons\Sales\common\models\Order;
@@ -99,25 +98,33 @@ class OrderController extends BaseController
     public function actionEdit()
     {
         $id = Yii::$app->request->get('id');
+        $returnUrl = Yii::$app->request->get('returnUrl',Url::to(['index']));
         $model = $this->findModel($id);
+        $model = $model ?? new OrderForm();
         // ajax 校验
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
+
+            $post = Yii::$app->request->post('OrderForm');
+            $model->consignee_info = $model->setConsigneeInfo($post);
+
             $isNewRecord = $model->isNewRecord;
             try{
                 $trans = Yii::$app->trans->beginTransaction();
-                $model = Yii::$app->salesService->order->createOrder($model);
+                $model = Yii::$app->gdzbService->order->createOrder($model);
                 $trans->commit();
                 return $isNewRecord
                     ? $this->message("创建成功", $this->redirect(['view', 'id' => $model->id]), 'success')
-                    : $this->message("保存成功", $this->redirect(Yii::$app->request->referrer), 'success');
+                    : $this->message("保存成功", $this->redirect($returnUrl), 'success');
 
             }catch (\Exception $e) {
                 $trans->rollback();
                 return $this->message($e->getMessage(), $this->redirect(Yii::$app->request->referrer), 'error');
             }
         }
-        //初始化 默认值
+        //初始化
+        $model->getConsigneeInfo($model);
+
         return $this->render($this->action->id, [
             'model' => $model,
         ]);
@@ -173,7 +180,7 @@ class OrderController extends BaseController
                 'model' => $model,
                 'dataProvider' => $dataProvider,
                 'tab'=>Yii::$app->request->get('tab',1),
-                'tabList'=>Yii::$app->salesService->order->menuTabList($id,$this->returnUrl),
+                'tabList'=>Yii::$app->gdzbService->order->menuTabList($id,$this->returnUrl),
                 'returnUrl'=>$this->returnUrl,
                 'return'=>!empty($return)?json_encode($return):"",
         ]);

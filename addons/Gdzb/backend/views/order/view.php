@@ -87,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('order_amount') ?>：</td>
                             <td><?= $model->order_amount ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('refund_no') ?>：</td>
-                            <td><?//= $model->refund_no ?></td>
+                            <td><?= $model->refund_no ?></td>
                             <td class="col-xs-1 text-right"></td>
                             <td></td>
 
@@ -117,9 +117,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="box-footer text-center">
                     <?php
                     if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
-                        echo Html::edit(['edit', 'id' => $model->id], '编辑', ['class' => 'btn btn-primary btn-ms',
-
-                        ]);
+                        echo Html::edit(['edit', 'id' => $model->id,'returnUrl' => Url::getReturnUrl()], '编辑', ['class' => 'btn btn-primary btn-ms']);
                     }
                     ?>
 
@@ -174,36 +172,12 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-xs-12">
             <div class="box" style="margin:0px">
                 <div class="box-header" style="margin:0">
-                    <h3 class="box-title"><i class="fa fa-info"></i> 商品信息</h3>
-                    <h6 style="color:red">*有款起版的商品（既有款号又有起版号的），下订单只能用起版号下单</h6>
+                    <h3 class="box-title"><i class="fa fa-info"></i> 商品明细</h3>
                     <?php
                     if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
-                        echo Html::create(['order-goods/edit', 'order_id' => $model->id], '期货商品', [
-                            'class' => 'btn btn-primary btn-xs openIframe',
-                            'data-width' => '90%',
-                            'data-height' => '90%',
-                            'data-offset' => '20px',
-                        ]);
-                        echo '&nbsp;';
-                        echo Html::create(['order-goods/select-stock', 'order_id' => $model->id], '现货商品', [
-                            'class' => 'btn btn-primary btn-xs openIframe',
-                            'data-width' => '90%',
-                            'data-height' => '90%',
-                            'data-offset' => '20px',
-                        ]);
-                        echo '&nbsp;';
-                        echo Html::create(['order-goods/select-diamond', 'order_id' => $model->id], '裸钻商品', [
-                            'class' => 'btn btn-primary btn-xs openIframe',
-                            'data-width' => '90%',
-                            'data-height' => '90%',
-                            'data-offset' => '20px',
-                        ]);
-                        echo '&nbsp;';
-                        echo Html::create(['order-goods/select-gift', 'order_id' => $model->id], '赠品', [
-                            'class' => 'btn btn-primary btn-xs openIframe',
-                            'data-width' => '90%',
-                            'data-height' => '90%',
-                            'data-offset' => '20px',
+                        echo Html::create(['order-goods/ajax-edit','order_id'=>$model->id], '添加', [
+                            'data-toggle' => 'modal',
+                            'data-target' => '#ajaxModal',
                         ]);
                     }
                     ?>
@@ -234,14 +208,21 @@ $this->params['breadcrumbs'][] = $this->title;
                             ],
                             'id',
                             [
+                                'attribute' => 'goods_sn',
+                                'value' => 'goods_sn',
+                                'headerOptions' => ['class' => 'col-md-1'],
+                            ],
+                            [
                                 'attribute' => 'goods_image',
                                 'value' => function ($model) {
-                                    return common\helpers\ImageHelper::fancyBox($model->goods_image);
+                                    $goods_image = $model->goods_image ? explode(',', $model->goods_image) : [];
+                                    return common\helpers\ImageHelper::fancyBox($goods_image);
                                 },
                                 'filter' => false,
                                 'format' => 'raw',
                                 'headerOptions' => ['width' => '80'],
                             ],
+
                             [
                                 'attribute' => 'goods_name',
                                 'value' => function ($model) {
@@ -249,65 +230,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 },
                                 'format' => 'raw',
                             ],
-                            [
-                                'attribute' => 'goods_id',
-                                'value' => 'goods_id',
-                                'headerOptions' => ['class' => 'col-md-1'],
-                            ],
-                            [
-                                'attribute' => 'goods_sn',
-                                'value' => 'goods_sn',
-                                'headerOptions' => ['class' => 'col-md-1'],
-                            ],
-                            [
-                                'attribute' => 'style_sn',
-                                'value' => function ($model) {
-                                    $style_sn = $model->style_sn;
-                                    $is_exist = Yii::$app->styleService->style->isExist($style_sn);
-                                    if (!$is_exist && $style_sn) {
-                                        $style_sn = "<font color='red'>{$style_sn}(erp无此款)</font>";
-                                    }
-                                    return $style_sn;
-                                },
-                                'format' => 'raw',
-                                'headerOptions' => ['class' => 'col-md-1'],
-                            ],
-                            [
-                                'label' => '裸钻证书号',
-                                'value' => function ($model) {
-                                    $order_goods_attr = \addons\Sales\common\models\OrderGoodsAttribute::find()->where(['id' => $model->id, 'attr_id' => \addons\Style\common\enums\AttrIdEnum::DIA_CERT_NO])->one();
-                                    $cert_id = $order_goods_attr->attr_value ?? '';
-                                    return $cert_id;
-                                }
-                            ],
-                            [
-                                'label' => '证书类型',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::DIA_CERT_TYPE] ?? "";
-                                },
-                            ],
-                            /* [
-                                'attribute'=>'qiban_sn',
-                                'value' => 'qiban_sn'
-                            ], */
-                            [
-                                'attribute' => 'qiban_type',
-                                'value' => function ($model) {
-                                    $qiban_sn = $model->qiban_sn;
-                                    $is_exist = Yii::$app->styleService->qiban->isExist($qiban_sn);
-                                    if (!$is_exist && $qiban_sn) {
-                                        $qiban_sn = "<font color='red'>{$qiban_sn}（erp无此起版号）</font>";
-                                    }
-                                    return \addons\Style\common\enums\QibanTypeEnum::getValue($model->qiban_type) . '<br/>' . $qiban_sn;
-                                },
-                                'format' => 'raw',
-                            ],
-                            [
-                                'attribute' => 'jintuo_type',
-                                'value' => function ($model) {
-                                    return \addons\Style\common\enums\JintuoTypeEnum::getValue($model->jintuo_type);
-                                }
-                            ],
+
                             [
                                 'attribute' => 'style_cate_id',
                                 'value' => function ($model) {
@@ -323,36 +246,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'format' => 'raw',
                             ],
                             [
-                                'attribute' => 'goods_num',
-                                'value' => 'goods_num'
-                            ],
-                            [
                                 'attribute' => 'goods_price',
                                 'value' => function ($model) {
-                                    return common\helpers\AmountHelper::outputAmount($model->goods_price, 2, $model->currency);
+                                    return $model->goods_price;
                                 }
                             ],
-                            [
-                                'attribute' => 'goods_discount',
-                                'value' => function ($model) {
-                                    return common\helpers\AmountHelper::outputAmount($model->goods_discount, 2, $model->currency);
-                                }
-                            ],
-                            [
-                                'attribute' => 'goods_pay_price',
-                                'value' => function ($model) {
-                                    return common\helpers\AmountHelper::outputAmount($model->goods_pay_price, 2, $model->currency);
-                                }
-                            ],
-                            [
-                                'class' => 'yii\grid\CheckboxColumn',
-                                'name' => 'id',  //设置每行数据的复选框属性
-                                'headerOptions' => ['width' => '30'],
-                            ],
-                            /* [
-                                    'attribute'=>'produce_sn',
-                                    'value' => 'produce_sn'
-                            ], */
+
+
                             [
                                 'attribute' => 'bc_status',
                                 'value' => function ($model) {
@@ -360,139 +260,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 },
                                 'format' => 'raw',
                             ],
-                            [
-                                'attribute' => 'is_return',
-                                'value' => function ($model) {
-                                    $str = "";
-                                    if (in_array($model->is_return,
-                                            [\addons\Sales\common\enums\IsReturnEnum::APPLY, \addons\Sales\common\enums\IsReturnEnum::HAS_RETURN])
-                                    && !empty($model->return_id)) {
-                                        $str .= Html::a("(" .$model->return_no. ")", ['return/view', 'id' => $model->return_id, 'returnUrl' => Url::getReturnUrl()], ['style' => "text-decoration:underline;color:#3c8dbc"]);
-                                    }
-                                    return \addons\Sales\common\enums\IsReturnEnum::getValue($model->is_return) . $str ?? '未操作';
-                                },
-                                'format' => 'raw',
-                            ],
-                            [
-                                'attribute' => 'is_stock',
-                                'value' => function ($model) {
-                                    return IsStockEnum::getValue($model->is_stock);
-                                }
-                            ],
-                            [
-                                'attribute' => 'is_gift',
-                                'value' => function ($model) {
-                                    return \addons\Sales\common\enums\IsGiftEnum::getValue($model->is_gift);
-                                }
-                            ],
-                            [
-                                'label' => '材质',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::MATERIAL] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '金料颜色',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::MATERIAL_COLOR] ?? "";
-                                },
 
-                            ],
-                            [
-                                'label' => '金重（g）',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::JINZHONG] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '美号',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::FINGER] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '港号',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::PORT_NO] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '链长（cm）',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::CHAIN_LENGTH] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '镶口',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::XIANGKOU] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '表面工艺',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::FACEWORK] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '主石类型',
-                                'value' => function ($model) {
-                                    return $model->attr[AttrIdEnum::MAIN_STONE_TYPE] ?? "";
-                                },
-                            ],
-                            [
-                                'label' => '主石石重和数量',
-                                'value' => function ($model) {
-                                    $main_stone_weight = $model->attr[AttrIdEnum::MAIN_STONE_WEIGHT] ?? "无";
-                                    $main_stone_num = $model->attr[AttrIdEnum::MAIN_STONE_NUM] ?? "无";
-                                    $main_stone_weight = $main_stone_weight == '' ? "无" : $main_stone_weight;
-                                    $main_stone_num = $main_stone_num == '' ? "无" : $main_stone_num;
-                                    return $main_stone_weight . '/' . $main_stone_num;
-                                },
 
-                            ],
-                            [
-                                'label' => '主石规格(颜色/净度/切工/抛光/对称/荧光)',
-                                'value' => function ($model) {
-                                    $main_stone_color = $model->attr[AttrIdEnum::MAIN_STONE_COLOR] ?? "无";
-                                    $main_stone_clarity = $model->attr[AttrIdEnum::MAIN_STONE_CLARITY] ?? "无";
-                                    $main_stone_cut = $model->attr[AttrIdEnum::MAIN_STONE_CUT] ?? "无";
-                                    $main_stone_polish = $model->attr[AttrIdEnum::MAIN_STONE_POLISH] ?? "无";
-                                    $main_stone_symmetry = $model->attr[AttrIdEnum::MAIN_STONE_SYMMETRY] ?? "无";
-                                    $main_stone_fluorescence = $model->attr[AttrIdEnum::MAIN_STONE_FLUORESCENCE] ?? "无";
-                                    return $main_stone_color . '/' . $main_stone_clarity . '/' . $main_stone_cut .
-                                        '/' . $main_stone_polish . '/' . $main_stone_symmetry . '/' . $main_stone_fluorescence;
-                                },
 
-                            ],
-                            [
-                                'label' => '副石石重和数量',
-                                'value' => function ($model) {
-                                    $side_stone_weight = $model->attr[AttrIdEnum::SIDE_STONE1_WEIGHT] ?? "无";
-                                    $side_stone_num = $model->attr[AttrIdEnum::SIDE_STONE1_NUM] ?? "无";
-                                    $side_stone_weight = $side_stone_weight == '' ? "无" : $side_stone_weight;
-                                    $side_stone_num = $side_stone_num == '' ? "无" : $side_stone_num;
-                                    return $side_stone_weight . '/' . $side_stone_num;
-                                },
-
-                            ],
-                            [
-                                'label' => '副石规格(颜色/净度)',
-                                'value' => function ($model) {
-                                    $side_stone_color = $model->attr[AttrIdEnum::SIDE_STONE1_COLOR] ?? "无";
-                                    $side_stone_clarity = $model->attr[AttrIdEnum::SIDE_STONE1_CLARITY] ?? "无";
-                                    $side_stone_color = $side_stone_color == '' ? "无" : $side_stone_color;
-                                    $side_stone_clarity = $side_stone_clarity == '' ? "无" : $side_stone_clarity;
-                                    return $side_stone_color . '/' . $side_stone_clarity;
-                                },
-
-                            ],
                             'remark',
-                            [
-                                'class' => 'yii\grid\CheckboxColumn',
-                                'name' => 'id',  //设置每行数据的复选框属性
-                                'headerOptions' => ['width' => '30'],
-                            ],
+
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'header' => '操作',

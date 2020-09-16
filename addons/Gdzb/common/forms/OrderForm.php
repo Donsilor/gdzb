@@ -25,7 +25,8 @@ class OrderForm extends Order
     {
         $rules = [
             [['channel_id','warehouse_id','customer_name','customer_mobile','customer_weixin','collect_type','collect_no','supplier_id'], 'required'],
-            [['consignee_info'],'parseConsigneeInfo'],
+            [['country_id','province_id','city_id'],'integer'],
+            [['address'], 'string', 'max' => 100],
         ];
         return ArrayHelper::merge(parent::rules(),$rules);
     }    
@@ -44,19 +45,26 @@ class OrderForm extends Order
     }
 
 
-    /**
-     * 款式图库
-     */
-    public function parseConsigneeInfo()
-    {
-        $this->consignee_info = json_encode([
-            'country_id' => $this->country_id,
-            'province_id' => $this->province_id,
-            'city_id' => $this->city_id,
-            'address' => $this->address
+
+
+    public function setConsigneeInfo($post){
+        return json_encode([
+            'country_id' => $post['country_id'],
+            'province_id' => $post['province_id'],
+            'city_id' => $post['city_id'],
+            'address' => $post['address']
         ]);
-        return $this->consignee_info;
     }
 
-    
+    public function getConsigneeInfo(&$model){
+        $consignee_info = json_decode($model->consignee_info,true);
+        $model->country_id = $consignee_info['country_id'];
+        $model->province_id = $consignee_info['province_id'];
+        $model->city_id = $consignee_info['city_id'];
+        $model->address = $consignee_info['address'];
+    }
+
+
+
+
 }

@@ -24,6 +24,7 @@ use addons\Sales\common\enums\PayStatusEnum;
 use common\enums\LogTypeEnum;
 use addons\Sales\common\enums\OrderFromEnum;
 use addons\Sales\common\models\OrderInvoice;
+use addons\Sales\common\forms\ExternalOrderForm;
 
 /**
  * Class SaleChannelService
@@ -38,14 +39,22 @@ class OrderService extends Service
      */
     public function menuTabList($order_id, $returnUrl = null)
     {
+        $model = Order::find()->select(['id','order_from'])->where(['id'=>$order_id])->one();
+        if($model->order_from == OrderFromEnum::FROM_EXTERNAL) {
             return [
-                    1=>['name'=>'订单信息','url'=>Url::to(['order/view','id'=>$order_id,'tab'=>1,'returnUrl'=>$returnUrl])],
-                    2=>['name'=>'日志信息','url'=>Url::to(['order-log/index','order_id'=>$order_id,'tab'=>2,'returnUrl'=>$returnUrl])],
-            ];       
+                1=>['name'=>'订单信息','url'=>Url::to(['external-order/view','id'=>$order_id,'tab'=>1,'returnUrl'=>$returnUrl])],
+                2=>['name'=>'日志信息','url'=>Url::to(['order-log/index','order_id'=>$order_id,'tab'=>2,'returnUrl'=>$returnUrl])],
+            ];
+        }else {
+            return [
+                1=>['name'=>'订单信息','url'=>Url::to(['order/view','id'=>$order_id,'tab'=>1,'returnUrl'=>$returnUrl])],
+                2=>['name'=>'日志信息','url'=>Url::to(['order-log/index','order_id'=>$order_id,'tab'=>2,'returnUrl'=>$returnUrl])],
+            ];
+        }
     }
     /**
      * 人工创建订单
-     * 
+     *
      * @param OrderForm $form
      */
     public function createOrder($form)
@@ -59,53 +68,155 @@ class OrderService extends Service
         if(false == $order->save()) {
             throw new \Exception($this->getError($order));
         }
-//        $customer = Customer::find()->where(['mobile'=>$order->customer_mobile,'channel_id'=>$order->sale_channel_id])->one();
-//        if(!$customer) {
-//            //2.创建用户信息
-//            $customer = new Customer();
-//            $customer->realname = $order->customer_name;
-//            $customer->mobile = $order->customer_mobile;
-//            $customer->email = $order->customer_email;
-//            $customer->channel_id = $order->sale_channel_id;
-//            $customer->level = $form->customer_level;
-//            $customer->source_id = $form->customer_source;
-//            if(false == $customer->save()) {
-//                throw new \Exception("创建用户失败：".$this->getError($customer));
-//            }
-//            \Yii::$app->salesService->customer->createCustomerNo($customer,true);
-//        }else{
-//            //更新用户信息
-//            $customer->realname = $customer->realname ? $customer->realname : $order->customer_name;
-//            $customer->mobile = $customer->mobile ? $customer->mobile: $order->customer_mobile;
-//            $customer->email = $customer->email ? $customer->email : $order->customer_email;
-//            $customer->level = $customer->level ? $customer->level: $form->customer_level;
-//            $customer->source_id = $customer->source_id ? $customer->source_id : $form->customer_source;
-//            if(false == $customer->save()) {
-//                throw new \Exception("更新用户失败：".$this->getError($customer));
-//            }
-//        }
-//        $order->customer_id = $customer->id;
+        $customer = Customer::find()->where(['mobile'=>$order->customer_mobile,'channel_id'=>$order->sale_channel_id])->one();
+        if(!$customer) {
+            //2.创建用户信息
+            $customer = new Customer();
+            $customer->realname = $order->customer_name;
+            $customer->mobile = $order->customer_mobile;
+            $customer->email = $order->customer_email;
+            $customer->channel_id = $order->sale_channel_id;
+            $customer->level = $form->customer_level;
+            $customer->source_id = $form->customer_source;
+            if(false == $customer->save()) {
+                throw new \Exception("创建用户失败：".$this->getError($customer));
+            }
+            \Yii::$app->salesService->customer->createCustomerNo($customer,true);
+        }else{
+            //更新用户信息
+            $customer->realname = $customer->realname ? $customer->realname : $order->customer_name;
+            $customer->mobile = $customer->mobile ? $customer->mobile: $order->customer_mobile;
+            $customer->email = $customer->email ? $customer->email : $order->customer_email;
+            $customer->level = $customer->level ? $customer->level: $form->customer_level;
+            $customer->source_id = $customer->source_id ? $customer->source_id : $form->customer_source;
+            if(false == $customer->save()) {
+                throw new \Exception("更新用户失败：".$this->getError($customer));
+            }
+        }
+        $order->customer_id = $customer->id;
         if($form->isNewRecord){
             $order->order_sn = $this->createOrderSn($order);
         }
         if(false == $order->save()) {
             throw new \Exception($this->getError($order));
         }
+        //3.创建订单金额
+        if($isNewOrder === true){
+            $account = new OrderAccount();
+            $account->order_id = $order->id;
+            $account->currency = $order->currency;
+            if(false == $account->save()) {
+                throw new \Exception($this->getError($account));
+            }
+        }
+        //4.同步订单收货地址
+        $address = OrderAddress::find()->where(['order_id'=>$order->id])->one();
+        if(!$address) {
+            $address = new OrderAddress();
+            $address->order_id = $order->id;
+        }
+        if($address->customer_id != $customer->id) {
+            $address->customer_id = $customer->id;
+            $address->realname = $customer->realname;
+            $address->mobile = $customer->mobile;
+            $address->email = $customer->email;
+            $address->country_id = $customer->country_id;
+            $address->province_id = $customer->province_id;
+            $address->city_id = $customer->city_id;
+            $address->address_details = $customer->address;
+            //$address->zip_code = $customer->zip_code;
+        }
+        if(false == $address->save(false)) {
+            throw new \Exception("同步收货地址失败：".$this->getError($address));
+        }
 
         //创建订单日志
         if($isNewOrder === true) {
             $log = [
-                    'order_id' => $order->id,
-                    'order_sn' => $order->order_sn,
-                    'order_status' => $order->order_status,
-                    'log_type' => LogTypeEnum::ARTIFICIAL,
-                    'log_time' => time(),
-                    'log_module' => '创建订单',
-                    'log_msg' => "创建订单, 订单号:".$order->order_sn
+                'order_id' => $order->id,
+                'order_sn' => $order->order_sn,
+                'order_status' => $order->order_status,
+                'log_type' => LogTypeEnum::ARTIFICIAL,
+                'log_time' => time(),
+                'log_module' => '创建订单',
+                'log_msg' => "创建订单, 订单号:".$order->order_sn
             ];
-            \Yii::$app->gdzbService->orderLog->realCreateOrderLog($log);
+            \Yii::$app->salesService->orderLog->createOrderLog($log);
         }
-        return $order;        
+        return $order;
+    }
+    /**
+     *  创建外部平台订单
+     * @param ExternalOrderForm $form
+     */
+    public function createExternalOrder($form)
+    {
+        if(false === $form->validate()) {
+            throw new \Exception($this->getError($form));
+        }
+        $isNewOrder = $form->isNewRecord;
+        //1.创建订单
+        $order = clone $form;
+        $order->pay_status = PayStatusEnum::HAS_PAY;
+        $order->order_from = OrderFromEnum::FROM_EXTERNAL;
+        if(false == $order->save()) {
+            throw new \Exception($this->getError($order));
+        }
+        //2.创建订单明细
+        if($isNewOrder === true){
+            foreach ($form->goods_list ?? [] as $goods) {
+                $orderGoods = new OrderGoods();
+                $orderGoods->attributes = $goods;
+                $orderGoods->order_id = $order->id;
+                if(false === $orderGoods->save()) {
+                    throw new \Exception($this->getError($orderGoods));
+                }
+            }
+        }
+        //3.创建订单金额
+        if($isNewOrder === true){
+            $account = new OrderAccount();
+            $account->order_id = $order->id;
+            $account->currency = $order->currency;
+            if(false == $account->save()) {
+                throw new \Exception($this->getError($account));
+            }
+        }
+        //4.订单收货地址
+        $address = OrderAddress::find()->where(['order_id'=>$order->id])->one();
+        if(!$address) {
+            $address = new OrderAddress();
+            $address->order_id = $order->id;
+        }
+        $address->attributes = $form->getConsigneeInfo();
+
+        if(false == $address->save()) {
+            throw new \Exception("同步收货地址失败：".$this->getError($address));
+        }
+
+        if($form->isNewRecord){
+            $order->order_sn = $this->createOrderSn($order);
+        }
+        if(false == $order->save()) {
+            throw new \Exception($this->getError($order));
+        }
+        //商品金额汇总
+        $this->orderSummary($order->id);
+
+        //创建订单日志
+        if($isNewOrder === true) {
+            $log = [
+                'order_id' => $order->id,
+                'order_sn' => $order->order_sn,
+                'order_status' => $order->order_status,
+                'log_type' => LogTypeEnum::ARTIFICIAL,
+                'log_time' => time(),
+                'log_module' => '创建订单',
+                'log_msg' => "创建新订单， 订单号:".$order->order_sn
+            ];
+            \Yii::$app->salesService->orderLog->createOrderLog($log);
+        }
+        return $order;
     }
     /**
      * 自动创建同步订单
@@ -132,8 +243,8 @@ class OrderService extends Service
         }
         $order->attributes = $orderInfo;
         if(false === $order->save()) {
-             throw new \Exception($this->getError($order));
-        }        
+            throw new \Exception($this->getError($order));
+        }
         //2.同步订单金额
         $account = OrderAccount::find()->where(['order_id'=>$order->id])->one();
         if(!$account) {
@@ -144,7 +255,7 @@ class OrderService extends Service
         if(false == $account->save()) {
             throw new \Exception($this->getError($account));
         }
-        
+
         //3.创建点款记录
         $orderPay = OrderPay::find()->where(['pay_sn'=>$order->pay_sn])->one();
         if(!$orderPay) {
@@ -212,7 +323,7 @@ class OrderService extends Service
             $account->order_discount = $account->discount_amount - $goods_discount;
             if(false === $account->save()) {
                 throw new \Exception("同步订单金额失败：".$this->getError($account));
-            }            
+            }
         }
         //5.同步客户信息
         $customer = Customer::find()->where(['mobile'=>$order->customer_mobile,'channel_id'=>$order->sale_channel_id])->one();
@@ -234,17 +345,17 @@ class OrderService extends Service
             if(false == $customer->save()) {
                 throw new \Exception("更新用户失败：".$this->getError($customer));
             }
-        }        
+        }
         //6.同步订单收货地址
         $address = OrderAddress::find()->where(['order_id'=>$order->id])->one();
         if(!$address) {
-            $address = new OrderAddress();            
+            $address = new OrderAddress();
             $address->order_id = $order->id;
         }
-        $address->attributes = $addressInfo;     
+        $address->attributes = $addressInfo;
         if(false == $address->save()) {
             throw new \Exception("同步收货地址失败：".$this->getError($address));
-        }  
+        }
         //7.同步发票
         if(!empty($invoiceInfo)) {
             $invoice = OrderInvoice::find()->where(['order_id'=>$order->id])->one();
@@ -258,7 +369,7 @@ class OrderService extends Service
             }
             $order->is_invoice   = $invoice->is_invoice;
         }
-        
+
         $order->customer_id = $customer->id;
         if($order->order_sn == ''){
             $order->order_sn = $this->createOrderSn($order);
@@ -266,22 +377,22 @@ class OrderService extends Service
         if(false == $order->save()) {
             throw new \Exception($this->getError($order));
         }
-        
+
         //创建订单日志
         if($isNewOrder === true) {
             $log = [
-                    'order_id' => $order->id,
-                    'order_sn' => $order->order_sn,
-                    'order_status' => $order->order_status,
-                    'log_type' => LogTypeEnum::SYSTEM,
-                    'log_time' => time(),
-                    'log_module' => '外部订单同步',
-                    'log_msg' => "同步创建订单,订单号:".$order->order_sn.', 同步来源：'.OrderFromEnum::getValue($order->order_from).', 外部订单号:'.$order->out_trade_no
+                'order_id' => $order->id,
+                'order_sn' => $order->order_sn,
+                'order_status' => $order->order_status,
+                'log_type' => LogTypeEnum::SYSTEM,
+                'log_time' => time(),
+                'log_module' => '外部订单同步',
+                'log_msg' => "同步创建订单,订单号:".$order->order_sn.', 同步来源：'.OrderFromEnum::getValue($order->order_from).', 外部订单号:'.$order->out_trade_no
             ];
             \Yii::$app->salesService->orderLog->createOrderLog($log);
         }
-        
-        return $order;        
+
+        return $order;
     }
     /**
      * 同步订单商品生成采购申请单
@@ -292,7 +403,7 @@ class OrderService extends Service
     {
         $applyInfo = [];
         $applyGoodsList = [];
-        
+
         $order = Order::find()->where(['id'=>$order_id])->one();
         if($order->goods_num <= 0 ){
             throw new \Exception('订单没有明细');
@@ -303,32 +414,32 @@ class OrderService extends Service
         $query = OrderGoods::find()->where(['order_id'=>$order_id,'is_stock'=>IsStockEnum::NO]);
         if(!empty($detail_ids)) {
             $query->andWhere(['id'=>$detail_ids]);
-        }        
-        $models = $query->all();        
+        }
+        $models = $query->all();
         foreach ($models as $model){
             $style = Style::find()->where(['style_sn'=>$model->style_sn])->one();
             $goods = [
-                    'order_detail_id' =>$model->id,
-                    'goods_image'=>$model->goods_image,
-                    'goods_images'=>$model->goods_image,
-                    'goods_name' =>$model->goods_name,
-                    'goods_num' =>$model->goods_num,
-                    'style_sn' => $model->style_sn,
-                    'style_id' => $style->id,
-                    'qiban_sn' => $model->qiban_sn,
-                    'qiban_type'=>$model->qiban_type,
-                    'jintuo_type'=>$model->jintuo_type,
-                    'goods_type' => $model->qiban_type == QibanTypeEnum::NO_STYLE ? PurchaseGoodsTypeEnum::OTHER : PurchaseGoodsTypeEnum::STYLE,
-                    'style_sex' =>$model->style_sex,
-                    'is_inlay' =>$model->is_inlay,
-                    'product_type_id'=>$model->product_type_id,
-                    'style_cate_id'=>$model->style_cate_id,
-                    'cost_price' => Yii::$app->salesService->orderGoods->getCostPrice($model),
-                    'style_channel_id' => $model->style_channel_id,
-                    'remark' => $model->remark,
+                'order_detail_id' =>$model->id,
+                'goods_image'=>$model->goods_image,
+                'goods_images'=>$model->goods_image,
+                'goods_name' =>$model->goods_name,
+                'goods_num' =>$model->goods_num,
+                'style_sn' => $model->style_sn,
+                'style_id' => $style->id,
+                'qiban_sn' => $model->qiban_sn,
+                'qiban_type'=>$model->qiban_type,
+                'jintuo_type'=>$model->jintuo_type,
+                'goods_type' => $model->qiban_type == QibanTypeEnum::NO_STYLE ? PurchaseGoodsTypeEnum::OTHER : PurchaseGoodsTypeEnum::STYLE,
+                'style_sex' =>$model->style_sex,
+                'is_inlay' =>$model->is_inlay,
+                'product_type_id'=>$model->product_type_id,
+                'style_cate_id'=>$model->style_cate_id,
+                'cost_price' => Yii::$app->salesService->orderGoods->getCostPrice($model),
+                'style_channel_id' => $model->style_channel_id,
+                'remark' => $model->remark,
 
 
-            ];            
+            ];
             $goods['goods_attrs'] = OrderGoodsAttribute::find()->where(['id'=>$model->id])->asArray()->all();
             $applyGoodsList[] = $goods;
         }
@@ -358,7 +469,7 @@ class OrderService extends Service
     {
         $orderGoodsList = OrderGoods::find()->select(['id'])->where(['out_ware_id'=>$wareId])->andFilterWhere(['in','order_id',$order_ids])->limit(1000)->all();
         if(empty($orderGoodsList)) {
-             throw new \Exception("[{$wareId}] 查询不到记录");
+            throw new \Exception("[{$wareId}] 查询不到记录");
         }
         foreach ($orderGoodsList as $orderGoods) {
             foreach ($goods_attrs ??[] as $goods_attr) {
@@ -367,7 +478,7 @@ class OrderService extends Service
                 }
                 $model = OrderGoodsAttribute::find()->where(['id'=>$orderGoods->id,'attr_id'=>$goods_attr['attr_id']])->one();
                 if(!$model){
-                    $model = new OrderGoodsAttribute(); 
+                    $model = new OrderGoodsAttribute();
                 }
                 $model->attributes = $goods_attr;
                 if($model->attr_value_id) {
@@ -379,7 +490,7 @@ class OrderService extends Service
                 }
             }
         }
-        
+
     }
     /**
      * 同步商品规格
@@ -387,7 +498,7 @@ class OrderService extends Service
      * @param unknown $goods_spec
      * @return boolean
      */
-    public function syncOrderGoodsSpec($wareId,$goods_spec) 
+    public function syncOrderGoodsSpec($wareId,$goods_spec)
     {
         if(is_array($goods_spec)) {
             $goods_spec = json_encode($goods_spec);
@@ -396,7 +507,7 @@ class OrderService extends Service
         }
         return OrderGoods::updateAll(['goods_spec'=>$goods_spec],['out_ware_id'=>$wareId]);
     }
-    
+
     /**
      * 创建订单编号
      * @param Style $model
@@ -408,9 +519,10 @@ class OrderService extends Service
         if(!$model->id) {
             throw new \Exception("创建订单号失败：ID不能为空");
         }
-        $order_sn = date("Ymd").str_pad($model->id,8,'0',STR_PAD_LEFT);
+        $order_time = $model->order_time ? $model->order_time: time();
+        $order_sn = date("Ymd",$order_time).str_pad($model->id,8,'0',STR_PAD_LEFT);
         $model->order_sn = $order_sn;
-        if($save === true) {            
+        if($save === true) {
             $result = $model->save(true,['id','order_sn']);
             if($result === false){
                 throw new \Exception("保存失败");
@@ -442,10 +554,12 @@ class OrderService extends Service
             $order_account->discount_amount = $sum['total_goods_discount'];
             $order_account->goods_amount = $sum['total_goods_price'];
             $order_account->order_amount = $order_account->goods_amount + $order_account->shipping_fee + $order_account->tax_fee + $order_account->safe_fee
-                        + $order_account->other_fee; // 商品总金额+运费，税费，保险费
+                + $order_account->other_fee; // 商品总金额+运费，税费，保险费
             $order_account->pay_amount = $order_account->order_amount - $order_account->discount_amount;
-            $order_account->save();
+            if(false === $order_account->save()){
+                throw new \Exception("订单金额汇总失败:".$this->getError($order_account));
+            }
         }
     }
-    
+
 }
