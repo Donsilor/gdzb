@@ -1,13 +1,13 @@
 // 颜色
-var color = ['#333333','#ffffff','#ff0000','#cccccc','#ffff00'];
-for(var c=0; c<color.length; c++){
+var colors = ['#333333','#ffffff','#ff0000','#cccccc','#ffff00'];
+for(var c=0; c<colors.length; c++){
   var div = document.createElement('div');
   div.className = 'option';
-  div.style.backgroundColor = color[c]; 
+  div.style.backgroundColor = colors[c]; 
   $('.text-color .option-box').append(div)
 }
 
-$('.colorIpt').val(color[0])
+$('.colorIpt').val(colors[0])
 
 // 字体
 // var typeface = [''];
@@ -26,12 +26,12 @@ function select(e){
 
 // 选择颜色
 $('.text-color .option').click(function() {
-  var index = $(this).index();
-  $(this).parent().prev().children('.value').children('.colorBlock').css('backgroundColor', color[index])
+  var idc = $(this).index();
+  $('.colorBlock').css('backgroundColor', colors[idc])
   $(this).parent().slideUp().hide()
-  $('.colorIpt').val(color[index])
+  $('.colorIpt').val(colors[idc])
 
-  amend('color', color[index])
+  amend('color', colors[idc])
 })
 
 // 颜色输入框
@@ -254,7 +254,7 @@ function showAttrs() {
               +';color:'+editAttrs[i].color
               +';link:'+editAttrs[i].link;
 
-        div = `<div style='${divStyle}' class='text-box text-box-${idNum}'ondblclick='edit(event, "text-box-${idNum}")'>
+        div = `<div style='${divStyle}' class='text-box text-box-${idNum}' ondblclick='edit(event, "text-box-${idNum}")'>
                   <div class='direction-box' onmousedown='moveImg(event, "text-box-${idNum}")'>
                     <div class='direction top' onmousedown='move(event, "top", "text-box-${idNum}")'></div>
                     <div class='direction down' onmousedown='move(event, "down", "text-box-${idNum}")'></div>
@@ -289,7 +289,7 @@ function showAttrs() {
               +';link:'+editAttrs[i].link;
 
         div = `<div style='${divStyle}' class='img-box img-box-${idNum}'>
-                <div class='direction-box' onmousedown='moveImg(event)' onclick='closeMove(event)'>
+                <div class='direction-box' onmousedown='moveImg(event)' ondblclick='loadImg(event, "img-box-${idNum}")'>
                   <div class='direction top' onmousedown='move(event, "top", "img-box-${idNum}")'></div>
                   <div class='direction down' onmousedown='move(event, "down", "img-box-${idNum}")'></div>
                   <div class='direction left' onmousedown='move(event, "left", "img-box-${idNum}")'></div>
@@ -406,11 +406,19 @@ $('.classify-text').on('mousedown', function() {
     divStyle ='position:'+'absolute'
             +';top:'+textObj.top
             +';left:'+textObj.left
+            +';z-index:'+textObj['z-index']
             +';width:'+textObj.width
             +';height:'+textObj.height
-            +';z-index:'+textObj['z-index'];
+            +';font-size:'+textObj['font-size']
+            +';font-style:'+textObj['font-style']
+            +';font-face:'+textObj['font-face']
+            +';font-weight:'+textObj['font-weight']
+            +';text-align:'+textObj['text-align']
+            +';text-decoration:'+textObj['text-decoration']
+            +';color:'+textObj.color
+            +';link:'+textObj.link;
 
-    div = `<div style='${divStyle}' class='text-box text-box-${idNum}'ondblclick='edit(event, "text-box-${idNum}")'>
+    div = `<div style='${divStyle}' class='text-box text-box-${idNum}' ondblclick='edit(event, "text-box-${idNum}")'>
               <div class='direction-box' onmousedown='moveImg(event, "text-box-${idNum}")'>
                 <div class='direction top' onmousedown='move(event, "top", "text-box-${idNum}")'></div>
                 <div class='direction down' onmousedown='move(event, "down", "text-box-${idNum}")'></div>
@@ -597,7 +605,7 @@ $('.classify-img').on('mousedown', function() {
             +';cursor:pointer';
 
     div = `<div style='${divStyle}' class='img-box img-box-${idNum}'>
-            <div class='direction-box' onmousedown='moveImg(event)'>
+            <div class='direction-box' onmousedown='moveImg(event)' ondblclick='loadImg(event, "img-box-${idNum}")'>
               <div class='direction top' onmousedown='move(event, "top", "img-box-${idNum}")'></div>
               <div class='direction down' onmousedown='move(event, "down", "img-box-${idNum}")'></div>
               <div class='direction left' onmousedown='move(event, "left", "img-box-${idNum}")'></div>
@@ -770,7 +778,6 @@ function addMove(e, className) {
     if(editObj.type == 'text'){
       $('.colorBlock').css('background-color', editObj.color)
       $('.colorIpt').val(' ')
-      console.log(778,editObj.color)
 
       if(editObj['font-size']){
         $('.font-size').text(parseInt(editObj['font-size']))
@@ -1366,7 +1373,7 @@ function loadImg(e,className) {
 
   $('.direction-box').hide()
 
-  $(e.currentTarget).prev('.ipt-img').click()
+  $('.'+className+ ' .ipt-img').click()
 }
 
 function changeFile(obj,className) {
@@ -1431,8 +1438,6 @@ function changeFile(obj,className) {
 
   　　　　success: function(res) {
             var imgUrl = res.data.url;
-
-            console.log(656,imgUrl)
 
             $('.'+className).children('.ele-box').addClass('no-bg')
             $('.'+className).find('.img').show().attr('src', imgUrl)
@@ -1538,6 +1543,10 @@ function amend(cl,val) {
     if(editIndex != -1){
       $('.'+elementActive).css(cl, val)
       data.attrs[editIndex][cl] = val;
+      
+      if(cl == 'color' || cl == 'font-size'){
+        $('.'+elementActive+ ' pre').css(cl, val)
+      }
     }
   }else{
     return
