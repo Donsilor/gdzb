@@ -61,29 +61,29 @@ $('.option-box .option').not('.text-color .option').click(function() {
 // 加粗、斜体、下划线
 $('.control-text .attr-2').click(function() {
   $(this).toggleClass('active');
-  var index = $(this).index(),key,val='';
+  var ix = $(this).index(),key,val='';
 
-  if((index == 0) && $(this).hasClass('active')){
+  if((ix == 0) && $(this).hasClass('active')){
     key = 'font-weight';
     val = 'bold';
   }
-  if((index == 0) && !$(this).hasClass('active')){
+  if((ix == 0) && !$(this).hasClass('active')){
     key = 'font-weight';
     val = '';
   }
-  if((index == 1) && $(this).hasClass('active')){
+  if((ix == 1) && $(this).hasClass('active')){
     key = 'font-style';
     val = 'italic';
   }
-  if((index == 1) && !$(this).hasClass('active')){
+  if((ix == 1) && !$(this).hasClass('active')){
     key = 'font-style';
     val = '';
   }
-  if((index == 2) && $(this).hasClass('active')){
+  if((ix == 2) && $(this).hasClass('active')){
     key = 'text-decoration';
     val = 'underline';
   }
-  if((index == 2) && !$(this).hasClass('active')){
+  if((ix == 2) && !$(this).hasClass('active')){
     key = 'text-decoration';
     val = '';
   }
@@ -101,6 +101,8 @@ function alignType(e) {
     aligns = ['justify','left','right','center'];
     
     amend('text-align', aligns[index])
+  }else{
+    amend('text-align', 'left')
   }
 }
 
