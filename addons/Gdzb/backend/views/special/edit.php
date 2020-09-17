@@ -16,7 +16,7 @@ $this->beginPage()
     <?php $this->head() ?>
     <script type="text/javascript">
         var baseStaticUrl = '<?= $baseStaticUrl; ?>';
-        var attrs = <?= \GuzzleHttp\json_encode($model->data) ?>
+        var editAttrs = <?= \GuzzleHttp\json_encode($model->data) ?>
     </script>
 </head>
 <body onselectstart="return false">
@@ -29,7 +29,7 @@ $this->beginPage()
                 <div class="basics-name fl clf">
                     <div class="title fl">*专题名称</div>
                     <div class="value fl">
-                        <input type="text" id="special-name" value="<?= $model->name ?>">
+                        <input type="text" id="special-name" maxlength="35" placeholder="限35字符以内" value="<?= $model->name ?>">
                     </div>
                 </div>
                 <div class="basics-url fl clf">
@@ -45,14 +45,14 @@ $this->beginPage()
                     <div class="tdk-t clf">
                         <div class="title fl">Title</div>
                         <div class="value fl">
-                            <textarea name="" id="title"><?= $model->title ?></textarea>
+                            <textarea name="" id="title" maxlength="255" placeholder="限255字符以内"><?= $model->title ?></textarea>
                         </div>
                     </div>
 
                     <div class="tdk-k clf">
                         <div class="title fl">Keywords</div>
                         <div class="value fl">
-                            <textarea name="" id="keyword"><?= $model->keywords ?></textarea>
+                            <textarea name="" id="keyword" maxlength="255" placeholder="限255字符以内"><?= $model->keywords ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@ $this->beginPage()
                     <div class="tdk-d clf">
                         <div class="title fl">Description</div>
                         <div class="value fl">
-                            <textarea name="" id="description"><?= $model->description ?></textarea>
+                            <textarea name="" id="description" maxlength="255" placeholder="限255字符以内"><?= $model->description ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -105,8 +105,14 @@ $this->beginPage()
             </div> -->
 
             <div class="middle-layer mobile">
-                <!-- 文字模板 -->
-                <div class="template-text"></div>
+                <div class="scroll-box" style="position: absolute;top:0;left:0;width:100%;height:100%;overflow:scroll">
+                    <div class="scroll">
+                        <!-- 文字模板 -->
+                        <div class="template-text"></div>
+                        
+                    </div>
+                </div>
+                <div class="area"><span onclick="addArea()">+ 增加区域</span></div>
             </div>
         </div>
 
@@ -197,16 +203,31 @@ $this->beginPage()
 
                         <div class="attr">
                             <div class="align clf">
-                                <div class="attr-4 fl align-justify" onclick="alignType(event)"></div>
-                                <div class="attr-4 fl align-left" onclick="alignType(event)"></div>
-                                <div class="attr-4 fl align-right" onclick="alignType(event)"></div>
-                                <div class="attr-4 fl align-center" onclick="alignType(event)"></div>
+                                <div class="attr-4 fl" onclick="alignType(event)">
+                                    <div class="icon align-justify"></div>
+                                    <div class="text">两端</div>
+                                </div>
+
+                                <div class="attr-4 fl" onclick="alignType(event)">
+                                    <div class="icon align-left"></div>
+                                    <div class="text">居左</div>
+                                </div>
+
+                                <div class="attr-4 fl" onclick="alignType(event)">
+                                    <div class="icon align-right"></div>
+                                    <div class="text">居右</div>
+                                </div>
+
+                                <div class="attr-4 fl" onclick="alignType(event)">
+                                    <div class="icon align-center"></div>
+                                    <div class="text">居中</div>
+                                </div>
                             </div>
                         </div>
 
                   <div class="attr-3 clf">
                     <div class="text fl">链接</div>
-                    <input type="text fl" class="ipt text-link">
+                    <input type="text fl" class="ipt fl link text-link" onblur="addLink(event)">
                   </div>
 
                   <div class="attr-child">
@@ -234,7 +255,7 @@ $this->beginPage()
 
                   <div class="attr clf">
                     <div class="text fl">链接</div>
-                    <input type="text" class="ipt fl width img-link">
+                    <input type="text" class="ipt fl link width img-link" onblur="addLink(event)">
                   </div>
 
                   <div class="attr">
@@ -261,12 +282,12 @@ $this->beginPage()
 
                   <div class="attr clf">
                     <div class="text fl">链接</div>
-                    <input type="text" class="ipt fl width video-link">
+                    <input type="text" class="ipt fl link width video-link" onblur="addLink(event)">
                   </div>
 
                   <div class="attr clf">
                     <div class="text fl width50">视频链接</div>
-                    <input type="text" class="ipt fl width">
+                    <input type="text" class="ipt fl width video-url">
                   </div>
 
                   <div class="attr">
