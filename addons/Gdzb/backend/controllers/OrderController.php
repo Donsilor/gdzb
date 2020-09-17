@@ -13,8 +13,7 @@ use addons\Sales\common\models\OrderAccount;
 use addons\Sales\common\models\SalesReturn;
 use common\enums\AuditStatusEnum;
 use common\enums\ConfirmEnum;
-use common\enums\FlowStatusEnum;
-use common\helpers\ArrayHelper;
+use common\helpers\Url;
 use Yii;
 use common\traits\Curd;
 use addons\Sales\common\models\Order;
@@ -96,36 +95,41 @@ class OrderController extends BaseController
      * 创建订单
      * @return array|mixed
      */
-    public function actionAjaxEdit()
+    public function actionEdit()
     {
         $id = Yii::$app->request->get('id');
+        $returnUrl = Yii::$app->request->get('returnUrl',Url::to(['index']));
         $model = $this->findModel($id);
+        $model = $model ?? new OrderForm();
         // ajax 校验
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
-            $isNewRecord = $model->isNewRecord;            
-            try{                
+
+            $post = Yii::$app->request->post('OrderForm');
+            $model->consignee_info = $model->setConsigneeInfo($post);
+
+            $isNewRecord = $model->isNewRecord;
+            try{
                 $trans = Yii::$app->trans->beginTransaction();
-                $model = Yii::$app->salesService->order->createOrder($model);                
+                $model = Yii::$app->gdzbService->order->createOrder($model);
                 $trans->commit();
-                return $isNewRecord  
+                return $isNewRecord
                     ? $this->message("创建成功", $this->redirect(['view', 'id' => $model->id]), 'success')
-                    : $this->message("保存成功", $this->redirect(Yii::$app->request->referrer), 'success');
-                
+                    : $this->message("保存成功", $this->redirect($returnUrl), 'success');
+
             }catch (\Exception $e) {
                 $trans->rollback();
                 return $this->message($e->getMessage(), $this->redirect(Yii::$app->request->referrer), 'error');
             }
         }
-        //初始化 默认值
+        //初始化
+        $model->getConsigneeInfo($model);
 
-        $model->customer_source = $model->customer->source_id ?? '';
-        $model->customer_level = $model->customer->level ?? '';
-        return $this->renderAjax($this->action->id, [
-                'model' => $model,
+        return $this->render($this->action->id, [
+            'model' => $model,
         ]);
-        
-    }   
+
+    }
     /**
      * 查询客户信息
      * @return array|\yii\db\ActiveRecord|NULL
@@ -155,8 +159,7 @@ class OrderController extends BaseController
     public function actionView()
     {
         $id = Yii::$app->request->get('id');        
-        $model = $this->findModel($id); 
-        $model->getTargetType();
+        $model = $this->findModel($id);
         $dataProvider = null;
         if (!is_null($id)) {
             $searchModel = new SearchModel([
@@ -171,25 +174,13 @@ class OrderController extends BaseController
             
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
             
-            $dataProvider->query->andWhere(['=', 'order_id', $id]);
-            
             $dataProvider->setSort(false);
-            //商品属性
-            $models = $dataProvider->models;
-            foreach ($models as & $goods){
-                $attrs = $goods->attrs ?? [];
-                $goods['attr'] = ArrayHelper::map($attrs,'attr_id','attr_value');
-
-                if ($goods->is_return == IsReturnEnum::HAS_RETURN){
-                    $return[] = $goods->id;
-                }
-            }
         }
         return $this->render($this->action->id, [
                 'model' => $model,
                 'dataProvider' => $dataProvider,
                 'tab'=>Yii::$app->request->get('tab',1),
-                'tabList'=>Yii::$app->salesService->order->menuTabList($id,$this->returnUrl),
+                'tabList'=>Yii::$app->gdzbService->order->menuTabList($id,$this->returnUrl),
                 'returnUrl'=>$this->returnUrl,
                 'return'=>!empty($return)?json_encode($return):"",
         ]);
@@ -259,14 +250,9 @@ class OrderController extends BaseController
         if($model->order_status != OrderStatusEnum::SAVE){
             return $this->message('订单不是保存状态', $this->redirect(\Yii::$app->request->referrer), 'error');
         }
-        $model->getTargetType();
+
         try{
             $trans = Yii::$app->db->beginTransaction();
-            if($model->targetType){
-                //审批流程
-                $flow = Yii::$app->services->flowType->createFlow($model->targetType,$id,$model->order_sn);               
-            }
-
             $model->order_status = OrderStatusEnum::PENDING;
             $model->audit_status = AuditStatusEnum::PENDING;
             if(false === $model->save()){
@@ -281,9 +267,9 @@ class OrderController extends BaseController
                     'log_type' => LogTypeEnum::ARTIFICIAL,
                     'log_time' => time(),
                     'log_module' => '申请审核',
-                    'log_msg' => $model->targetType ? "订单提交申请，审批编号:".$flow->id : '订单提交申请',
+                    'log_msg' => '订单提交申请',
             ];
-            \Yii::$app->salesService->orderLog->createOrderLog($log);
+            \Yii::$app->gdzbService->orderLog->createOrderLog($log);
             $trans->commit();
             return $this->message('操作成功', $this->redirect(\Yii::$app->request->referrer), 'success');
         }catch (\Exception $e){
@@ -309,41 +295,17 @@ class OrderController extends BaseController
             try{
                 $trans = Yii::$app->trans->beginTransaction();
 
-                $model->getTargetType();
-                if($model->targetType){
-                    $audit = [
-                        'audit_status' =>  $model->audit_status ,
-                        'audit_time' => time(),
-                        'audit_remark' => $model->audit_remark
-                    ];
-                    $flow = \Yii::$app->services->flowType->flowAudit($model->targetType,$id,$audit);
-                    //审批完结或者审批不通过才会走下面
-					if($flow->flow_status == FlowStatusEnum::COMPLETE || $flow->flow_status == FlowStatusEnum::CANCEL){
-                        $model->auditor_id = \Yii::$app->user->id;
-                        $model->audit_time = time();
-                        if($model->audit_status == AuditStatusEnum::PASS){
-                            $model->order_status = OrderStatusEnum::CONFORMED;
-                        }else{
-                            $model->order_status = OrderStatusEnum::SAVE;
-                        }
-                        if(false === $model->save()){
-                            return $this->message($this->getError($model), $this->redirect(\Yii::$app->request->referrer), 'error');
-                        }
-                    }
-                    $log_msg = "订单审核：".AuditStatusEnum::getValue($model->audit_status)."，审核备注：".$model->audit_remark."，审批编号:".$flow->id;
+                $model->auditor_id = \Yii::$app->user->id;
+                $model->audit_time = time();
+                if($model->audit_status == AuditStatusEnum::PASS){
+                    $model->order_status = OrderStatusEnum::CONFORMED;
                 }else{
-                    $model->auditor_id = \Yii::$app->user->id;
-                    $model->audit_time = time();
-                    if($model->audit_status == AuditStatusEnum::PASS){
-                        $model->order_status = OrderStatusEnum::CONFORMED;
-                    }else{
-                        $model->order_status = OrderStatusEnum::SAVE;
-                    }
-                    if(false === $model->save()){
-                        return $this->message($this->getError($model), $this->redirect(\Yii::$app->request->referrer), 'error');
-                    }
-                    $log_msg = "订单审核：".AuditStatusEnum::getValue($model->audit_status)."，审核备注：".$model->audit_remark;
+                    $model->order_status = OrderStatusEnum::SAVE;
                 }
+                if(false === $model->save()){
+                    return $this->message($this->getError($model), $this->redirect(\Yii::$app->request->referrer), 'error');
+                }
+                $log_msg = "订单审核：".AuditStatusEnum::getValue($model->audit_status)."，审核备注：".$model->audit_remark;
                 
                 //订单日志
                 $log = [

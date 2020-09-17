@@ -76,9 +76,9 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'attribute' => 'marriage',
                             'format' => 'raw',
                             'value' => function ($model){
-                                return \addons\Sales\common\enums\MarriageEnum::getValue($model->marriage);
+                                return \addons\Gdzb\common\enums\MarriageEnum::getValue($model->marriage);
                             },
-                            'filter' => Html::activeDropDownList($searchModel, 'marriage',\addons\Sales\common\enums\MarriageEnum::getMap(), [
+                            'filter' => Html::activeDropDownList($searchModel, 'marriage',\addons\Gdzb\common\enums\MarriageEnum::getMap(), [
                                 'prompt' => '全部',
                                 'class' => 'form-control',
                                 'style'=> 'width:80px;',

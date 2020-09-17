@@ -118,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 if($model->business_scope){
                                     $scope_key = explode(',', $model->business_scope);
                                     $scope_key = array_filter($scope_key);
-                                    $scope_val = \addons\Supply\common\enums\BusinessScopeEnum::getValues($scope_key);
+                                    $scope_val = \addons\Gdzb\common\enums\BusinessScopeEnum::getValues($scope_key);
                                     return implode(",",$scope_val);
                                 }else{
                                     return '';

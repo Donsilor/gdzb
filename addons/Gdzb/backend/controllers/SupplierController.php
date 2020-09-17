@@ -138,7 +138,7 @@ class SupplierController extends BaseController
             $business_scope_arr = array_filter($business_scope_arr);
             $business_scope_str = '';
             foreach ($business_scope_arr as $business_scope){
-                $business_scope_str .= ','. \addons\Supply\common\enums\BusinessScopeEnum::getValue($business_scope);
+                $business_scope_str .= ','. \addons\Gdzb\common\enums\BusinessScopeEnum::getValue($business_scope);
             }
             $model->business_scope = trim( $business_scope_str,',' );
         }
