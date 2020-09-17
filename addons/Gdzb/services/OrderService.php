@@ -2,26 +2,19 @@
 
 namespace addons\Gdzb\services;
 
-use addons\Sales\common\models\OrderGoods;
-use addons\Sales\common\models\OrderGoodsAttribute;
-use addons\Style\common\enums\QibanTypeEnum;
+use addons\Gdzb\common\models\Customer;
+use addons\Gdzb\common\models\Goods;
+use addons\Gdzb\common\models\Order;
+use addons\Gdzb\common\models\OrderGoods;
+use addons\Warehouse\common\enums\GoodsStatusEnum;
 use Yii;
 use common\components\Service;
 use common\helpers\Url;
 use addons\Sales\common\forms\OrderForm;
-use addons\Sales\common\models\OrderAccount;
-use addons\Sales\common\models\Customer;
-use addons\Sales\common\models\Order;
-use addons\Sales\common\models\OrderAddress;
-use common\enums\AuditStatusEnum;
-use addons\Sales\common\enums\IsStockEnum;
+
 use addons\Style\common\models\Style;
-use addons\Finance\common\models\OrderPay;
-use common\helpers\SnHelper;
-use addons\Sales\common\enums\PayStatusEnum;
 use common\enums\LogTypeEnum;
-use addons\Sales\common\enums\OrderFromEnum;
-use addons\Sales\common\models\OrderInvoice;
+
 
 /**
  * Class SaleChannelService
@@ -107,6 +100,77 @@ class OrderService extends Service
     }
 
 
+    /****
+     * @param $model
+     * @return Customer|array|null|void|\yii\db\ActiveRecord
+     * @throws \Exception
+     * 同步客户
+     */
+    public function createSyncCustomer($model){
+        $customer_weixin = $model->customer_weixin ?? '';
+        if(!$customer_weixin) return;
+        $customer = Customer::find()->where(['customer_weixin'])->one();
+        if(!$customer){
+            $consignee_info = json_decode($model->consignee_info,true);
+            $customer = new Customer();
+            $customer_field = [
+                'realname' => $model->customer_name ?? '',
+                'mobile' => $model->customer_mobile ?? '',
+                'wechat' => $model->customer_weixin ?? '',
+                'channel_id' => $model->channel_id ?? 4,
+                'source_id' => $model->channel_id ?? 4,
+                'follower_id' => $model->follower_id ?? '',
+                'order_num' => 0,
+                'order_amount' => 0,
+                'country_id' => $consignee_info['country_id'] ?? '',
+                'province_id' => $consignee_info['province_id'] ?? '',
+                'city_id' => $consignee_info['city_id'] ?? '',
+                'address' => $consignee_info['address'] ?? '',
+            ];
+            $customer->attributes = $customer_field;
+        }
+        $customer->order_num += 1;
+        $customer->order_amount += $model->order_amount;
+        if(false === $customer->save()){
+            throw new \Exception($this->getError($customer));
+        }
+        //反写customer_id
+        if($customer->isNewRecord){
+            $model->customer_id = $customer->id;
+            if(false === $model->save(true,['customer_id'])){
+                throw new \Exception($this->getError($model));
+            }
+        }
+        return $customer;
+    }
+
+
+    /****
+     * @param $model
+     * @return Customer|array|null|void|\yii\db\ActiveRecord
+     * @throws \Exception
+     * 同步商品到库存
+     */
+    public function createSyncGoods($order_id){
+        $orderGoods = OrderGoods::find()->where(['order_id' => $order_id])->asArray()->all();
+        foreach ($orderGoods as $order_goods){
+            $goods = Goods::find()->where(['goods_sn' => $order_goods['goods_sn']])->one();
+            if($goods) continue;
+            $goods = new Goods();
+            $goods->attributes = $order_goods;
+            $goods->created_at = time();
+            $goods->goods_status = GoodsStatusEnum::IN_SALE;
+            if(false === $goods->save()){
+                throw new \Exception($this->getError($goods));
+            }
+        }
+        return $orderGoods;
+    }
+
+
+
+
+
     /**
      * 创建订单编号
      * @param Style $model
@@ -142,7 +206,7 @@ class OrderService extends Service
             ->where(['order_id'=>$order_id])
             ->asArray()->one();
         if($sum) {
-            Order::updateAll(['goods_num'=>$sum['total_num'], 'goods_price'=>$sum['order_amount']],['id'=>$order_id]);
+            Order::updateAll(['goods_num'=>$sum['total_num'], 'order_amount'=>$sum['order_amount']],['id'=>$order_id]);
         }
     }
 
