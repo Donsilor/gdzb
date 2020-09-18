@@ -224,6 +224,16 @@ data = {
 },
 timer;
 
+// 重置富文本样式
+function resetCss() {
+  $('.colorBlock').css('background-color', colors[0])
+  $('.colorIpt').val(colors[0])
+  $('.font-size').text($(this).text())
+  $('.attr-2').removeClass('active')
+  $('.attr-4').removeClass('active')
+  $('.link').text('')
+}
+
 console.log('attrs ===> ', editAttrs)
 
 // 编辑展示
@@ -353,6 +363,8 @@ showAttrs()
 
 // 添加文本
 $('.classify-text').on('mousedown', function() {
+  resetCss()
+
   var textObj = {};
   for(var attr in textAttr){
     textObj[attr] = textAttr[attr];
@@ -528,6 +540,8 @@ function onBlur(e,className) {
 
 // 增加图片
 $('.classify-img').on('mousedown', function() {
+  resetCss()
+
   var imgObj = {};
   for(var attr in imgAttr){
     imgObj[attr] = imgAttr[attr];
@@ -638,6 +652,8 @@ $('.classify-img').on('mousedown', function() {
 
 // 增加视频
 $('.classify-video').on('mousedown', function() {
+  resetCss()
+
   // return
   var videoObj = {};
   for(var attr in videoAttr){
@@ -1145,13 +1161,16 @@ function move(e, direction, className) {
             editObj.top = 0
           }
           if(editObj.top > posYH){
-            editObj.top = posYH-4
+            editObj.top = posYH
           }
   
           editObj.height = (posYH-editObj.top)+'px';
-          editObj.top = editObj.top + 'px';
+          editObj.width = (posYH-editObj.top)*rate+'px';
+          editObj.top = editObj.top+'px';
+
+          // if(editObj.width >= ())
   
-          box.css({'top':editObj.top,'height':editObj.height})
+          box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1191,8 +1210,10 @@ function move(e, direction, className) {
   
           editObj.left = editObj.left + 'px';
           editObj.width = (posXW-parseInt(editObj.left))+'px';
+          // console.log(box.find('.img').css('height'))
+          editObj.height = box.find('.img').css('height');
   
-          box.css({'left':editObj.left,'width':editObj.width})
+          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1224,31 +1245,32 @@ function move(e, direction, className) {
       case 'topLeft':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
-          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+          // mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
   
           editObj.left = mouseX;
-          editObj.top = mouseY;
+          // editObj.top = mouseY;
           
-          if(editObj.top < 0){
-            editObj.top = 0
-          }
-          if(editObj.top > posYH){
-            editObj.top = posYH
-          }
+          // if(editObj.top < 0){
+          //   editObj.top = 0
+          // }
+
+          // if(editObj.top > posYH){
+          //   editObj.top = posYH
+          // }
   
           if(editObj.left < 0){
             editObj.left = 0
           }
+
           if(editObj.left > posXW){
             editObj.left = posXW
           }
   
           editObj.width = (posXW-parseInt(editObj.left))+'px';
-          editObj.height = (posYH-editObj.top)+'px';
-          editObj.top = editObj.top + 'px';
+          editObj.height = parseInt(box.find('.img').css('height'));
           editObj.left = editObj.left + 'px';
   
-          box.css({'left':editObj.left,'top':editObj.top,'width':editObj.width,'height':editObj.height})
+          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1339,7 +1361,6 @@ function move(e, direction, className) {
         })
     }
   }
-  
 
   // 返回结果
   function returnData() {
@@ -1544,7 +1565,7 @@ function amend(cl,val) {
       $('.'+elementActive).css(cl, val)
       data.attrs[editIndex][cl] = val;
       
-      if(cl == 'color' || cl == 'font-size'){
+      if(cl == 'color' || cl == 'font-size' || 'text-align'){
         $('.'+elementActive+ ' pre').css(cl, val)
       }
     }
@@ -1609,19 +1630,8 @@ function save() {
     dataType: 'json',
     data: {'Special': param, '_csrf-backend': $('meta[name=csrf-token]').attr("content")},
 
-    statusCode: {
-      302: function(e) {
-        alert('保存成功')
-      }
-    },
-
     success: function(msg) {
-      alert('保存成功')
-      // if(msg.error == 0) {
-      //   //window.location.reload();
-      // } else {
-      //   alert(msg.msg);
-      // }
+      console.log(333,msg)
     }
   })
 }

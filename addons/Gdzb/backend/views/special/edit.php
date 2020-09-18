@@ -155,7 +155,6 @@ $this->beginPage()
 
                                     <div class="option-box">
                                         <div class="option">微软雅黑</div>
-                                        <div class="option">黑体</div>
                                     </div>
                                 </div>
                             </div>
