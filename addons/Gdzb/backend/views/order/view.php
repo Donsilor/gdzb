@@ -216,6 +216,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'goods_image',
                                 'value' => function ($model) {
                                     $goods_image = $model->goods_image ? explode(',', $model->goods_image) : [];
+                                    $goods_image = $goods_image ? $goods_image[0] : '';
                                     return common\helpers\ImageHelper::fancyBox($goods_image);
                                 },
                                 'filter' => false,
@@ -246,69 +247,49 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'format' => 'raw',
                             ],
                             [
+                                'attribute' => 'goods_status',
+                                'value' => function ($model) {
+                                    return \addons\Warehouse\common\enums\GoodsStatusEnum::getValue($model->goods_status);
+                                },
+                                'format' => 'raw',
+                            ],
+                            [
+                                'attribute' => 'warehouse_id',
+                                'value' => function ($model) {
+                                    return $model->warehouse->name ?? '';
+                                },
+                                'format' => 'raw',
+                            ],
+                            'goods_size',
+                            [
                                 'attribute' => 'goods_price',
                                 'value' => function ($model) {
                                     return $model->goods_price;
                                 }
                             ],
-
-
                             [
-                                'attribute' => 'bc_status',
+                                'attribute' => 'refund_price',
                                 'value' => function ($model) {
-                                    return \addons\Supply\common\enums\BuChanEnum::getValue($model->bc_status) ?? '未布产' . '<br/>' . $model->produce_sn;
-                                },
-                                'format' => 'raw',
+                                    return $model->refund_price;
+                                }
                             ],
-
-
-
                             'remark',
-
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'header' => '操作',
                                 //'headerOptions' => ['width' => '150'],
-                                'template' => '{view} {edit} {delete} <br/>{stock} {untie} {apply-edit} ',
+                                'template' => '{edit} {delete} ',
                                 'buttons' => [
-                                    'view' => function ($url, $model, $key) {
-                                        return Html::edit(['order-goods/view', 'id' => $model->id, 'order_id' => $model->order_id, 'returnUrl' => Url::getReturnUrl()], '详情', [
-                                            'class' => 'btn btn-info btn-xs',
-                                        ]);
-                                    },
                                     'edit' => function ($url, $model, $key) use ($order) {
                                         if ($order->order_status == OrderStatusEnum::SAVE) {
-                                            if ($model->product_type_id == 1) {
-                                                return Html::edit(['order-goods/edit-diamond', 'id' => $model->id], '编辑', ['class' => 'btn btn-primary btn-xs openIframe', 'data-width' => '90%', 'data-height' => '90%', 'data-offset' => '20px']);
-                                            } elseif ($model->is_gift == \addons\Sales\common\enums\IsGiftEnum::YES) {
-                                                return Html::edit(['order-goods/edit-gift', 'id' => $model->id], '编辑', ['class' => 'btn btn-primary btn-xs openIframe', 'data-width' => '90%', 'data-height' => '90%', 'data-offset' => '20px']);
-                                            } elseif ($model->is_stock == IsStockEnum::NO) {
-                                                return Html::edit(['order-goods/edit', 'id' => $model->id], '编辑', ['class' => 'btn btn-primary btn-xs openIframe', 'data-width' => '90%', 'data-height' => '90%', 'data-offset' => '20px']);
-                                            } else {
-                                                return Html::edit(['order-goods/edit-stock', 'id' => $model->id], '编辑', ['class' => 'btn btn-primary btn-xs openIframe', 'data-width' => '90%', 'data-height' => '90%', 'data-offset' => '20px']);
-                                            }
-
-                                        }
-                                    },
-                                    'stock' => function ($url, $model, $key) use ($order) {
-                                        if ($order->order_status == OrderStatusEnum::SAVE && $model->is_stock == IsStockEnum::NO) {
-                                            return Html::edit(['order-goods/stock', 'id' => $model->id], '绑定现货', ['class' => 'btn btn-primary btn-xs', 'data-toggle' => 'modal', 'data-target' => '#ajaxModalLg',]);
-                                        }
-                                    },
-                                    'untie' => function ($url, $model, $key) use ($order) {
-                                        if ($order->order_status == OrderStatusEnum::SAVE && $model->is_stock == IsStockEnum::YES && $model->product_type_id != 1 && $model->is_gift == \addons\Sales\common\enums\IsGiftEnum::NO) {
-                                            return Html::edit(['order-goods/untie', 'id' => $model->id], '解绑', [
+                                            return Html::edit(['order-goods/ajax-edit', 'order_id'=>$model->order_id,'id' => $model->id], '编辑', [
+                                                'data-toggle' => 'modal',
+                                                'data-target' => '#ajaxModal',
                                                 'class' => 'btn btn-primary btn-xs',
-                                                'onclick' => 'rfTwiceAffirm(this,"解绑现货", "确定解绑吗？");return false;',
-                                            ]);
-                                        }
+                                                ]);
 
+                                        }
                                     },
-//                                            'apply-edit' =>function($url, $model, $key) use($order){
-//                                                if($order->order_status == OrderStatusEnum::CONFORMED) {
-//                                                    return Html::edit(['order-goods/apply-edit','id' => $model->id],'申请编辑',['class' => 'btn btn-primary btn-xs openIframe','data-width'=>'90%','data-height'=>'90%','data-offset'=>'20px']);
-//                                                }
-//                                            },
                                     'delete' => function ($url, $model, $key) use ($order) {
                                         if ($order->order_status == OrderStatusEnum::SAVE) {
                                             return Html::delete(['order-goods/delete', 'id' => $model->id, 'order_id' => $model->order_id, 'returnUrl' => Url::getReturnUrl()], '删除', ['class' => 'btn btn-danger btn-xs']);
@@ -328,52 +309,20 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="row">
                             <div class="col-lg-8 text-right">
-                                <label><?= $model->getAttributeLabel('account.goods_amount') ?>：</label></div>
-                            <div class="col-lg-4"><?= AmountHelper::outputAmount($model->account->goods_amount ?? 0, 2, $model->currency) ?></div>
+                                <label><?= $model->getAttributeLabel('order_amount') ?>：</label></div>
+                            <div class="col-lg-4"><?= $model->order_amount ?></div>
                         </div>
                         <div class="row">
-                            <div class="col-lg-8 text-right">
-                                <label><?= $model->getAttributeLabel('account.shipping_fee') ?>：</label></div>
-                            <div class="col-lg-4"><?= AmountHelper::outputAmount($model->account->shipping_fee ?? 0, 2, $model->currency) ?></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-8 text-right"><label><?= $model->getAttributeLabel('account.tax_fee') ?>
+                            <div class="col-lg-8 text-right"><label><?= $model->getAttributeLabel('refund_num') ?>
                                     ：</label></div>
-                            <div class="col-lg-4"><?= AmountHelper::outputAmount($model->account->tax_fee ?? 0, 2, $model->currency) ?></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-8 text-right"><label><?= $model->getAttributeLabel('account.safe_fee') ?>
-                                    ：</label></div>
-                            <div class="col-lg-4"><?= AmountHelper::outputAmount($model->account->safe_fee ?? 0, 2, $model->currency) ?></div>
+                            <div class="col-lg-4"><?= $model->refund_num ?></div>
                         </div>
                         <div class="row">
                             <div class="col-lg-8 text-right">
-                                <label><?= $model->getAttributeLabel('account.order_amount') ?>：</label></div>
-                            <div class="col-lg-4"><?= AmountHelper::outputAmount($model->account->order_amount ?? 0, 2, $model->currency) ?></div>
+                                <label><?= $model->getAttributeLabel('refund_amount') ?>：</label></div>
+                            <div class="col-lg-4"><?= $model->refund_amount ?></div>
                         </div>
-                        <div class="row">
-                            <div class="col-lg-8 text-right">
-                                <label><?= $model->getAttributeLabel('account.discount_amount') ?>：</label></div>
-                            <div class="col-lg-4"><?= AmountHelper::outputAmount($model->account->discount_amount ?? 0, 2, $model->currency) ?></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-8 text-right">
-                                <label><?= $model->getAttributeLabel('account.pay_amount') ?>：</label></div>
-                            <div class="col-lg-4"
-                                 style="color:red"><?= AmountHelper::outputAmount($model->account->pay_amount ?? 0, 2, $model->currency) ?></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-8 text-right">
-                                <label><?= $model->getAttributeLabel('account.paid_amount') ?>：</label></div>
-                            <div class="col-lg-4"
-                                 style="color:red"><?= AmountHelper::outputAmount($model->account->paid_amount ?? 0, 2, $model->currency) ?></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-8 text-right">
-                                <label><?= $model->getAttributeLabel('account.refund_amount') ?>：</label></div>
-                            <div class="col-lg-4"
-                                 style="color:red"><?= AmountHelper::outputAmount($model->account->refund_amount ?? 0, 2, $model->currency) ?></div>
-                        </div>
+
                     </div><!-- end col-lg-6 -->
                 </div><!-- end footer -->
             </div>
@@ -388,44 +337,36 @@ $this->params['breadcrumbs'][] = $this->title;
                     <table class="table table-hover">
                         <thead>
                         <tr>
-                            <th>收货人</th>
-                            <th>联系方式</th>
+                            <th>客户姓名</th>
+                            <th>客户电话</th>
+                            <th>客户微信</th>
                             <th>国家</th>
                             <th>省份</th>
                             <th>城市</th>
-                            <th>详细地址</th>
-                            <th>邮编</th>
+                            <th>收货地址</th>
                             <th>操作</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr>
-                            <td><?= $model->address->realname ?? '' ?></td>
-                            <td>
-                                <?php
-                                $str = '';
-                                if ($model->address) {
-                                    if ($model->address->mobile) {
-                                        $str .= $model->address->mobile . '<br/>';
-                                    }
-                                    if ($model->address->email) {
-                                        $str .= $model->address->email;
-                                    }
+                            <td><?= $model->customer_name ?></td>
+                            <td><?= $model->customer_mobile ?></td>
+                            <td><?= $model->customer_weixin ?></td>
+                            <?php $model->getConsigneeInfo($model);?>
+                            <td><?= $model->country->title ?? '' ?></td>
+                            <td><?= $model->province->title ?? '' ?></td>
+                            <td><?= $model->city->title ?? '' ?></td>
+                            <td><?= $model->address ?? '' ?></td>
+                            <td><?php
+                                if($model->order_status == OrderStatusEnum::SAVE){
+                                    Html::edit(['ajax-edit-address', 'id' => $model->id, 'returnUrl' => $returnUrl], '编辑', [
+                                        'class' => 'btn btn-primary btn-ms',
+                                        'style' => "margin-left:5px",
+                                        'data-toggle' => 'modal',
+                                        'data-target' => '#ajaxModal',
+                                    ]);
                                 }
-                                echo $str;
                                 ?>
-                            </td>
-                            <td><?= $model->address->country_name ?? '' ?></td>
-                            <td><?= $model->address->province_name ?? '' ?></td>
-                            <td><?= $model->address->city_name ?? '' ?></td>
-                            <td><?= $model->address->address_details ?? '' ?></td>
-                            <td><?= $model->address->zip_code ?? '' ?></td>
-                            <td><?= Html::edit(['ajax-edit-address', 'id' => $model->id, 'returnUrl' => $returnUrl], '编辑', [
-                                    'class' => 'btn btn-primary btn-ms',
-                                    'style' => "margin-left:5px",
-                                    'data-toggle' => 'modal',
-                                    'data-target' => '#ajaxModal',
-                                ]); ?>
                             </td>
 
                         </tr>
@@ -446,34 +387,34 @@ $this->params['breadcrumbs'][] = $this->title;
                         <thead>
                         <tr>
                             <th>是否开发票</th>
-                            <th>发票抬头</th>
-                            <th>纳税人识别号</th>
                             <th>发票类型</th>
+                            <th>发票抬头</th>
+                            <th>抬头类型</th>
+                            <th>纳税人识别号</th>
                             <th>发票邮箱</th>
-                            <th>发送次数</th>
+                            <th>发票状态</th>
                             <th>操作</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr>
-                            <td><?= addons\Sales\common\enums\IsInvoiceEnum::getValue($model->invoice->is_invoice ?? '') ?></td>
-                            <td><?= $model->invoice->invoice_title ?? '' ?></td>
-                            <td><?= $model->invoice->tax_number ?? '' ?></td>
-                            <td><?= addons\Sales\common\enums\InvoiceTypeEnum::getValue($model->invoice->invoice_type ?? '') ?></td>
-                            <td><?= $model->invoice->email ?? '' ?></td>
-                            <td><?= $model->invoice->send_num ?? '' ?></td>
+                            <td><?= addons\Sales\common\enums\IsInvoiceEnum::getValue($model->is_invoice ?? '') ?></td>
+                            <?php
+                             $model->getInvoiceInfo($model);
+                            ?>
+                            <td><?= \addons\Sales\common\enums\InvoiceTypeEnum::getValue($model->invoice_type ?? '') ?></td>
+                            <td><?= $model->invoice_title ?? '' ?></td>
+                            <td><?= addons\Sales\common\enums\InvoiceTitleTypeEnum::getValue($model->title_type ?? '') ?></td>
+                            <td><?= $model->tax_number ?? '' ?></td>
+                            <td><?= $model->email ?? '' ?></td>
+                            <td><?= \addons\Gdzb\common\enums\InvoiceStatusEnum::getValue($model->invoice_status ?? '') ?></td>
                             <td><?= Html::edit(['ajax-edit-invoice', 'id' => $model->id, 'returnUrl' => $returnUrl], '编辑', [
                                     'class' => 'btn btn-primary btn-ms',
                                     'style' => "margin-left:5px",
                                     'data-toggle' => 'modal',
                                     'data-target' => '#ajaxModal',
                                 ]); ?>
-                                <?= Html::edit(['ajax-send-invoice', 'id' => $model->id, 'returnUrl' => $returnUrl], '发送', [
-                                    'class' => 'btn btn-success btn-ms',
-                                    'style' => "margin-left:5px",
-                                    'data-toggle' => 'modal',
-                                    'data-target' => '#ajaxModal',
-                                ]); ?>
+
                             </td>
                         </tr>
                         </tbody>

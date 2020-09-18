@@ -2,6 +2,8 @@
 
 namespace addons\Gdzb\backend\controllers;
 
+use addons\Gdzb\common\forms\ConsigneeForm;
+use addons\Gdzb\common\forms\InvoiceForm;
 use addons\Sales\common\enums\IsReturnEnum;
 use addons\Sales\common\enums\OrderStatusEnum;
 
@@ -9,19 +11,16 @@ use addons\Sales\common\enums\ReturnTypeEnum;
 use addons\Gdzb\common\forms\OrderForm;
 use addons\Gdzb\common\forms\OrderGoodsForm;
 use addons\Sales\common\forms\ReturnForm;
-use addons\Sales\common\models\OrderAccount;
 use addons\Sales\common\models\SalesReturn;
 use common\enums\AuditStatusEnum;
 use common\enums\ConfirmEnum;
 use common\helpers\Url;
 use Yii;
 use common\traits\Curd;
-use addons\Sales\common\models\Order;
+use addons\Gdzb\common\models\Order;
 use common\models\base\SearchModel;
-use addons\Sales\common\models\OrderGoods;
+use addons\Gdzb\common\models\OrderGoods;
 use common\helpers\ResultHelper;
-use addons\Sales\common\models\OrderInvoice;
-use addons\Sales\common\models\OrderAddress;
 use addons\Sales\common\models\Customer;
 use common\enums\LogTypeEnum;
 use common\helpers\Auth;
@@ -173,7 +172,7 @@ class OrderController extends BaseController
             ]);
             
             $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-            
+            $dataProvider->query->andWhere(['=', 'order_id', $id]);
             $dataProvider->setSort(false);
         }
         return $this->render($this->action->id, [
@@ -223,15 +222,6 @@ class OrderController extends BaseController
             return ResultHelper::json(422, '取消失败！'.$e->getMessage());
         }        
               
-    }    
-    /**
-     * 分配跟单人
-     * @return mixed|string|\yii\web\Response
-     * @throws \yii\base\ExitException
-     */
-    public function actionAjaxFollower()
-    {
-        
     }
 
 
@@ -245,8 +235,9 @@ class OrderController extends BaseController
         if($order_goods_count == 0){
             return $this->message('订单没有明细', $this->redirect(\Yii::$app->request->referrer), 'error');
         }
+        $this->modelClass = Order::class;
         $model = $this->findModel($id);
-        $model = $model ?? new OrderForm();
+        $model = $model ?? new Order();
         if($model->order_status != OrderStatusEnum::SAVE){
             return $this->message('订单不是保存状态', $this->redirect(\Yii::$app->request->referrer), 'error');
         }
@@ -258,7 +249,7 @@ class OrderController extends BaseController
             if(false === $model->save()){
                 throw new \Exception($this->getError($model));
             }
-            
+
             //订单日志
             $log = [
                     'order_id' => $model->id,
@@ -288,7 +279,8 @@ class OrderController extends BaseController
     {
         $id = Yii::$app->request->get('id');
         $model = $this->findModel($id);
-        $model = $model ?? new OrderForm();
+        $this->modelClass = Order::class;
+        $model = $model ?? new Order();
         // ajax 校验
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
@@ -305,6 +297,15 @@ class OrderController extends BaseController
                 if(false === $model->save()){
                     return $this->message($this->getError($model), $this->redirect(\Yii::$app->request->referrer), 'error');
                 }
+
+                //同步客户
+                Yii::$app->gdzbService->order->createSyncCustomer($model);
+
+                //同步商品
+                Yii::$app->gdzbService->order->createSyncGoods($id);
+
+
+
                 $log_msg = "订单审核：".AuditStatusEnum::getValue($model->audit_status)."，审核备注：".$model->audit_remark;
                 
                 //订单日志
@@ -317,7 +318,7 @@ class OrderController extends BaseController
                         'log_module' => '订单审核',
                         'log_msg' => $log_msg,
                 ];
-                \Yii::$app->salesService->orderLog->createOrderLog($log);
+                \Yii::$app->gdzbService->orderLog->createOrderLog($log);
                 $trans->commit();
             }catch (\Exception $e){
                 $trans->rollBack();
@@ -332,41 +333,6 @@ class OrderController extends BaseController
     }
 
 
-    /**
-     * 修改费用
-     * @return \yii\web\Response|mixed|string|string
-     */
-    public function actionAjaxEditFee()
-    {
-        $id = Yii::$app->request->get('id');
-        $this->modelClass = OrderAccount::class;
-        $model = $this->findModel($id);
-        $isNewRecord = $model->isNewRecord;
-        if($isNewRecord) {
-            $model->order_id = $id;
-        }
-        // ajax 校验
-        $this->activeFormValidate($model);
-        if ($model->load(Yii::$app->request->post())) {
-            try{
-                $trans = Yii::$app->trans->beginTransaction();
-                if(false === $model->save()) {
-                    throw new \Exception($this->getError($model));
-                }
-                //更新采购汇总：总金额和总数量
-                \Yii::$app->salesService->order->orderSummary($model->order_id);
-                $trans->commit();
-
-                return $this->message("保存成功", $this->redirect(Yii::$app->request->referrer), 'success');
-            }catch (\Exception $e) {
-                $trans->rollback();
-                return $this->message($e->getMessage(), $this->redirect(Yii::$app->request->referrer), 'error');
-            }
-        }
-        return $this->renderAjax($this->action->id, [
-            'model' => $model,
-        ]);
-    }
 
     /**
      * 修改收货地址
@@ -375,17 +341,15 @@ class OrderController extends BaseController
     public function actionAjaxEditAddress()
     {
         $id = Yii::$app->request->get('id');
-        $this->modelClass = OrderAddress::class;
+        $this->modelClass = ConsigneeForm::class;
         $model = $this->findModel($id);
-        $isNewRecord = $model->isNewRecord;
-        if($isNewRecord) {
-            $model->order_id = $id;     
-        }        
         // ajax 校验
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
             try{
                 $trans = Yii::$app->trans->beginTransaction();
+                $model->consignee_info = $model->setConsigneeInfo($model);
+
                 if(false === $model->save()) {
                     throw new \Exception($this->getError($model));
                 }                
@@ -397,89 +361,45 @@ class OrderController extends BaseController
                 return $this->message($e->getMessage(), $this->redirect(Yii::$app->request->referrer), 'error');
             }
         }
-        if(!$model->realname) {
-            $model->realname = $model->order->customer_name ?? null;
-        }
-        if(!$model->mobile) {
-            $model->mobile = $model->order->customer_mobile ?? null;
-        }
-        if(!$model->email) {
-            $model->email = $model->order->customer_email ?? null;
-        }
-        if($isNewRecord && isset($model->customer)) {
-            $model->country_id = $model->customer->country_id ?? null;
-            $model->province_id = $model->customer->province_id ?? null;
-            $model->city_id = $model->customer->city_id ?? null;
-            $model->address_details = $model->customer->address_details ?? null;
-        }
+        //初始化
+        $model->getConsigneeInfo($model);
         return $this->renderAjax($this->action->id, [
                 'model' => $model,
         ]);
     }
     
     /**
-     * 修改收货地址
+     * 修改发票
      * @return \yii\web\Response|mixed|string|string
      */
     public function actionAjaxEditInvoice()
     {
         $id = Yii::$app->request->get('id');
-        $this->modelClass = OrderInvoice::class;
+        $this->modelClass = InvoiceForm::class;
         $model = $this->findModel($id);
-        if($model->isNewRecord) {
-            $model->order_id = $id;
-        }
         // ajax 校验
         $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
             try{
                 $trans = Yii::$app->trans->beginTransaction();
+                $model->invoice_info = $model->setInvoiceInfo($model);
+
                 if(false === $model->save()) {
                     throw new \Exception($this->getError($model));
-                }                
+                }
                 $trans->commit();
-                
+
                 return $this->message("保存成功", $this->redirect(Yii::$app->request->referrer), 'success');
-                
             }catch (\Exception $e) {
                 $trans->rollback();
                 return $this->message($e->getMessage(), $this->redirect(Yii::$app->request->referrer), 'error');
             }
         }
-        
+        //初始化
+        $model->getInvoiceInfo($model);
         return $this->renderAjax($this->action->id, [
-                'model' => $model,
+            'model' => $model,
         ]);
-    }
-    /**
-     * 申请采购
-     * @return array|mixed
-     */
-    public function actionAjaxPurchaseApply()
-    {
-        $id = Yii::$app->request->get('id');
-        $model = $this->findModel($id);
-        try {
-            $trans = Yii::$app->db->beginTransaction();
-            $apply = Yii::$app->salesService->order->syncPurchaseApply($id);
-            //订单日志
-            $log_msg = "生成采购申请单。采购申请单号：{$apply->apply_sn}";
-            $log = [
-                'order_id' => $model->id,
-                'order_sn' => $model->order_sn,
-                'order_status' => $model->order_status,
-                'log_type' => LogTypeEnum::ARTIFICIAL,
-                'log_time' => time(),
-                'log_module' => '生成采购申请单',
-                'log_msg' => $log_msg,
-            ];
-            \Yii::$app->salesService->orderLog->createOrderLog($log);
-            $trans->commit();
-            return $this->message('操作成功', $this->redirect(\Yii::$app->request->referrer), 'success');
-        } catch (\Exception $e) {
-            $trans->rollBack();
-            return $this->message($e->getMessage(), $this->redirect(Yii::$app->request->referrer), 'error');
-        }       
     }
 
     /**

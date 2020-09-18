@@ -1,16 +1,11 @@
 <?php
 namespace addons\Gdzb\backend\controllers;
 
-use addons\Sales\common\enums\IsGiftEnum;
-use addons\Sales\common\enums\IsStockEnum;
 use addons\Sales\common\enums\OrderStatusEnum;
 use addons\Gdzb\common\forms\OrderGoodsForm;
-use addons\Sales\common\models\Order;
-use addons\Sales\common\models\OrderGoods;
-use addons\Sales\common\models\OrderGoodsAttribute;
+use addons\Gdzb\common\models\Order;
+use addons\Gdzb\common\models\OrderGoods;
 use addons\Style\common\enums\QibanTypeEnum;
-use addons\Supply\common\enums\BuChanEnum;
-use addons\Supply\common\enums\FromTypeEnum;
 use common\enums\ConfirmEnum;
 use common\helpers\ResultHelper;
 use common\helpers\StringHelper;
@@ -37,34 +32,40 @@ class OrderGoodsController extends BaseController
         $order_id = Yii::$app->request->get('order_id');
         $model = $this->findModel($id);
         $model = $model ?? new OrderGoodsForm();
+        $model->order_id = $order_id;
+        $order = Order::find()->where(['id'=>$order_id])->one();
 
+        // ajax 校验
+        $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
             if(!$model->validate()) {
                 return ResultHelper::json(422, $this->getError($model));
             }
             try{
                 $trans = Yii::$app->trans->beginTransaction();
+                $model->warehouse_id = $order->warehouse_id;
                 if(false === $model->save()){
                     throw new \Exception($this->getError($model));
                 }
                 //没有货号，生成货号
                 if(!$model->goods_sn){
                     Yii::$app->gdzbService->orderGoods->createGoodsSn($model);
+                }else{
+                    //判断货品是否库存，如果是库存，则改变库存货品状态
+                    Yii::$app->gdzbService->orderGoods->syncGoods($model);
                 }
                 //更新采购汇总：总金额和总数量
                 Yii::$app->gdzbService->order->orderSummary($model->order_id);
                 $trans->commit();
-                //前端提示
-                Yii::$app->getSession()->setFlash('success','保存成功');
-                return ResultHelper::json(200, '保存成功');
+                $this->redirect(Yii::$app->request->referrer);
             }catch (\Exception $e){
                 $trans->rollBack();
-                return ResultHelper::json(422, $e->getMessage());
+                $this->message($this->getError($model), $this->redirect(Yii::$app->request->referrer), 'error');
             }
         }
+
         return $this->renderAjax($this->action->id, [
             'model' => $model,
-            'order_id' => $order_id,
         ]);
     }
 
@@ -81,36 +82,24 @@ class OrderGoodsController extends BaseController
      */
     public function actionDelete($id)
     {
+
         $order_id = Yii::$app->request->get('order_id');
-
         try{
-
             $trans = Yii::$app->trans->beginTransaction();
-
             $order = Order::find()->where(['id'=>$order_id])->one();
             if($order->order_status == OrderStatusEnum::CONFORMED) {
                 throw new \Exception("订单已审核,不允许删除",422);
             }
             $model = $this->findModel($id);
-            if($model->product_type_id == 1){
-                //裸钻
-                Yii::$app->salesService->orderGoods->delDiamond($model);
-            }elseif ($model->is_gift == IsGiftEnum::YES){
-                //赠品
-                Yii::$app->salesService->orderGoods->delGift($model);
-            }elseif($model->is_stock == IsStockEnum::YES){
-                //现货解绑
-                Yii::$app->salesService->orderGoods->toUntie($model);
-            }
-
             if (!$model->delete()) {
                 throw new \Exception("删除失败",422);
             }
+            //如果货号已在库存，则还原
+            Yii::$app->gdzbService->orderGoods->syncGoods($model,'del');
 
-            //删除商品属性
-            OrderGoodsAttribute::deleteAll(['id'=>$id]);
+
             //更新单据汇总
-            Yii::$app->salesService->order->orderSummary($order_id);
+            Yii::$app->gdzbService->order->orderSummary($order_id);
             $trans->commit();
             return $this->message("删除成功", $this->redirect($this->returnUrl));
         }catch (\Exception $e) {
