@@ -26,14 +26,14 @@ use Yii;
  * @property int $created_at 创建时间
  * @property int $updated_at 更新时间
  */
-class OrderGoods extends BaseModel
+class Goods extends BaseModel
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return self::tableFullName('order_goods');
+        return self::tableFullName('goods');
     }
 
     /**
@@ -47,6 +47,7 @@ class OrderGoods extends BaseModel
             [['goods_sn', 'goods_size'], 'string', 'max' => 60],
             [['goods_name'], 'string', 'max' => 150],
             [['goods_image'], 'parseGoodsImage'],
+            [['goods_sn'], 'unique'],
         ];
     }
 

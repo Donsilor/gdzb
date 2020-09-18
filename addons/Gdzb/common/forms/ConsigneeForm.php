@@ -14,19 +14,13 @@ use addons\Gdzb\common\models\Order;
 /**
  * 订单 Form
  */
-class OrderForm extends Order
+class ConsigneeForm extends Order
 {
 
     public $country_id;
     public $province_id;
     public $city_id;
     public $address;
-    public $invoice_type;
-    public $title_type;
-    public $invoice_title;
-    public $tax_number;
-    public $email;
-    public $invoice_status;
 
     /**
      * {@inheritdoc}
@@ -34,10 +28,9 @@ class OrderForm extends Order
     public function rules()
     {
         $rules = [
-            [['channel_id','warehouse_id','customer_name','customer_mobile','customer_weixin','collect_type',
-                'collect_no'], 'required'],
-            [['country_id','province_id','city_id','supplier_id','invoice_type','title_type','invoice_status'],'integer'],
-            [['address','invoice_title','tax_number','email'], 'string', 'max' => 100],
+            [['customer_name','customer_mobile','customer_weixin'], 'required'],
+            [['country_id','province_id','city_id'],'integer'],
+            [['address'], 'string', 'max' => 100],
         ];
         return ArrayHelper::merge(parent::rules(),$rules);
     }    
@@ -52,12 +45,6 @@ class OrderForm extends Order
             'province_id' => '省',
             'city_id' => '市',
             'address' => '地址',
-            'invoice_type' => '发票类型',
-            'title_type' => '抬头类型',
-            'invoice_title' => '发票抬头',
-            'tax_number' => '纳税人识别号',
-            'email' => '发送邮箱',
-            'invoice_status' => '发票状态',
         ]);
     }
 
@@ -86,37 +73,6 @@ class OrderForm extends Order
         $model->province_id = $consignee_info['province_id'];
         $model->city_id = $consignee_info['city_id'];
         $model->address = $consignee_info['address'];
-    }
-
-
-    /**
-     * @param $post
-     * @return string
-     * 设置地址
-     */
-    public function setInvoiceInfo($post){
-        return json_encode([
-            'invoice_type' => $post['invoice_type'],
-            'title_type' => $post['title_type'],
-            'invoice_title' => $post['invoice_title'],
-            'tax_number' => $post['tax_number'],
-            'invoice_status' => $post['invoice_status'],
-            'email' => $post['email'],
-        ]);
-    }
-
-    /****
-     * @param $model
-     * 获取地址
-     */
-    public function getInvoiceInfo(&$model){
-        $invoice_info = json_decode($model->invoice_info,true);
-        $model->invoice_type = $invoice_info['invoice_type'] ?? InvoiceTypeEnum::ELECTRONIC;
-        $model->title_type = $invoice_info['title_type'] ?? InvoiceTitleTypeEnum::PERSONAL;
-        $model->invoice_title = $invoice_info['invoice_title'];
-        $model->tax_number = $invoice_info['tax_number'];
-        $model->invoice_status = $invoice_info['invoice_status'] ?? InvoiceStatusEnum::TO_INVOICE;
-        $model->email = $invoice_info['email'];
     }
 
 

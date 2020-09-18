@@ -95,7 +95,7 @@ class SpecialController extends BaseController
                 return ResultHelper::json(422, $this->getError($model));
             }
 
-            return $this->message("保存成功", $this->redirect(Yii::$app->request->referrer), 'success');
+            return ResultHelper::json(200, 'success');
         }
         return $this->render($this->action->id, [
             'model' => $model,
