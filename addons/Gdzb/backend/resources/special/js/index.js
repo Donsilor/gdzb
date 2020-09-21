@@ -1,3 +1,8 @@
+// 返回上一页
+$('.go-back').click(function() {
+  history.back(-1)
+})
+
 // 颜色
 var colors = ['#333333','#ffffff','#ff0000','#cccccc','#ffff00'];
 for(var c=0; c<colors.length; c++){
@@ -20,8 +25,10 @@ $('.colorIpt').val(colors[0])
 
 // 下拉框选项
 function select(e){
+  e.stopPropagation();
   var option = $(e.target).parent().next();
-  option.css('display') == 'none' ? option.slideDown().show() : option.slideUp().hide()
+  option.css('display') == 'none' ? option.slideDown(200).show() : option.slideUp(200).hide()
+
 }
 
 // 选择颜色
@@ -127,6 +134,58 @@ function addLink(e) {
   }
 }
 
+// 图片、视频宽高
+function iptBlur(e, t) {
+  if(elementActive){
+    var width,height;
+
+    switch (t) {
+      case 'img-width':
+        width = parseInt($(e.target).val());
+        height = parseInt(width/ratio);
+        
+        $('.'+elementActive).css('width', width)
+        $('.'+elementActive).css('height', height)
+        $('.img-height').val(height)
+
+        break;
+
+      case 'img-height':
+        height = parseInt($(e.target).val());
+        width = parseInt(height*ratio);
+        
+        $('.'+elementActive).css('width', width)
+        $('.'+elementActive).css('height', height)
+        $('.img-width').val(width)
+
+        break;
+
+      case 'video-width':
+        width = parseInt($(e.target).val());
+        height = parseInt(width/ratio);
+        
+        $('.'+elementActive).css('width', width)
+        $('.'+elementActive).css('height', height)
+        $('.video-height').val(height)
+
+        break;
+
+      case 'video-height':
+        height = parseInt($(e.target).val());
+        width = parseInt(height*ratio);
+        
+        $('.'+elementActive).css('width', width)
+        $('.'+elementActive).css('height', height)
+        $('.video-width').val(width)
+
+        break;
+  
+      default:
+        break;
+    }
+  }
+}
+
 // 删除元素
 $('.del').click(function() {
   $('.'+elementActive).remove()
@@ -206,6 +265,12 @@ elementActiveZIndex = 0,
 // 图片宽高比
 ratio = 0,
 
+// 最大高度
+maxHeight = 0,
+
+// 判断是否拖拽
+ifMove = false,
+
 // 鼠标位置
 mouseX = '',
 mouseY = '',
@@ -224,6 +289,16 @@ data = {
 },
 timer;
 
+// 重置富文本样式
+function resetCss() {
+  $('.colorBlock').css('background-color', colors[0])
+  $('.colorIpt').val(colors[0])
+  $('.font-size').text($(this).text())
+  $('.attr-2').removeClass('active')
+  $('.attr-4').removeClass('active')
+  $('.link').val('')
+}
+
 console.log('attrs ===> ', editAttrs)
 
 // 编辑展示
@@ -237,6 +312,7 @@ function showAttrs() {
     for(var i in editAttrs){
       data.attrs[i] = editAttrs[i];
       idNum = (editAttrs[i]['z-index']-0) > idNum ? editAttrs[i]['z-index']-0 : idNum;
+      maxHeight = parseInt(editAttrs[i].top)+parseInt(editAttrs[i].top) > maxHeight ? parseInt(editAttrs[i].top)+parseInt(editAttrs[i].top) : maxHeight;
       
       if(editAttrs[i].type == 'text'){
         divStyle ='position:'+'absolute'
@@ -353,6 +429,10 @@ showAttrs()
 
 // 添加文本
 $('.classify-text').on('mousedown', function() {
+  resetCss()
+
+  ifMove = false;
+
   var textObj = {};
   for(var attr in textAttr){
     textObj[attr] = textAttr[attr];
@@ -366,6 +446,8 @@ $('.classify-text').on('mousedown', function() {
   tem.css({'width': textObj.width, 'height': textObj.height})
 
   $('.content').on('mousemove', function(e) {
+    ifMove = true;
+
     mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
     mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
     
@@ -433,10 +515,20 @@ $('.classify-text').on('mousedown', function() {
               <textarea type='text' class='ipt-text' onblur='onBlur(event, "text-box-${idNum}")'></textarea>
               <pre class='pre' onclick='addMove(event, "text-box-${idNum}")' ></pre>
           </div>`;
+      
     $('.scroll').append(div)
 
-    var heig = parseInt(textObj.top) + parseInt(textObj.height);
-    aotuScroll(heig)
+    if(!ifMove && maxHeight){
+      textObj.top = maxHeight+20 + 'px';
+      maxHeight = parseInt(textObj.top) + parseInt(textObj.height)
+    }
+
+    $('.text-box-'+idNum).css('top',textObj.top)
+    
+    var site = parseInt(textObj.top) + parseInt(textObj.height);
+    aotuScroll(site)
+
+    tier('text-box-'+idNum)
 
     idNum++;
     $('.content').off('mouseup')
@@ -457,7 +549,7 @@ function edit(e, className) {
   if(!elementActive){
     elementActive = className;
     elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', '999');
+    $('.'+className).css('z-index', 9999);
   }else{
     $('.'+elementActive).css('z-index', elementActiveZIndex)
     elementActive = className;
@@ -499,7 +591,6 @@ function edit(e, className) {
   editObj['text-decoration'] = $('.attr-underline').hasClass('active') ? 'underline' : '';
 
   $(e.currentTarget).css({'font-size': editObj['font-size'],'font-weight': editObj['font-weight'],'font-style': editObj['font-style'],'text-decoration': editObj['text-decoration'],'text-align': editObj['text-align'],'color': editObj['color']});
-
 }
 
 // 获取光标
@@ -528,6 +619,10 @@ function onBlur(e,className) {
 
 // 增加图片
 $('.classify-img').on('mousedown', function() {
+  resetCss()
+
+  ifMove = false;
+
   var imgObj = {};
   for(var attr in imgAttr){
     imgObj[attr] = imgAttr[attr];
@@ -554,6 +649,8 @@ $('.classify-img').on('mousedown', function() {
   tem.css({'width': imgObj.width, 'height': imgObj.height})
 
   $('.content').on('mousemove', function(e) {
+    ifMove = true;
+
     mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
     mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
@@ -623,8 +720,17 @@ $('.classify-img').on('mousedown', function() {
           </div>`;
     $('.scroll').append(div)
 
-    var heig = parseInt(imgObj.top) + parseInt(imgObj.height);
-    aotuScroll(heig)
+    if(!ifMove && maxHeight){
+      imgObj.top = maxHeight+20 + 'px';
+      maxHeight = parseInt(imgObj.top) + parseInt(imgObj.height)
+    }
+
+    $('.img-box-'+idNum).css('top',imgObj.top)
+    
+    var site = parseInt(imgObj.top) + parseInt(imgObj.height);
+    aotuScroll(site)
+
+    tier('img-box-'+idNum)
 
     idNum++;
     $('.content').off('mouseup')
@@ -638,6 +744,10 @@ $('.classify-img').on('mousedown', function() {
 
 // 增加视频
 $('.classify-video').on('mousedown', function() {
+  resetCss()
+
+  ifMove = false;
+
   // return
   var videoObj = {};
   for(var attr in videoAttr){
@@ -662,6 +772,8 @@ $('.classify-video').on('mousedown', function() {
   tem.css({'width': videoObj.width, 'height': videoObj.height})
 
   $('.content').on('mousemove', function(e) {
+    ifMove = true;
+
     mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
     mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
@@ -719,19 +831,32 @@ $('.classify-video').on('mousedown', function() {
 
     div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
             <div class='direction-box' onmousedown='moveImg(event)'>
-              <div class='direction top' onmousedown='move(event, "top")'></div>
-              <div class='direction down' onmousedown='move(event, "down")'></div>
-              <div class='direction left' onmousedown='move(event, "left")'></div>
-              <div class='direction right' onmousedown='move(event, "right")'></div>
-              <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
-              <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
-              <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
-              <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
+              <div class='direction top' onmousedown='move(event, "top", "video-box-${idNum}")'></div>
+              <div class='direction down' onmousedown='move(event, "down", "video-box-${idNum}")'></div>
+              <div class='direction left' onmousedown='move(event, "left", "video-box-${idNum}")'></div>
+              <div class='direction right' onmousedown='move(event, "right", "video-box-${idNum}")'></div>
+              <div class='direction topLeft' onmousedown='move(event, "topLeft", "video-box-${idNum}")'></div>
+              <div class='direction topRight' onmousedown='move(event, "topRight", "video-box-${idNum}")'></div>
+              <div class='direction downLeft' onmousedown='move(event, "downLeft", "video-box-${idNum}")'></div>
+              <div class='direction downRight' onmousedown='move(event, "downRight", "video-box-${idNum}")'></div>
             </div>
             <input type='file' class='ipt-img' accept='video/*' onchange='changeFile(event, "video-box-${idNum}")'/>
             <video class='video' src='' width="100%" height="100%" controls="controls" autoplay="autoplay"  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
           </div>`;
+
     $('.scroll').append(div)
+
+    if(!ifMove && maxHeight){
+      videoObj.top = maxHeight+20 + 'px';
+      maxHeight = parseInt(videoObj.top) + parseInt(videoObj.height)
+    }
+
+    $('.video-box-'+idNum).css('top',videoObj.top)
+    
+    var site = parseInt(videoObj.top) + parseInt(videoObj.height);
+    aotuScroll(site)
+
+    tier('video-box-'+idNum)
 
     idNum++;
     $('.content').off('mouseup')
@@ -745,16 +870,7 @@ $('.classify-video').on('mousedown', function() {
 function addMove(e, className) {
   e.stopPropagation();
 
-  if(!elementActive){
-    elementActive = className;
-    elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', '999');
-  }else{
-    $('.'+elementActive).css('z-index', elementActiveZIndex)
-    elementActive = className;
-    elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', 9999)
-  }
+  tier(className)
   
   clearTimeout(timer);
   timer = setTimeout(function () {
@@ -1145,13 +1261,16 @@ function move(e, direction, className) {
             editObj.top = 0
           }
           if(editObj.top > posYH){
-            editObj.top = posYH-4
+            editObj.top = posYH
           }
   
           editObj.height = (posYH-editObj.top)+'px';
-          editObj.top = editObj.top + 'px';
+          editObj.width = (posYH-editObj.top)*rate+'px';
+          editObj.top = editObj.top+'px';
+
+          // if(editObj.width >= ())
   
-          box.css({'top':editObj.top,'height':editObj.height})
+          box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1191,8 +1310,10 @@ function move(e, direction, className) {
   
           editObj.left = editObj.left + 'px';
           editObj.width = (posXW-parseInt(editObj.left))+'px';
+          // console.log(box.find('.img').css('height'))
+          editObj.height = box.find('.img').css('height');
   
-          box.css({'left':editObj.left,'width':editObj.width})
+          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1224,31 +1345,32 @@ function move(e, direction, className) {
       case 'topLeft':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
-          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+          // mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
   
           editObj.left = mouseX;
-          editObj.top = mouseY;
+          // editObj.top = mouseY;
           
-          if(editObj.top < 0){
-            editObj.top = 0
-          }
-          if(editObj.top > posYH){
-            editObj.top = posYH
-          }
+          // if(editObj.top < 0){
+          //   editObj.top = 0
+          // }
+
+          // if(editObj.top > posYH){
+          //   editObj.top = posYH
+          // }
   
           if(editObj.left < 0){
             editObj.left = 0
           }
+
           if(editObj.left > posXW){
             editObj.left = posXW
           }
   
           editObj.width = (posXW-parseInt(editObj.left))+'px';
-          editObj.height = (posYH-editObj.top)+'px';
-          editObj.top = editObj.top + 'px';
+          editObj.height = parseInt(box.find('.img').css('height'));
           editObj.left = editObj.left + 'px';
   
-          box.css({'left':editObj.left,'top':editObj.top,'width':editObj.width,'height':editObj.height})
+          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1339,7 +1461,6 @@ function move(e, direction, className) {
         })
     }
   }
-  
 
   // 返回结果
   function returnData() {
@@ -1360,16 +1481,7 @@ function loadImg(e,className) {
   e.stopPropagation();
   clearTimeout(timer);
 
-  if(!elementActive){
-    elementActive = className;
-    elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', '999');
-  }else{
-    $('.'+elementActive).css('z-index', elementActiveZIndex)
-    elementActive = className;
-    elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', 9999)
-  }
+  tier(className)
 
   $('.direction-box').hide()
 
@@ -1544,7 +1656,7 @@ function amend(cl,val) {
       $('.'+elementActive).css(cl, val)
       data.attrs[editIndex][cl] = val;
       
-      if(cl == 'color' || cl == 'font-size'){
+      if(cl == 'color' || cl == 'font-size' || 'text-align'){
         $('.'+elementActive+ ' pre').css(cl, val)
       }
     }
@@ -1554,8 +1666,23 @@ function amend(cl,val) {
 
 }
 
+// 切换层级
+function tier(ele) {
+  if(!elementActive){
+    elementActive = ele;
+    elementActiveZIndex = $('.'+ele).css('z-index');
+    $('.'+ele).css('z-index', 9999);
+  }else{
+    $('.'+elementActive).css('z-index', elementActiveZIndex)
+    elementActive = ele;
+    elementActiveZIndex = $('.'+ele).css('z-index');
+    $('.'+ele).css('z-index', 9999)
+  }
+}
+
 // 去除层级和选中状态
 $('body').click(function (e) {
+  $('.option-box').hide()
   if(!($(e.target).parents().hasClass('content-r') || $(e.target).parents().hasClass('content-m'))){
       $('.direction-box').hide()
       elementActive = '';
@@ -1592,6 +1719,11 @@ function closeClone() {
 function save() {
   $('.direction-box').hide()
 
+  if(!$('#special-url').val()){
+    alert('保存失败，URL不能为空')
+    return
+  }
+
   var id = $('#special-id').val();
 
   var param = {};
@@ -1609,19 +1741,9 @@ function save() {
     dataType: 'json',
     data: {'Special': param, '_csrf-backend': $('meta[name=csrf-token]').attr("content")},
 
-    statusCode: {
-      302: function(e) {
-        alert('保存成功')
-      }
-    },
-
     success: function(msg) {
+      // console.log(msg)
       alert('保存成功')
-      // if(msg.error == 0) {
-      //   //window.location.reload();
-      // } else {
-      //   alert(msg.msg);
-      // }
     }
   })
 }

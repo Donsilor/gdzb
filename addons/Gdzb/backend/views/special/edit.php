@@ -45,14 +45,14 @@ $this->beginPage()
                     <div class="tdk-t clf">
                         <div class="title fl">Title</div>
                         <div class="value fl">
-                            <textarea name="" id="title" maxlength="255" placeholder="限255字符以内"><?= $model->title ?></textarea>
+                            <textarea name="" id="title" maxlength="120" placeholder="限120字符以内"><?= $model->title ?></textarea>
                         </div>
                     </div>
 
                     <div class="tdk-k clf">
                         <div class="title fl">Keywords</div>
                         <div class="value fl">
-                            <textarea name="" id="keyword" maxlength="255" placeholder="限255字符以内"><?= $model->keywords ?></textarea>
+                            <textarea name="" id="keyword" maxlength="120" placeholder="限120字符以内"><?= $model->keywords ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@ $this->beginPage()
                     <div class="tdk-d clf">
                         <div class="title fl">Description</div>
                         <div class="value fl">
-                            <textarea name="" id="description" maxlength="255" placeholder="限255字符以内"><?= $model->description ?></textarea>
+                            <textarea name="" id="description" maxlength="120" placeholder="限120字符以内"><?= $model->description ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -103,13 +103,13 @@ $this->beginPage()
                 <span class="fl switchPc" onclick="togglePc()">pc</span>
               </div>
             </div> -->
+            <div class="go-back"></div>
 
             <div class="middle-layer mobile">
                 <div class="scroll-box" style="position: absolute;top:0;left:0;width:100%;height:100%;overflow:scroll">
                     <div class="scroll">
                         <!-- 文字模板 -->
                         <div class="template-text"></div>
-                        
                     </div>
                 </div>
                 <div class="area"><span onclick="addArea()">+ 增加区域</span></div>
@@ -155,7 +155,6 @@ $this->beginPage()
 
                                     <div class="option-box">
                                         <div class="option">微软雅黑</div>
-                                        <div class="option">黑体</div>
                                     </div>
                                 </div>
                             </div>
@@ -243,13 +242,13 @@ $this->beginPage()
                 <div class="align">
                   <div class="attr clf">
                     <div class="text fl">长</div>
-                    <input type="number" class="ipt img-width fl">
+                    <input type="number" class="ipt img-width fl" onblur="iptBlur(event, 'img-width')">
                     <div class="px fl">px</div>
                   </div>
 
                   <div class="attr clf">
                     <div class="text fl">宽</div>
-                    <input type="number" class="ipt img-height fl">
+                    <input type="number" class="ipt img-height fl" onblur="iptBlur(event, 'img-height')">
                     <div class="px fl">px</div>
                   </div>
 
@@ -270,13 +269,13 @@ $this->beginPage()
                 <div class="align">
                   <div class="attr clf">
                     <div class="text fl">长</div>
-                    <input type="number" class="ipt video-width fl">
+                    <input type="number" class="ipt video-width fl" onblur="iptBlur('video-width')">
                     <div class="px fl">px</div>
                   </div>
 
                   <div class="attr clf">
                     <div class="text fl">宽</div>
-                    <input type="number" class="ipt video-height fl">
+                    <input type="number" class="ipt video-height fl" onblur="iptBlur('video-height')">
                     <div class="px fl">px</div>
                   </div>
 
