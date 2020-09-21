@@ -3,27 +3,16 @@
 namespace addons\Gdzb\services;
 
 use addons\Gdzb\common\models\Goods;
-use addons\Sales\common\models\OrderGoods;
-use addons\Sales\common\models\OrderGoodsAttribute;
-use addons\Style\common\enums\QibanTypeEnum;
+use addons\Gdzb\common\models\Order;
+use addons\Gdzb\common\models\OrderGoods;
+use addons\Sales\common\enums\RefundStatusEnum;
 use addons\Warehouse\common\enums\GoodsStatusEnum;
+use common\enums\ConfirmEnum;
+use common\helpers\StringHelper;
 use Yii;
 use common\components\Service;
-use common\helpers\Url;
-use addons\Sales\common\forms\OrderForm;
-use addons\Sales\common\models\OrderAccount;
-use addons\Sales\common\models\Customer;
-use addons\Sales\common\models\Order;
-use addons\Sales\common\models\OrderAddress;
-use common\enums\AuditStatusEnum;
-use addons\Sales\common\enums\IsStockEnum;
-use addons\Style\common\models\Style;
-use addons\Finance\common\models\OrderPay;
-use common\helpers\SnHelper;
-use addons\Sales\common\enums\PayStatusEnum;
-use common\enums\LogTypeEnum;
-use addons\Sales\common\enums\OrderFromEnum;
-use addons\Sales\common\models\OrderInvoice;
+
+
 
 /**
  * Class SaleChannelService
@@ -45,14 +34,11 @@ class OrderGoodsService extends Service
         }
         $prefix   = '';
         //2.商品材质（产品线）
-        $type_tag = $model->productType->tag ?? '0';
+        $type_tag = StringHelper::getFirstCode($model->productType->name) ?? 0;
         $prefix .= $type_tag;
         //3.产品分类
-        $cate_tag = $model->styleCate->tag ?? '';
-        if(count($cate_tag_list = explode("-", $cate_tag)) < 2 ) {
-            $cate_tag_list = [0,0];
-        }
-        list($cate_m, $cate_w) = $cate_tag_list;
+        $cate_tag = StringHelper::getFirstCode($model->styleCate->name) ?? 0;
+        $prefix .= $cate_tag;
 
         //4.数字部分
         $middle = str_pad($model->id,8,'0',STR_PAD_LEFT);
@@ -83,6 +69,8 @@ class OrderGoodsService extends Service
                     if($goods->save(true,['order_id','goods_status']) === false){
                         throw new \Exception($this->getError($goods));
                     }
+
+
                     break;
                 case 'del':
                     if($goods->goods_status != GoodsStatusEnum::IN_SALE){
@@ -93,12 +81,92 @@ class OrderGoodsService extends Service
                     if($goods->save(true,['order_id','goods_status']) === false){
                         throw new \Exception($this->getError($goods));
                     }
+
                     break;
+
+                case 'delivery':
+                    if($goods->goods_status != GoodsStatusEnum::IN_SALE){
+                        throw new \Exception("货号信息有误，请查明原因");
+                    }
+                    $goods->goods_status = GoodsStatusEnum::HAS_SOLD;
+                    if($goods->save(true,['goods_status']) === false){
+                        throw new \Exception($this->getError($goods));
+                    }
+
             }
 
             return $goods;
         }
         return true;
+
+    }
+
+
+    //退货
+    public function syncRefund($order_id,$ids){
+        $order = Order::find()->where(['id'=>$order_id])->one();
+        $order_goods = OrderGoods::find()->where(['id'=>$ids])->all();
+        $refund_goods = [];
+        $refund_price_sum = 0;
+        $refund_num = count($order_goods);
+        $goods_sns = [];
+        foreach ($order_goods as $model){
+            if($model['is_return'] == ConfirmEnum::YES){
+                throw new \Exception("商品{$model->goods_sn}已经退货");
+            }
+            $goods_sns[] = $model->goods_sn;
+            $refund_goods[] = [
+                'goods_sn' =>$model->goods_sn,
+                'goods_image' =>$model->goods_image,
+                'order_goods_id' =>$model->id,
+                'goods_name' =>$model->goods_name,
+                'cost_price' =>$model->cost_price,
+                'goods_price' =>$model->goods_price,
+                'refund_price' =>$model->goods_price,
+                'warehouse_id' =>$model->warehouse_id,
+                'style_cate_id' =>$model->style_cate_id,
+                'product_type_id' =>$model->product_type_id,
+            ];
+
+            $refund_price_sum += $model->goods_price;
+
+            //更新订单明细信息
+            $model->is_return = ConfirmEnum::YES;
+            $model->refund_price = $model->goods_price;
+            if($model->save(true,['is_return','goods_price']) === false){
+                throw new \Exception($this->getError($model));
+            }
+        }
+
+        $refund = [
+            'order_id' => $order->id,
+            'refund_amount' => $refund_price_sum,
+            'refund_num' => $refund_num,
+            'channel_id' => $order->channel_id,
+            'warehouse_id' => $order->warehouse_id,
+            'customer_id' => $order->customer_id,
+        ];
+
+
+        //更新订单信息
+        $order->refund_amount += $refund_price_sum;
+        $order->refund_num += $refund_num;
+        $order->refund_status = $order->goods_num > $order->refund_num ? RefundStatusEnum::PART_RETURN : RefundStatusEnum::HAS_RETURN;
+        if($order->save(true,['refund_amount','refund_num','refund_status']) === false){
+            throw new \Exception($this->getError($order));
+        }
+
+//        //更新库存商品状态
+//        $res = Goods::updateAll(['goods_status'=>GoodsStatusEnum::IN_REFUND],['goods_sn' => $goods_sns]);
+//        if(!$res){
+//            throw new \Exception('更新商品状态失败');
+//        }
+
+
+        $return = \Yii::$app->gdzbService->orderRefund->createSyncRefund($refund,$refund_goods);
+
+        $return['order_sn'] = $order->order_sn;
+        $return['order_status'] = $order->order_status;
 
     }
 

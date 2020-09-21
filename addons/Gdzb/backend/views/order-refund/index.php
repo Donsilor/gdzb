@@ -6,7 +6,7 @@ use yii\grid\GridView;
 use common\helpers\Html;
 use common\helpers\ImageHelper;
 
-$this->title = '客户列表';
+$this->title = '退货单';
 $this->params['breadcrumbs'][] = ['label' => $this->title];
 
 ?>
@@ -37,30 +37,62 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             'headerOptions' => [],
                         ],
                         [
-                            'attribute' => 'customer_no',
+                            'attribute' => 'refund_sn',
                             'format' => 'raw',
                             'value'=>function($model) {
-                                return $model->customer_no;
+                                return Html::a($model->refund_sn, ['view', 'id' => $model->id,'returnUrl'=>Url::getReturnUrl()], ['style'=>"text-decoration:underline;color:#3c8dbc"]);
+                            },
+                            'headerOptions' => ['style'=> 'width:100px;'],
+                        ],
+                        [
+                            'attribute' => 'order.order_sn',
+                            'format' => 'raw',
+                            'value'=>function($model) {
+                                return $model->order->order_sn ?? '';
                             },
                             'headerOptions' => ['style'=> 'width:100px;'],
                         ],
 
                         [
-                            'attribute' => 'realname',
+                            'attribute' => 'customer.wechat',
+                            'headerOptions' =>  ['style'=> 'width:80px;'],
+                        ],
+                        [
+                            'attribute' => 'refund_status',
                             'format' => 'raw',
-                            'value'=>function($model) {
-                                return Html::a($model->realname, ['view', 'id' => $model->id,'returnUrl'=>Url::getReturnUrl()], ['style'=>"text-decoration:underline;color:#3c8dbc"]);
+                            'headerOptions' => ['class' => 'col-md-1'],
+                            'value' => function ($model){
+                                return \addons\Gdzb\common\enums\RefundStatusEnum::getValue($model->refund_status);
                             },
+                            'filter' => Html::activeDropDownList($searchModel, 'refund_status',\addons\Gdzb\common\enums\RefundStatusEnum::getMap(), [
+                                'prompt' => '全部',
+                                'class' => 'form-control',
+                                'style'=> 'width:80px;',
+                            ]),
+                        ],
+                        [
+                            'attribute' => 'audit_status',
+                            'format' => 'raw',
+                            'headerOptions' => ['class' => 'col-md-1'],
+                            'value' => function ($model){
+                                return \common\enums\AuditStatusEnum::getValue($model->audit_status);
+                            },
+                            'filter' => Html::activeDropDownList($searchModel, 'refund_status',\common\enums\AuditStatusEnum::getMap(), [
+                                'prompt' => '全部',
+                                'class' => 'form-control',
+                                'style'=> 'width:80px;',
+                            ]),
+                        ],
+                        [
+                            'attribute' => 'refund_amount',
                             'filter' => true,
                             'headerOptions' => ['style'=> 'width:80px;'],
                         ],
-
                         [
-                            'attribute' => 'wechat',
-                            'headerOptions' =>  ['style'=> 'width:80px;'],
+                            'attribute' => 'refund_num',
+                            'filter' => true,
+                            'headerOptions' => ['style'=> 'width:80px;'],
                         ],
-
-
                         [
                             'attribute' => 'channel_id',
                             'format' => 'raw',
@@ -74,39 +106,14 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                             ]),
                             'headerOptions' => ['class' => 'col-md-1'],
                         ],
+
                         [
-                            'attribute' => 'source_id',
+                            'attribute' => 'warehouse_id',
                             'format' => 'raw',
                             'value' => function ($model){
-                                return $model->source->name ?? '';
+                                return $model->warehouse->name ?? '';
                             },
-                            'filter' => Html::activeDropDownList($searchModel, 'source_id',\Yii::$app->salesService->sources->getDropDown(), [
-                                'prompt' => '全部',
-                                'class' => 'form-control',
-                                'style'=> 'width:100px;',
-                            ]),
-                            'headerOptions' => ['class' => 'col-md-1'],
-                        ],
-                        [
-                            'attribute' => 'order_num',
-                            'headerOptions' =>  ['style'=> 'width:80px;'],
-                        ],
-                        [
-                            'attribute' => 'order_amount',
-                            'headerOptions' =>  ['style'=> 'width:80px;'],
-                        ],
-                        [
-                            'attribute' => 'remark',
-                            'headerOptions' =>  ['class' => 'col-md-2'],
-                            'filter' => false,
-                        ],
-                        [
-                            'attribute' => 'follower_id',
-                            'format' => 'raw',
-                            'value' => function ($model){
-                                return $model->follower->username ?? '';
-                            },
-                            'filter' => Html::activeDropDownList($searchModel, 'follower_id',Yii::$app->services->backendMember->getDropDown(), [
+                            'filter' => Html::activeDropDownList($searchModel, 'warehouse_id',\Yii::$app->warehouseService->warehouse->getDropDown(), [
                                 'prompt' => '全部',
                                 'class' => 'form-control',
                                 'style'=> 'width:100px;',
@@ -137,36 +144,32 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                                 return Yii::$app->formatter->asDate($model->created_at);
                             }
                         ],
-                        [
-                            'attribute' => 'status',
-                            'format' => 'raw',
-                            'headerOptions' => ['class' => 'col-md-1'],
-                            'value' => function ($model){
-                                return \common\enums\StatusEnum::getValue($model->status);
-                            },
-                            'filter' => Html::activeDropDownList($searchModel, 'status',\common\enums\StatusEnum::getMap(), [
-                                'prompt' => '全部',
-                                'class' => 'form-control',
-                                'style'=> 'width:80px;',
-                            ]),
-                        ],
+
                         [
                             'header' => "操作",
                             'class' => 'yii\grid\ActionColumn',
                             'contentOptions' => ['style' => ['white-space' => 'nowrap']],
-                            'template' => '{edit} {view} {status}',
+                            'template' => ' {view} {apply} {ajax-audit}',
                             'buttons' => [
-                                'edit' => function ($url, $model, $key) {
-                                    return Html::edit(['edit', 'id' => $model->id]);
+                                'apply' => function($url, $model, $key){
+                                    if($model->audit_status == \common\enums\AuditStatusEnum::SAVE){
+                                        return Html::edit(['ajax-apply','id'=>$model->id], '提审', [
+                                            'class'=>'btn btn-success btn-sm',
+                                            'onclick' => 'rfTwiceAffirm(this,"提交审核", "确定提交吗？");return false;',
+                                        ]);
+                                    }
+                                },
+                                'ajax-audit' => function($url, $model, $key){
+                                    if($model->audit_status == \common\enums\AuditStatusEnum::PENDING ){
+                                        return Html::edit(['ajax-audit','id'=>$model->id], '审核', [
+                                            'class'=>'btn btn-success btn-sm',
+                                            'data-toggle' => 'modal',
+                                            'data-target' => '#ajaxModal',
+                                        ]);
+                                    }
                                 },
                                 'view' => function ($url, $model, $key) {
                                     return Html::a('查看', ['view', 'id' => $model->id,'returnUrl'=>Url::getReturnUrl()], ['class' => 'btn btn-warning btn-sm']);
-                                },
-                                'status' => function ($url, $model, $key) {
-                                    return Html::status($model->status);
-                                },
-                                'destroy' => function ($url, $model, $key) {
-                                    return Html::delete(['destroy', 'id' => $model->id]);
                                 },
                             ],
                         ],

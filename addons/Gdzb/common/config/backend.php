@@ -31,7 +31,15 @@ return [
                             [
                                     'title' => '订单列表',
                                     'route' => 'order/index',
-                            ],                             
+                            ],
+                            [
+                                'title' => '商品管理',
+                                'route' => 'goods/index',
+                            ],
+                            [
+                                'title' => '退货管理',
+                                'route' => 'order-refund/index',
+                            ],
                     ],
                     
             ],

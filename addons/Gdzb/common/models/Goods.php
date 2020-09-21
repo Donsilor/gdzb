@@ -5,6 +5,7 @@ namespace addons\Gdzb\common\models;
 use addons\Style\common\models\ProductType;
 use addons\Style\common\models\StyleCate;
 use addons\Warehouse\common\models\Warehouse;
+use common\models\backend\Member;
 use Yii;
 
 /**
@@ -42,8 +43,8 @@ class Goods extends BaseModel
     public function rules()
     {
         return [
-            [['order_id', 'goods_status', 'warehouse_id', 'style_cate_id', 'product_type_id', 'created_at', 'updated_at'], 'integer'],
-            [['cost_price', 'goods_price','refund_price'], 'number'],
+            [['order_id', 'goods_status', 'warehouse_id', 'style_cate_id','creator_id', 'product_type_id', 'created_at', 'updated_at'], 'integer'],
+            [['cost_price', 'goods_price'], 'number'],
             [['goods_sn', 'goods_size'], 'string', 'max' => 60],
             [['goods_name'], 'string', 'max' => 150],
             [['goods_image'], 'parseGoodsImage'],
@@ -67,9 +68,9 @@ class Goods extends BaseModel
             'cost_price' => '成本价',
             'warehouse_id' => '所属仓库',
             'goods_price' => '实际销售价',
-            'refund_price' => '退款金额',
             'style_cate_id' => '商品分类',
             'product_type_id' => '产品线',
+            'creator_id' => '创建人',
             'remark' => '备注',
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
@@ -102,17 +103,17 @@ class Goods extends BaseModel
      * 关联产品线分类一对一
      * @return \yii\db\ActiveQuery
      */
-    public function getProductType()
+    public function getType()
     {
-        return $this->hasOne(ProductType::class, ['id'=>'product_type_id'])->alias("productType");
+        return $this->hasOne(ProductType::class, ['id'=>'product_type_id'])->alias("type");
     }
     /**
      * 关联款式分类一对一
      * @return \yii\db\ActiveQuery
      */
-    public function getStyleCate()
+    public function getCate()
     {
-        return $this->hasOne(StyleCate::class, ['id'=>'style_cate_id'])->alias("styleCate");
+        return $this->hasOne(StyleCate::class, ['id'=>'style_cate_id'])->alias("cate");
     }
 
     /**
@@ -122,5 +123,15 @@ class Goods extends BaseModel
     public function getWarehouse()
     {
         return $this->hasOne(Warehouse::class, ['id'=>'warehouse_id'])->alias("warehouse");
+    }
+
+
+    /**
+     * 创建人
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreator()
+    {
+        return $this->hasOne(Member::class, ['id'=>'creator_id'])->alias('creator');
     }
 }

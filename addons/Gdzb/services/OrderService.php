@@ -7,6 +7,7 @@ use addons\Gdzb\common\models\Goods;
 use addons\Gdzb\common\models\Order;
 use addons\Gdzb\common\models\OrderGoods;
 use addons\Warehouse\common\enums\GoodsStatusEnum;
+use common\enums\ConfirmEnum;
 use Yii;
 use common\components\Service;
 use common\helpers\Url;
@@ -109,7 +110,7 @@ class OrderService extends Service
     public function createSyncCustomer($model){
         $customer_weixin = $model->customer_weixin ?? '';
         if(!$customer_weixin) return;
-        $customer = Customer::find()->where(['customer_weixin'])->one();
+        $customer = Customer::find()->where(['wechat' => $customer_weixin])->one();
         if(!$customer){
             $consignee_info = json_decode($model->consignee_info,true);
             $customer = new Customer();
@@ -118,7 +119,7 @@ class OrderService extends Service
                 'mobile' => $model->customer_mobile ?? '',
                 'wechat' => $model->customer_weixin ?? '',
                 'channel_id' => $model->channel_id ?? 4,
-                'source_id' => $model->channel_id ?? 4,
+                'source_id' => '',
                 'follower_id' => $model->follower_id ?? '',
                 'order_num' => 0,
                 'order_amount' => 0,
@@ -131,6 +132,7 @@ class OrderService extends Service
         }
         $customer->order_num += 1;
         $customer->order_amount += $model->order_amount;
+
         if(false === $customer->save()){
             throw new \Exception($this->getError($customer));
         }
@@ -163,7 +165,9 @@ class OrderService extends Service
             if(false === $goods->save()){
                 throw new \Exception($this->getError($goods));
             }
+
         }
+
         return $orderGoods;
     }
 
@@ -202,12 +206,21 @@ class OrderService extends Service
     public function orderSummary($order_id)
     {
         $sum = OrderGoods::find()
-            ->select(['sum(1) as total_num','sum(goods_price) as order_amount'])
-            ->where(['order_id'=>$order_id])
+            ->select(['sum(1) as total_num','sum(goods_price) as order_amount', 'sum(cost_price) as cost_price'])
+            ->where(['order_id'=>$order_id,'is_return' => ConfirmEnum::NO])
             ->asArray()->one();
         if($sum) {
-            Order::updateAll(['goods_num'=>$sum['total_num'], 'order_amount'=>$sum['order_amount']],['id'=>$order_id]);
+            Order::updateAll(['goods_num'=>$sum['total_num'], 'order_amount'=>$sum['order_amount'], 'cost_price'=>$sum['cost_price']],['id'=>$order_id]);
         }
     }
 
+
+    public function getOrderAmountNum($where){
+        $sum = Order::find()
+            ->select(['sum(1) as trade_num','sum(order_amount) as total_order_amount','sum(goods_num) as total_goods_num',
+                'sum(refund_amount) as total_refund_amount','sum(refund_num) as total_refund_num'])
+            ->where($where)
+            ->asArray()->one();
+        return $sum;
+    }
 }

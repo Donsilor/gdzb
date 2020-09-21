@@ -125,9 +125,9 @@ class Customer extends BaseModel
      * 销售渠道 一对一
      * @return \yii\db\ActiveQuery
      */
-    public function getChannel()
+    public function getSaleChannel()
     {
-        return $this->hasOne(SaleChannel::class, ['id'=>'channel_id'])->alias('channel');
+        return $this->hasOne(SaleChannel::class, ['id'=>'channel_id'])->alias('saleChannel');
     }
 
     /**

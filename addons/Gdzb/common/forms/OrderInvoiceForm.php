@@ -14,7 +14,7 @@ use addons\Gdzb\common\models\Order;
 /**
  * 订单 Form
  */
-class InvoiceForm extends Order
+class OrderInvoiceForm extends Order
 {
 
     public $invoice_type;

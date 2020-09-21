@@ -6,7 +6,7 @@ use common\helpers\Url;
 $form = ActiveForm::begin([
         'id' => $model->formName(),
         'enableAjaxValidation' => true,
-        'validationUrl' => Url::to(['stock','id' => $model['id']]),
+        'validationUrl' => Url::to(['ajax-audit','id' => $model['id']]),
         'fieldConfig' => [
                 //'template' => "<div class='col-sm-2 text-right'>{label}</div><div class='col-sm-10'>{input}\n{hint}\n{error}</div>",
         ]
@@ -15,12 +15,13 @@ $form = ActiveForm::begin([
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span></button>
-        <h4 class="modal-title">绑定现货</h4>
+        <h4 class="modal-title">基本信息</h4>
     </div>
 
     <div class="modal-body">
         <div class="tab-content">
-            <?= $form->field($model, 'goods_id')->textInput(); ?>
+            <?= $form->field($model, 'audit_status')->radioList(\common\enums\AuditStatusEnum::getAuditMap()); ?>
+            <?= $form->field($model, 'audit_remark')->textArea(); ?>
             <!-- /.tab-pane -->
         </div>
         <!-- /.tab-content -->

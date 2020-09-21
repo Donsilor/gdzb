@@ -75,8 +75,12 @@ class Order extends BaseModel
     public function rules()
     {
         return [
-            [['merchant_id', 'channel_id', 'goods_num', 'refund_num','pay_type', 'pay_status', 'pay_time', 'finished_time', 'order_time', 'order_status', 'refund_status', 'express_id', 'delivery_status', 'delivery_time', 'follower_id', 'followed_time', 'followed_status', 'audit_status', 'audit_time', 'auditor_id', 'customer_id', 'supplier_id', 'warehouse_id', 'is_invoice', 'creator_id', 'created_at', 'updated_at','collect_type','order_from'], 'integer'],
-            [['order_amount', 'refund_amount'], 'number'],
+            [['merchant_id', 'channel_id', 'goods_num', 'refund_num','pay_type', 'pay_status', 'pay_time', 'finished_time',
+                'order_time', 'order_status', 'refund_status', 'express_id', 'delivery_status',
+                'follower_id', 'followed_time', 'followed_status', 'audit_status', 'audit_time', 'auditor_id',
+                'customer_id', 'supplier_id', 'warehouse_id', 'is_invoice', 'creator_id', 'created_at', 'updated_at',
+                'collect_type','order_from'], 'integer'],
+            [['order_amount', 'refund_amount','cost_price'], 'number'],
             [['language'], 'string', 'max' => 5],
             [['currency'], 'string', 'max' => 3],
             [['order_sn'], 'string', 'max' => 20],
@@ -89,6 +93,7 @@ class Order extends BaseModel
             [['customer_message'], 'string', 'max' => 500],
             [['consignee_info', 'invoice_info'], 'string', 'max' => 1000],
             [['order_sn'], 'unique'],
+            [['delivery_time'], 'safe'],
         ];
     }
 
@@ -105,6 +110,7 @@ class Order extends BaseModel
             'order_sn' => '订单编号',
             'order_amount' => '订单金额',
             'refund_amount' => '退款金额',
+            'cost_price' => '成本价',
             'channel_id' => '销售渠道',
             'goods_num' => '商品数量',
             'refund_num' => '退款数量',
@@ -250,6 +256,14 @@ class Order extends BaseModel
         return $this->hasOne(Member::class, ['id'=>'creator_id'])->alias('creator');
     }
 
+    /**
+     * 审核人
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAuditor()
+    {
+        return $this->hasOne(Member::class, ['id'=>'auditor_id'])->alias('auditor');
+    }
 
     /**
      * 对应供应商

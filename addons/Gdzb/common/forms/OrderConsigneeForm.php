@@ -14,7 +14,7 @@ use addons\Gdzb\common\models\Order;
 /**
  * 订单 Form
  */
-class ConsigneeForm extends Order
+class OrderConsigneeForm extends Order
 {
 
     public $country_id;

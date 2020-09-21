@@ -22,8 +22,8 @@ class OrderStatusEnum extends \common\enums\BaseEnum
                self::SAVE => "已保存",
                self::PENDING => "待审核",
                self::CONFORMED => "已审核", 
-               self::CANCAEL => "已关闭", 
-               self::CLOSE => "已取消", 
+               self::CLOSE => "已关闭",
+               self::CANCAEL => "已取消",
         ];
     }
     

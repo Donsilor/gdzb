@@ -98,28 +98,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'headerOptions' => [],
             ],
+
             [
-                    'attribute' => 'customer_name',
-                    'value' => 'customer_name',                    
-                    'filter' => Html::activeTextInput($searchModel, 'customer_name', [
-                            'class' => 'form-control',
-                            'style'=> 'width:100px;'
-                    ]),
-                    'format' => 'raw',
-                    'headerOptions' => ['width'=>'100'],
-            ],
-            [
-                    'label' => '联系方式',
-                    'attribute' => 'customer_mobile',
-                    'value' => function($model){
-                          $str = '';
-                          $str .= $model->customer_mobile ? $model->customer_mobile."<br/>":'';
-                          $str .= $model->customer_weixin ? $model->customer_weixin."<br/>":'';
-                          return $str;
-                    },
-                    'filter' => false,
-                    'format' => 'raw',
-                    'headerOptions' => ['width'=>'80'],
+                'label' => '客户信息',
+                'attribute' => 'customer_mobile',
+                'value' => function($model){
+                    $str = '';
+                    $str .= $model->customer_name ? $model->customer_name."<br/>":'';
+                    $str .= $model->customer_mobile ? $model->customer_mobile."<br/>":'';
+                    $str .= $model->customer_weixin ? $model->customer_weixin."<br/>":'';
+                    return $str;
+                },
+                'filter' => false,
+                'format' => 'raw',
+                'headerOptions' => ['width'=>'80'],
             ],
 /*                
             [
@@ -132,7 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                     'attribute' => 'order_amount',
                     'value' => function($model){
-                         return \common\helpers\AmountHelper::outputAmount($model->order_amount??0,2,$model->currency);
+                         return $model->order_amount??0;
                     },
                     'filter' => false,
                     'format' => 'raw',
@@ -141,7 +133,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                     'attribute' => 'refund_amount',
                     'value' => function($model){
-                        return \common\helpers\AmountHelper::outputAmount($model->refund_amount??0,2,$model->currency);
+                        return $model->refund_amount??0;
                     },
                     'filter' => false,
                     'format' => 'raw',
@@ -175,7 +167,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]),
                     'format' => 'raw',
                     'headerOptions' => ['width'=>'100'],
-            ],  
+            ],
             [
                     'attribute' => 'order_status',
                     'value' => function ($model){
@@ -275,10 +267,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     },                    
                     'close' => function($url, $model, $key){
-                       
-                            return Html::delete(['delete', 'id' => $model->id],'关闭',[
+                        if($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
+                            return Html::delete(['delete', 'id' => $model->id], '关闭', [
                                 'onclick' => 'rfTwiceAffirm(this,"关闭单据", "确定关闭吗？");return false;',
                             ]);
+                        }
 
                     },                    
                 ]

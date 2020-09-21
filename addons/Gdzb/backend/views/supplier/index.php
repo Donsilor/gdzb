@@ -102,9 +102,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'attribute' => 'source_id',
                             'value' => function ($model){
-                                return \addons\Gdzb\common\enums\SourceEnum::getValue($model->source_id);
+                                return \addons\Gdzb\common\enums\SupplierSourceEnum::getValue($model->source_id);
                             },
-                            'filter' => Html::activeDropDownList($searchModel, 'source_id',\addons\Gdzb\common\enums\SourceEnum::getMap(), [
+                            'filter' => Html::activeDropDownList($searchModel, 'source_id',\addons\Gdzb\common\enums\SupplierSourceEnum::getMap(), [
                                 'prompt' => '全部',
                                 'class' => 'form-control',
                                 'style'=> 'width:120px;'
@@ -226,7 +226,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             'template' => '{edit} {apply} {audit} {status} {delete}',
                             'buttons' => [
                             'edit' => function($url, $model, $key){
-                                return Html::edit(['edit', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()]);
+                                if($model->audit_status == AuditStatusEnum::SAVE) {
+                                    return Html::edit(['edit', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()]);
+                                }
                              },
                             'apply' => function($url, $model, $key){
                                 if($model->audit_status == AuditStatusEnum::SAVE){

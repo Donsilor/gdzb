@@ -2,11 +2,14 @@
 
 namespace addons\Gdzb\backend\controllers;
 
-use addons\Gdzb\common\forms\ConsigneeForm;
-use addons\Gdzb\common\forms\InvoiceForm;
+use addons\Gdzb\common\forms\OrderConsigneeForm;
+use addons\Gdzb\common\forms\OrderDeliveryForm;
+use addons\Gdzb\common\forms\OrderInvoiceForm;
+use addons\Sales\common\enums\DeliveryStatusEnum;
 use addons\Sales\common\enums\IsReturnEnum;
 use addons\Sales\common\enums\OrderStatusEnum;
 
+use addons\Sales\common\enums\PayStatusEnum;
 use addons\Sales\common\enums\ReturnTypeEnum;
 use addons\Gdzb\common\forms\OrderForm;
 use addons\Gdzb\common\forms\OrderGoodsForm;
@@ -23,7 +26,6 @@ use addons\Gdzb\common\models\OrderGoods;
 use common\helpers\ResultHelper;
 use addons\Sales\common\models\Customer;
 use common\enums\LogTypeEnum;
-use common\helpers\Auth;
 
 /**
  * Default controller for the `order` module
@@ -37,14 +39,6 @@ class OrderController extends BaseController
      */
     public $modelClass = OrderForm::class;
 
-    public function actionTest()
-    {   
-        $res = Auth::verify('special:1001');
-        var_dump($res);exit;
-        $order_no = '130311942049';
-        Yii::$app->jdSdk->getOrderInfo($order_no);
-        exit;
-    }    
     /**
      * Renders the index view for the module
      * @return string
@@ -72,14 +66,6 @@ class OrderController extends BaseController
         if($order_status != -1) {
             $dataProvider->query->andWhere(['=', 'order_status', $order_status]);
         }
-        // 联系人搜索
-        if(!empty($searchParams['customer_mobile'])) {
-            $where = [ 'or',
-                    ['like', Order::tableName().'.customer_mobile', $searchParams['customer_mobile']],
-
-            ];            
-            $dataProvider->query->andWhere($where);
-        }        
         //创建时间过滤
         if (!empty($searchParams['order_time'])) {
             list($start_date, $end_date) = explode('/', $searchParams['order_time']);
@@ -203,24 +189,21 @@ class OrderController extends BaseController
      * @throws Exception
      * @return array|mixed
      */
-    public function actionDelete()
+    public function actionDelete($id)
     {
-        $ids = Yii::$app->request->post("ids", []);
-        if(empty($ids) || !is_array($ids)) {
-            return ResultHelper::json(422, '提交数据异常');
-        } 
-        
-        try {
-            $trans = Yii::$app->db->beginTransaction();                      
-            foreach ($ids as $id) {
-                
-            }
-            $trans->commit();
-            return ResultHelper::json(200, '操作成功');   
-        } catch (\Exception $e) {
-            $trans->rollBack();
-            return ResultHelper::json(422, '取消失败！'.$e->getMessage());
-        }        
+        if (!($model = $this->modelClass::findOne($id))) {
+            return $this->message("找不到数据", $this->redirect(['index']), 'error');
+        }
+        $model->order_status = OrderStatusEnum::CLOSE;
+        $orderGoods = OrderGoods::find()->where(['order_id'=>$id])->all();
+        foreach ($orderGoods as $good){
+            //如果货号已在库存，则还原
+            Yii::$app->gdzbService->orderGoods->syncGoods($good,'del');
+        }
+        if ($model->save(true,['order_status'])) {
+            return $this->message("删除成功", $this->redirect(['index']));
+        }
+        return $this->message("删除失败", $this->redirect(['index']), 'error');
               
     }
 
@@ -291,6 +274,10 @@ class OrderController extends BaseController
                 $model->audit_time = time();
                 if($model->audit_status == AuditStatusEnum::PASS){
                     $model->order_status = OrderStatusEnum::CONFORMED;
+
+                    $model->pay_time = time();
+                    $model->pay_status = PayStatusEnum::HAS_PAY;
+                    $model->delivery_status = DeliveryStatusEnum::TO_SEND;
                 }else{
                     $model->order_status = OrderStatusEnum::SAVE;
                 }
@@ -298,12 +285,12 @@ class OrderController extends BaseController
                     return $this->message($this->getError($model), $this->redirect(\Yii::$app->request->referrer), 'error');
                 }
 
+
+
                 //同步客户
                 Yii::$app->gdzbService->order->createSyncCustomer($model);
-
                 //同步商品
                 Yii::$app->gdzbService->order->createSyncGoods($id);
-
 
 
                 $log_msg = "订单审核：".AuditStatusEnum::getValue($model->audit_status)."，审核备注：".$model->audit_remark;
@@ -333,6 +320,59 @@ class OrderController extends BaseController
     }
 
 
+    /**
+     * 订单发货
+     * @return array
+     * @throws \yii\db\Exception
+     */
+    public function actionAjaxDelivery()
+    {
+        $id = Yii::$app->request->get('id');
+        $this->modelClass = OrderDeliveryForm::class;
+        $model = $this->findModel($id);
+        $model = $model ?? new OrderDeliveryForm();
+        // ajax 校验
+        $this->activeFormValidate($model);
+        if ($model->load(Yii::$app->request->post())) {
+            try{
+                $trans = Yii::$app->trans->beginTransaction();
+                $model->delivery_status = DeliveryStatusEnum::HAS_SEND;
+                if(false === $model->save()){
+                    return $this->message($this->getError($model), $this->redirect(\Yii::$app->request->referrer), 'error');
+                }
+                //同步商品信息
+                $orderGoods = OrderGoods::find()->where(['order_id' => $id])->all();
+                foreach ($orderGoods as $good){
+                    //如果货号已在库存，则还原
+                    Yii::$app->gdzbService->orderGoods->syncGoods($good,'delivery');
+                }
+                $log_msg = "订单发货：".DeliveryStatusEnum::getValue($model->delivery_status)."，发货单号：".$model->express_no;
+
+                //订单日志
+                $log = [
+                    'order_id' => $model->id,
+                    'order_sn' => $model->order_sn,
+                    'order_status' => $model->order_status,
+                    'log_type' => LogTypeEnum::ARTIFICIAL,
+                    'log_time' => time(),
+                    'log_module' => '订单审核',
+                    'log_msg' => $log_msg,
+                ];
+                \Yii::$app->gdzbService->orderLog->createOrderLog($log);
+                $trans->commit();
+            }catch (\Exception $e){
+                $trans->rollBack();
+                return $this->message("发货失败:". $e->getMessage(),  $this->redirect(Yii::$app->request->referrer), 'error');
+            }
+            return $this->message("发货成功", $this->redirect(Yii::$app->request->referrer), 'success');
+        }
+        $model->audit_status = AuditStatusEnum::PASS;
+        return $this->renderAjax($this->action->id, [
+            'model' => $model,
+        ]);
+    }
+
+
 
     /**
      * 修改收货地址
@@ -341,7 +381,7 @@ class OrderController extends BaseController
     public function actionAjaxEditAddress()
     {
         $id = Yii::$app->request->get('id');
-        $this->modelClass = ConsigneeForm::class;
+        $this->modelClass = OrderConsigneeForm::class;
         $model = $this->findModel($id);
         // ajax 校验
         $this->activeFormValidate($model);
@@ -375,7 +415,7 @@ class OrderController extends BaseController
     public function actionAjaxEditInvoice()
     {
         $id = Yii::$app->request->get('id');
-        $this->modelClass = InvoiceForm::class;
+        $this->modelClass = OrderInvoiceForm::class;
         $model = $this->findModel($id);
         // ajax 校验
         $this->activeFormValidate($model);

@@ -4,9 +4,7 @@ namespace addons\Gdzb\backend\controllers;
 use addons\Sales\common\enums\OrderStatusEnum;
 use addons\Gdzb\common\forms\OrderGoodsForm;
 use addons\Gdzb\common\models\Order;
-use addons\Gdzb\common\models\OrderGoods;
-use addons\Style\common\enums\QibanTypeEnum;
-use common\enums\ConfirmEnum;
+use common\enums\LogTypeEnum;
 use common\helpers\ResultHelper;
 use common\helpers\StringHelper;
 use common\traits\Curd;
@@ -25,7 +23,7 @@ class OrderGoodsController extends BaseController
      * @var PurchaseGoodsForm $model
      * @return mixed
      */
-    public function actionAjaxEdit()
+    public function actionEdit()
     {
         $this->layout = '@backend/views/layouts/iframe';
         $id = Yii::$app->request->get('id');
@@ -36,7 +34,6 @@ class OrderGoodsController extends BaseController
         $order = Order::find()->where(['id'=>$order_id])->one();
 
         // ajax 校验
-        $this->activeFormValidate($model);
         if ($model->load(Yii::$app->request->post())) {
             if(!$model->validate()) {
                 return ResultHelper::json(422, $this->getError($model));
@@ -57,14 +54,15 @@ class OrderGoodsController extends BaseController
                 //更新采购汇总：总金额和总数量
                 Yii::$app->gdzbService->order->orderSummary($model->order_id);
                 $trans->commit();
-                $this->redirect(Yii::$app->request->referrer);
+                Yii::$app->getSession()->setFlash('success','保存成功');
+                return ResultHelper::json(200, '保存成功');
             }catch (\Exception $e){
                 $trans->rollBack();
-                $this->message($this->getError($model), $this->redirect(Yii::$app->request->referrer), 'error');
+                return ResultHelper::json(422, $e->getMessage());
             }
         }
 
-        return $this->renderAjax($this->action->id, [
+        return $this->render($this->action->id, [
             'model' => $model,
         ]);
     }
@@ -116,67 +114,33 @@ class OrderGoodsController extends BaseController
 
     /**
      * @return mixed
-     * 布产
+     * 生成退货单
      */
-    public function actionBuchan(){
+    public function actionRefund(){
+        $order_id = \Yii::$app->request->get('order_id');
         $ids = \Yii::$app->request->get('ids');
         if(!is_object($ids)) {
             $ids = StringHelper::explodeIds($ids);
         }
         try{
             $trans = Yii::$app->db->beginTransaction();
-            $order_goods = OrderGoods::find()->where(['id'=>$ids])->all();
-            foreach ($order_goods as $model){
-                if($model['is_stock'] == IsStockEnum::YES){
-                    return $this->message("商品{$model->id}为现货，不能布产", $this->redirect(\Yii::$app->request->referrer), 'warning');
-                }
-                if($model['is_bc'] == ConfirmEnum::YES){
-                    return $this->message("商品{$model->id}为已经布产", $this->redirect(\Yii::$app->request->referrer), 'warning');
-                }
+            //同步生成退货单
 
-                if($model->qiban_type == QibanTypeEnum::NON_VERSION ){
-                    //非起版
-                    $is_exeist = Yii::$app->styleService->style->isExist($model->style_sn);
-                    if(!$is_exeist){
-                        return $this->message("款式库没有此款号{$model->style_sn},请确认", $this->redirect(\Yii::$app->request->referrer), 'warning');
-                    }
-                }else{
-                    //起版
-                    $is_exeist = Yii::$app->styleService->qiban->isExist($model->qiban_sn);
-                    if(!$is_exeist){
-                        return $this->message("起版库没有此起版号{$model->qiban_sn},请确认", $this->redirect(\Yii::$app->request->referrer), 'warning');
-                    }
-                }
+            $return = Yii::$app->gdzbService->orderGoods->syncRefund($order_id,$ids);
 
+            $log_msg = "订单退货,退货单号：".$return['refund_sn'].";退货商品（".join(',',$ids)."）;";
 
-                $goods = [
-                    'goods_name' =>$model->goods_name,
-                    'goods_num' =>$model->goods_num,
-                    'order_detail_id'=>$model->order_id,
-                    'order_detail_id' => $model->id,
-                    'order_sn'=>$model->order->order_sn,
-                    'from_type' => FromTypeEnum::ORDER,
-                    'style_sn' => $model->style_sn,
-                    'bc_status' => BuChanEnum::INITIALIZATION,
-                    'qiban_sn' => $model->qiban_sn,
-                    'qiban_type'=>$model->qiban_type,
-                    'jintuo_type'=>$model->jintuo_type,
-                    'style_sex' =>$model->style_sex,
-                    'is_inlay' =>$model->is_inlay,
-                    'product_type_id'=>$model->product_type_id,
-                    'style_cate_id'=>$model->style_cate_id,
-                ];
-                $goods_attrs = OrderGoodsAttribute::find()->where(['id'=>$model->id])->asArray()->all();
-                $produce = Yii::$app->supplyService->produce->createProduce($goods ,$goods_attrs);
-                if($produce) {
-                    $model->bc_status = BuChanEnum::INITIALIZATION;
-                    $model->is_bc = ConfirmEnum::YES;
-                    $model->produce_sn = $produce->produce_sn;
-                }
-                if(false === $model->save()) {
-                    throw new \Exception($this->getError($model),422);
-                }
-            }
+            //订单日志
+            $log = [
+                'order_id' => $order_id,
+                'order_sn' => $return['order_sn'],
+                'order_status' => $return['order_status'],
+                'log_type' => LogTypeEnum::ARTIFICIAL,
+                'log_time' => time(),
+                'log_module' => '订单审核',
+                'log_msg' => $log_msg,
+            ];
+            \Yii::$app->gdzbService->orderLog->createOrderLog($log);
             $trans->commit();
             return $this->message('操作成功', $this->redirect(\Yii::$app->request->referrer), 'success');
         }catch (\Exception $e){

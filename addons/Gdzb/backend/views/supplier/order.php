@@ -6,11 +6,11 @@ use yii\grid\GridView;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-$this->title = '客户详情';
+$this->title = '订单列表';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="box-body nav-tabs-custom">
-    <h2 class="page-header"><?= $this->title ?></h2>
+    <h2 class="page-header"><?= $this->title ?> - <?= $model->supplier_code?> - <?= \common\enums\AuditStatusEnum::getValue($model->audit_status)?></h2>
     <?php echo Html::menuTab($tabList,$tab)?>
     <div class="row">
         <div class="col-sm-12">

@@ -13,7 +13,6 @@ use Yii;
  * @property int $id
  * @property int $order_id
  * @property string $goods_sn 商品编号
- * @property int $goods_status 货品状态
  * @property string $goods_size 尺寸(mm)
  * @property string $goods_image 商品图片
  * @property string $goods_name
@@ -42,7 +41,7 @@ class OrderGoods extends BaseModel
     public function rules()
     {
         return [
-            [['order_id', 'goods_status', 'warehouse_id', 'style_cate_id', 'product_type_id', 'created_at', 'updated_at'], 'integer'],
+            [['order_id', 'warehouse_id', 'style_cate_id', 'creator_id','product_type_id', 'created_at', 'updated_at', 'is_return'], 'integer'],
             [['cost_price', 'goods_price','refund_price'], 'number'],
             [['goods_sn', 'goods_size'], 'string', 'max' => 60],
             [['goods_name'], 'string', 'max' => 150],
@@ -59,7 +58,6 @@ class OrderGoods extends BaseModel
             'id' => 'ID',
             'order_id' => 'Order ID',
             'goods_sn' => '商品编号',
-            'goods_status' => '货品状态',
             'goods_size' => '尺寸(mm)',
             'goods_image' => '商品图片',
             'goods_name' => '商品名称',
@@ -67,13 +65,32 @@ class OrderGoods extends BaseModel
             'warehouse_id' => '所属仓库',
             'goods_price' => '实际销售价',
             'refund_price' => '退款金额',
+            'is_return' => '是否退货',
             'style_cate_id' => '商品分类',
             'product_type_id' => '产品线',
             'remark' => '备注',
+            'creator_id' => '创建人',
             'created_at' => '创建时间',
             'updated_at' => '更新时间',
         ];
     }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     */
+    public function beforeSave($insert)
+    {
+        if ($this->isNewRecord) {
+            if(isset(Yii::$app->user)) {
+                $this->creator_id = Yii::$app->user->identity->getId();
+            }else{
+                $this->creator_id = 0;
+            }
+        }
+        return parent::beforeSave($insert);
+    }
+
 
     /**
      * 款式图库

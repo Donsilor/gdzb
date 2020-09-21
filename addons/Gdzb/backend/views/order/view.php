@@ -139,29 +139,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     }
                     ?>
-                    <?php
-                    if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::CONFORMED && empty($model->apply_id)) {
-                        echo Html::edit(['ajax-purchase-apply', 'id' => $model->id], '申请采购', [
-                            'class' => 'btn btn-success btn-ms',
-                            'onclick' => 'rfTwiceAffirm(this,"申请采购", "确定申请采购吗？");return false;',
-                        ]);
-                    }
-                    ?>
-                    <?php
-                    if ($model->pay_status == \addons\Sales\common\enums\PayStatusEnum::HAS_PAY
-                        && !in_array($model->refund_status, [\addons\Sales\common\enums\RefundStatusEnum::HAS_RETURN])) {
-                        echo Html::edit(['return', 'id' => $model->id], '退款', [
-                            //'data-toggle' => 'modal',
-                            'class' => 'btn btn-warning btn-ms openIframe',
-                            //'data-target' => '#ajaxModalLg',
-                            'data-width' => '90%', 'data-height' => '90%', 'data-offset' => '20px'
-                        ]);
-                    }
-                    ?>
+
 
                     <?php
                     if ($model->delivery_status == \addons\Sales\common\enums\DeliveryStatusEnum::TO_SEND) {
-                        echo Html::a('发货', ['shipping/view', 'id' => $model->id, 'returnUrl' => Url::getReturnUrl()], ['class' => 'btn btn-primary btn-ms']);
+                        echo Html::edit(['ajax-delivery', 'id' => $model->id], '发货', [
+                            'class' => 'btn btn-primary btn-ms',
+                            'data-toggle' => 'modal',
+                            'data-target' => '#ajaxModal',
+                        ]);
                     }
                     ?>
                 </div>
@@ -175,19 +161,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     <h3 class="box-title"><i class="fa fa-info"></i> 商品明细</h3>
                     <?php
                     if ($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::SAVE) {
-                        echo Html::create(['order-goods/ajax-edit','order_id'=>$model->id], '添加', [
-                            'data-toggle' => 'modal',
-                            'data-target' => '#ajaxModal',
+                        echo Html::create(['order-goods/edit','order_id'=>$model->id], '添加',  [
+                            'class' => 'btn btn-primary btn-xs openIframe',
+                            'data-width' => '80%',
+                            'data-height' => '80%',
+                            'data-offset' => '20px',
                         ]);
                     }
                     ?>
                     <?php
-                    //                    if($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::CONFORMED) {
-                    //                        echo Html::button('布产', [
-                    //                            'class'=>'btn btn-success btn-xs',
-                    //                            'onclick' => 'batchBuchan()',
-                    //                        ]);
-                    //                    }
+                    if($model->order_status == \addons\Sales\common\enums\OrderStatusEnum::CONFORMED) {
+                        echo Html::button('生成退货单', [
+                            'class'=>'btn btn-success btn-xs',
+                            'onclick' => 'batchRefund()',
+                        ]);
+                    }
                     ?>
                 </div>
                 <div class="table-responsive col-lg-12">
@@ -235,21 +223,21 @@ $this->params['breadcrumbs'][] = $this->title;
                             [
                                 'attribute' => 'style_cate_id',
                                 'value' => function ($model) {
-                                    return $model->cate->name ?? '';
+                                    return $model->styleCate->name ?? '';
                                 },
                                 'format' => 'raw',
                             ],
                             [
                                 'attribute' => 'product_type_id',
                                 'value' => function ($model) {
-                                    return $model->type->name ?? '';
+                                    return $model->productType->name ?? '';
                                 },
                                 'format' => 'raw',
                             ],
                             [
-                                'attribute' => 'goods_status',
+                                'attribute' => 'is_return',
                                 'value' => function ($model) {
-                                    return \addons\Warehouse\common\enums\GoodsStatusEnum::getValue($model->goods_status);
+                                    return \common\enums\ConfirmEnum::getValue($model->is_return);
                                 },
                                 'format' => 'raw',
                             ],
@@ -430,4 +418,23 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
     <!-- tab-content end -->
 </div>
+<script>
+    function batchRefund() {
+        appConfirm("生成退货单", '确定退货吗', function (value) {
+            switch (value) {
+                case "defeat":
+                    var ids = $("#order-goods").yiiGridView("getSelectedRows");
+                    if (ids == '') {
+                        rfMsg('请选中商品明细')
+                        return false;
+                    }
+                    var url = "<?= Url::to(['order-goods/refund'])?>?order_id=<?= $order->id?>&ids=" + ids;
+                    window.location = url;
 
+                    break;
+                default:
+            }
+        });
+    }
+
+</script>

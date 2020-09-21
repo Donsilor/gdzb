@@ -8,7 +8,7 @@ use common\enums\BaseEnum;
  * 配件类型举
  * @package common\enums
  */
-class SourceEnum extends BaseEnum
+class SupplierSourceEnum extends BaseEnum
 {
     const General = 1;
     const Market_Find = 2;
