@@ -1719,6 +1719,11 @@ function closeClone() {
 function save() {
   $('.direction-box').hide()
 
+  if(!$('#special-url').val()){
+    alert('保存失败，URL不能为空')
+    return
+  }
+
   var id = $('#special-id').val();
 
   var param = {};
@@ -1737,7 +1742,8 @@ function save() {
     data: {'Special': param, '_csrf-backend': $('meta[name=csrf-token]').attr("content")},
 
     success: function(msg) {
-      console.log(333,msg)
+      // console.log(msg)
+      alert('保存成功')
     }
   })
 }

@@ -45,14 +45,14 @@ $this->beginPage()
                     <div class="tdk-t clf">
                         <div class="title fl">Title</div>
                         <div class="value fl">
-                            <textarea name="" id="title" maxlength="255" placeholder="限255字符以内"><?= $model->title ?></textarea>
+                            <textarea name="" id="title" maxlength="120" placeholder="限120字符以内"><?= $model->title ?></textarea>
                         </div>
                     </div>
 
                     <div class="tdk-k clf">
                         <div class="title fl">Keywords</div>
                         <div class="value fl">
-                            <textarea name="" id="keyword" maxlength="255" placeholder="限255字符以内"><?= $model->keywords ?></textarea>
+                            <textarea name="" id="keyword" maxlength="120" placeholder="限120字符以内"><?= $model->keywords ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@ $this->beginPage()
                     <div class="tdk-d clf">
                         <div class="title fl">Description</div>
                         <div class="value fl">
-                            <textarea name="" id="description" maxlength="255" placeholder="限255字符以内"><?= $model->description ?></textarea>
+                            <textarea name="" id="description" maxlength="120" placeholder="限120字符以内"><?= $model->description ?></textarea>
                         </div>
                     </div>
                 </div>
