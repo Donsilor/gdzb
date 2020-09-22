@@ -270,10 +270,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'buttons' => [
                                     'edit' => function ($url, $model, $key) use ($order) {
                                         if ($order->order_status == OrderStatusEnum::SAVE) {
-                                            return Html::edit(['order-goods/ajax-edit', 'order_id'=>$model->order_id,'id' => $model->id], '编辑', [
-                                                'data-toggle' => 'modal',
-                                                'data-target' => '#ajaxModal',
-                                                'class' => 'btn btn-primary btn-xs',
+                                            return Html::edit(['order-goods/edit', 'order_id'=>$model->order_id,'id' => $model->id], '编辑', [
+                                                'class' => 'btn btn-primary btn-xs openIframe',
+                                                'data-width' => '80%',
+                                                'data-height' => '80%',
+                                                'data-offset' => '20px',
                                                 ]);
 
                                         }

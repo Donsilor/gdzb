@@ -11,7 +11,7 @@ use common\helpers\Url;
 /* @var $model addons\Sales\common\models\Customer */
 /* @var $form yii\widgets\ActiveForm */
 
-$this->title = $model->id?\Yii::t('customer', '编辑客户'):\Yii::t('customer', '新增客户');
+$this->title = $model->id?\Yii::t('customer', '编辑订单'):\Yii::t('customer', '新增订单');
 $this->params['breadcrumbs'][] = ['label' => \Yii::t('customer', 'Sales'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
