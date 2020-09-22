@@ -6,6 +6,7 @@ use addons\Gdzb\common\models\Customer;
 use addons\Gdzb\common\models\Goods;
 use addons\Gdzb\common\models\Order;
 use addons\Gdzb\common\models\OrderGoods;
+use addons\Sales\common\enums\RefundStatusEnum;
 use addons\Warehouse\common\enums\GoodsStatusEnum;
 use common\enums\ConfirmEnum;
 use Yii;
@@ -51,32 +52,7 @@ class OrderService extends Service
         if(false == $order->save()) {
             throw new \Exception($this->getError($order));
         }
-//        $customer = Customer::find()->where(['mobile'=>$order->customer_mobile,'channel_id'=>$order->sale_channel_id])->one();
-//        if(!$customer) {
-//            //2.创建用户信息
-//            $customer = new Customer();
-//            $customer->realname = $order->customer_name;
-//            $customer->mobile = $order->customer_mobile;
-//            $customer->email = $order->customer_email;
-//            $customer->channel_id = $order->sale_channel_id;
-//            $customer->level = $form->customer_level;
-//            $customer->source_id = $form->customer_source;
-//            if(false == $customer->save()) {
-//                throw new \Exception("创建用户失败：".$this->getError($customer));
-//            }
-//            \Yii::$app->salesService->customer->createCustomerNo($customer,true);
-//        }else{
-//            //更新用户信息
-//            $customer->realname = $customer->realname ? $customer->realname : $order->customer_name;
-//            $customer->mobile = $customer->mobile ? $customer->mobile: $order->customer_mobile;
-//            $customer->email = $customer->email ? $customer->email : $order->customer_email;
-//            $customer->level = $customer->level ? $customer->level: $form->customer_level;
-//            $customer->source_id = $customer->source_id ? $customer->source_id : $form->customer_source;
-//            if(false == $customer->save()) {
-//                throw new \Exception("更新用户失败：".$this->getError($customer));
-//            }
-//        }
-//        $order->customer_id = $customer->id;
+
         if($form->isNewRecord){
             $order->order_sn = $this->createOrderSn($order);
         }
@@ -111,7 +87,9 @@ class OrderService extends Service
         $customer_weixin = $model->customer_weixin ?? '';
         if(!$customer_weixin) return;
         $customer = Customer::find()->where(['wechat' => $customer_weixin])->one();
+        $isNewRecord = false;
         if(!$customer){
+            $isNewRecord = true;
             $consignee_info = json_decode($model->consignee_info,true);
             $customer = new Customer();
             $customer_field = [
@@ -137,7 +115,7 @@ class OrderService extends Service
             throw new \Exception($this->getError($customer));
         }
         //反写customer_id
-        if($customer->isNewRecord){
+        if($isNewRecord == true){
             $model->customer_id = $customer->id;
             if(false === $model->save(true,['customer_id'])){
                 throw new \Exception($this->getError($model));
@@ -206,11 +184,15 @@ class OrderService extends Service
     public function orderSummary($order_id)
     {
         $sum = OrderGoods::find()
-            ->select(['sum(1) as total_num','sum(goods_price) as order_amount', 'sum(cost_price) as cost_price'])
-            ->where(['order_id'=>$order_id,'is_return' => ConfirmEnum::NO])
+            ->select(['sum(1) as total_num','sum(goods_price) as order_amount', 'sum(cost_price) as cost_price',
+                'sum(if(is_return =1,1,0)) as refund_num','sum(refund_price) as refund_amount'])
+            ->where(['order_id'=>$order_id])
             ->asArray()->one();
         if($sum) {
-            Order::updateAll(['goods_num'=>$sum['total_num'], 'order_amount'=>$sum['order_amount'], 'cost_price'=>$sum['cost_price']],['id'=>$order_id]);
+            $refund_status = $sum['total_num'] > $sum['refund_num'] ? RefundStatusEnum::PART_RETURN : RefundStatusEnum::HAS_RETURN;
+            Order::updateAll(['goods_num'=>$sum['total_num'] ?? 0, 'order_amount'=>$sum['order_amount'] ?? 0,
+                'cost_price'=>$sum['cost_price'] ?? 0,'refund_num' => $sum['refund_num'] ?? 0,
+                'refund_amount'=> $sum['refund_amount'] ?? 0, 'refund_status'=>$refund_status],['id'=>$order_id]);
         }
     }
 

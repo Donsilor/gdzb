@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_weixin') ?>：</td>
                             <td><?= $model->customer_weixin ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('delivery_time') ?>：</td>
-                            <td><?= $model->delivery_time ? Yii::$app->formatter->asDate($model->delivery_time) : '' ?></td>
+                            <td><?= $model->delivery_time ? \Yii::$app->formatter->asDate($model->delivery_time) : '' ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('follower_id') ?>：</td>
                             <td><?= $model->follower->username ?? '' ?></td>
                         </tr>
@@ -142,7 +142,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                     <?php
-                    if ($model->delivery_status == \addons\Sales\common\enums\DeliveryStatusEnum::TO_SEND) {
+                    if ($model->delivery_status == \addons\Sales\common\enums\DeliveryStatusEnum::TO_SEND
+                        && $model->refund_status != \addons\Sales\common\enums\RefundStatusEnum::HAS_RETURN) {
                         echo Html::edit(['ajax-delivery', 'id' => $model->id], '发货', [
                             'class' => 'btn btn-primary btn-ms',
                             'data-toggle' => 'modal',
@@ -270,10 +271,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'buttons' => [
                                     'edit' => function ($url, $model, $key) use ($order) {
                                         if ($order->order_status == OrderStatusEnum::SAVE) {
-                                            return Html::edit(['order-goods/ajax-edit', 'order_id'=>$model->order_id,'id' => $model->id], '编辑', [
-                                                'data-toggle' => 'modal',
-                                                'data-target' => '#ajaxModal',
-                                                'class' => 'btn btn-primary btn-xs',
+                                            return Html::edit(['order-goods/edit', 'order_id'=>$model->order_id,'id' => $model->id], '编辑', [
+                                                'class' => 'btn btn-primary btn-xs openIframe',
+                                                'data-width' => '80%',
+                                                'data-height' => '80%',
+                                                'data-offset' => '20px',
                                                 ]);
 
                                         }
