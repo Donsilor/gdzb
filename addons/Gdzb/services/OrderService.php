@@ -51,32 +51,7 @@ class OrderService extends Service
         if(false == $order->save()) {
             throw new \Exception($this->getError($order));
         }
-//        $customer = Customer::find()->where(['mobile'=>$order->customer_mobile,'channel_id'=>$order->sale_channel_id])->one();
-//        if(!$customer) {
-//            //2.创建用户信息
-//            $customer = new Customer();
-//            $customer->realname = $order->customer_name;
-//            $customer->mobile = $order->customer_mobile;
-//            $customer->email = $order->customer_email;
-//            $customer->channel_id = $order->sale_channel_id;
-//            $customer->level = $form->customer_level;
-//            $customer->source_id = $form->customer_source;
-//            if(false == $customer->save()) {
-//                throw new \Exception("创建用户失败：".$this->getError($customer));
-//            }
-//            \Yii::$app->salesService->customer->createCustomerNo($customer,true);
-//        }else{
-//            //更新用户信息
-//            $customer->realname = $customer->realname ? $customer->realname : $order->customer_name;
-//            $customer->mobile = $customer->mobile ? $customer->mobile: $order->customer_mobile;
-//            $customer->email = $customer->email ? $customer->email : $order->customer_email;
-//            $customer->level = $customer->level ? $customer->level: $form->customer_level;
-//            $customer->source_id = $customer->source_id ? $customer->source_id : $form->customer_source;
-//            if(false == $customer->save()) {
-//                throw new \Exception("更新用户失败：".$this->getError($customer));
-//            }
-//        }
-//        $order->customer_id = $customer->id;
+
         if($form->isNewRecord){
             $order->order_sn = $this->createOrderSn($order);
         }
@@ -111,7 +86,9 @@ class OrderService extends Service
         $customer_weixin = $model->customer_weixin ?? '';
         if(!$customer_weixin) return;
         $customer = Customer::find()->where(['wechat' => $customer_weixin])->one();
+        $isNewRecord = false;
         if(!$customer){
+            $isNewRecord = true;
             $consignee_info = json_decode($model->consignee_info,true);
             $customer = new Customer();
             $customer_field = [
@@ -137,7 +114,7 @@ class OrderService extends Service
             throw new \Exception($this->getError($customer));
         }
         //反写customer_id
-        if($customer->isNewRecord){
+        if($isNewRecord == true){
             $model->customer_id = $customer->id;
             if(false === $model->save(true,['customer_id'])){
                 throw new \Exception($this->getError($model));

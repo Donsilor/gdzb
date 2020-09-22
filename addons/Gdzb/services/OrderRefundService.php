@@ -84,6 +84,8 @@ class OrderRefundService extends Service
         $goods_sns = array_values(array_column($refund_goods,'goods_sn'));
         Goods::updateAll(['goods_status' => GoodsStatusEnum::IN_STOCK],['goods_sn'=>$goods_sns]);
 
+        Yii::$app->gdzbService->order->orderSummary($model->order_id);
+
     }
 
     public function syncAuditNoPass($model){

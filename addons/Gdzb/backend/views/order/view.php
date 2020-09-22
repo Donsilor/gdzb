@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('customer_weixin') ?>：</td>
                             <td><?= $model->customer_weixin ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('delivery_time') ?>：</td>
-                            <td><?= $model->delivery_time ? Yii::$app->formatter->asDate($model->delivery_time) : '' ?></td>
+                            <td><?= $model->delivery_time ? \Yii::$app->formatter->asDate($model->delivery_time) : '' ?></td>
                             <td class="col-xs-1 text-right"><?= $model->getAttributeLabel('follower_id') ?>：</td>
                             <td><?= $model->follower->username ?? '' ?></td>
                         </tr>

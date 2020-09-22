@@ -20,7 +20,7 @@ class OrderDeliveryForm extends Order
     {
         $rules = [
             [['express_id','express_no','delivery_time'], 'required'],
-            [['followed_time'],'parseFollowedTime']
+            [['delivery_time'],'parseDeliveryTime']
         ];
         return ArrayHelper::merge(parent::rules(),$rules);
     }
@@ -28,11 +28,11 @@ class OrderDeliveryForm extends Order
     /**
      * 款式图库
      */
-    public function parseFollowedTime()
+    public function parseDeliveryTime()
     {
-        $this->followed_time = strtotime($this->followed_time);
+        $this->delivery_time = strtotime($this->delivery_time);
 
-        return $this->followed_time;
+        return $this->delivery_time;
     }
     /**
      * {@inheritdoc}
