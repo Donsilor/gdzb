@@ -430,7 +430,7 @@ function showAttrs() {
               +';link:'+editAttrs[i].link;
 
         div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
-                <div class='direction-box' onmousedown='moveImg(event)'>
+                <div class='direction-box' onmousedown='moveImg(event)' ondblclick='loadImg(event, "video-box-${idNum}")'>
                   <div class='direction top' onmousedown='move(event, "top")'></div>
                   <div class='direction down' onmousedown='move(event, "down")'></div>
                   <div class='direction left' onmousedown='move(event, "left")'></div>
@@ -898,7 +898,7 @@ $('.classify-video').on('mousedown', function() {
             +';cursor:pointer';
 
     div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
-            <div class='direction-box' onmousedown='moveImg(event)'>
+            <div class='direction-box' onmousedown='moveImg(event)' ondblclick='loadImg(event, "video-box-${idNum}")'>
               <div class='direction top' onmousedown='move(event, "top", "video-box-${idNum}")'></div>
               <div class='direction down' onmousedown='move(event, "down", "video-box-${idNum}")'></div>
               <div class='direction left' onmousedown='move(event, "left", "video-box-${idNum}")'></div>
