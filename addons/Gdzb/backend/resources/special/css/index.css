@@ -65,6 +65,20 @@ html{
   clear: both;
 }
 
+.btn{
+  width: 110px;
+  height: 30px;
+  background-color: #169BD5;
+  border-radius: 4px;
+  text-align: center;
+  line-height: 30px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #fff;
+  margin: 0 auto;
+  cursor: pointer;
+}
+
 .select .default{
   width: 100%;
   height: 100%;
@@ -130,18 +144,12 @@ html{
   border-radius: 2px;
 }
 
-.save{
-  width: 110px;
-  height: 30px;
+.preview{
   background-color: #79AF42;
-  border-radius: 4px;
-  text-align: center;
-  line-height: 30px;
-  color: #fff;
-  margin: 40px auto 0;
-  letter-spacing: 1px;
-  cursor: pointer;
+  margin: 60px auto 20px;
 }
+
+.save{}
 
 .container{
   width: 1200px;
@@ -209,13 +217,12 @@ html{
 
 .top-box-r{
   width: 20%;
-  height: 100%;
   position: relative;
-  height: 140px;
+  height: 30px;
 }
 .top-box-r .icon{
   position: absolute;
-  top: 20px;
+  top: 5px;
   right: 60px;
   width: 20px;
   height: 20px;
@@ -227,20 +234,6 @@ html{
   transform: rotate(180deg);
 }
 
-.top-box-r .preview{
-  position: absolute;
-  top: 90px;
-  right: 40px;
-  width: 70px;
-  height: 30px;
-  line-height: 30px;
-  font-size: 12px;
-  text-align: center;
-  color: #fff;
-  cursor: pointer;
-  background-color: #169BD5;
-  border-radius: 4px;
-}
 .top-box input,
 .top-box textarea{
   width: 100%;

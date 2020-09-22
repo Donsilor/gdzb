@@ -70,7 +70,6 @@ $this->beginPage()
 
         <div class="top-box-r fr">
             <div class="icon" onclick="openTdk()"></div>
-            <div class="preview" onclick="preview()">预览</div>
         </div>
     </div>
 
@@ -298,7 +297,8 @@ $this->beginPage()
               </div>
             </div>
 
-            <div class="save" onclick="save()">保存网页</div>
+            <div class="btn preview" onclick="preview()">预览</div>
+            <div class="btn save" onclick="save()">保存网页</div>
         </div>
 
     </div>

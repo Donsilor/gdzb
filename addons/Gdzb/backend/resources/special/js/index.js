@@ -4,7 +4,7 @@ $('.go-back').click(function() {
 })
 
 // 颜色
-var colors = ['#333333','#ffffff','#ff0000','#cccccc','#ffff00'];
+var colors = ['#333333','#ffffff','#169BD5','#cccccc','#ff0000','#79AF42','#ffff00','#800080'];
 for(var c=0; c<colors.length; c++){
   var div = document.createElement('div');
   div.className = 'option';
@@ -62,7 +62,7 @@ function colorOnBlur(e) {
 $('.option-box .option').not('.text-color .option').click(function() {
   $(this).parent().prev().children('.value').text($(this).text())
   $(this).parent().slideUp().hide()
-  amend('font-size', $(this).text()-0)
+  amend('font-size', $(this).text()+'px')
 })
 
 // 加粗、斜体、下划线
@@ -189,13 +189,35 @@ function iptBlur(e, t) {
 // 删除元素
 $('.del').click(function() {
   $('.'+elementActive).remove()
+  var flag = false;
   for(var i in data.attrs){
     if(data.attrs[i].element == elementActive){
+      var site = parseInt(data.attrs[i].top) + parseInt(data.attrs[i].height);
+      if(site == maxHeight){
+        flag = true
+      }else{
+        flag = false
+      }
+
       data.attrs.splice(i,1)
+
       elementActive = '';
       elementActiveZIndex = 0;
       break
     }
+  }
+
+  if(flag && data.attrs.length){
+    maxHeight = 0;
+    for(var j in data.attrs){
+      if((parseInt(data.attrs[j].top)+parseInt(data.attrs[j].height)) > maxHeight){
+        maxHeight = parseInt(data.attrs[j].top)+parseInt(data.attrs[j].height)
+      }
+    }
+  }
+
+  if(!data.attrs.length){
+    maxHeight = 0;
   }
 })
 
@@ -211,11 +233,11 @@ tem = $('.template-text'),
 textAttr = {
   element: '',
   type: '',
-  top: '',
-  left: '',
+  top: 0,
+  left: 0,
   'z-index': 0,
-  width: '',
-  height: '',
+  width: 0,
+  height: 0,
   'font-face': '',
   'font-size': '',
   'font-weight': '',
@@ -231,11 +253,11 @@ textAttr = {
 imgAttr = {
   element: '',
   type: '',
-  top: '',
+  top: 0,
+  left: 0,
   'z-index': 0,
-  left: '',
-  width: '',
-  height: '',
+  width: 0,
+  height: 0,
   url: '',
   link: ''
 },
@@ -244,11 +266,11 @@ imgAttr = {
 videoAttr = {
   element: '',
   type: '',
-  top: '',
+  top: 0,
+  left: 0,
   'z-index': 0,
-  left: '',
-  width: '',
-  height: '',
+  width: 0,
+  height: 0,
   url: '',
   link: ''
 },
@@ -312,7 +334,7 @@ function showAttrs() {
     for(var i in editAttrs){
       data.attrs[i] = editAttrs[i];
       idNum = (editAttrs[i]['z-index']-0) > idNum ? editAttrs[i]['z-index']-0 : idNum;
-      maxHeight = parseInt(editAttrs[i].top)+parseInt(editAttrs[i].top) > maxHeight ? parseInt(editAttrs[i].top)+parseInt(editAttrs[i].top) : maxHeight;
+      maxHeight = parseInt(editAttrs[i].top)+parseInt(editAttrs[i].height) > maxHeight ? parseInt(editAttrs[i].top)+parseInt(editAttrs[i].height) : maxHeight;
       
       if(editAttrs[i].type == 'text'){
         divStyle ='position:'+'absolute'
@@ -428,11 +450,11 @@ function showAttrs() {
 showAttrs()
 
 // 添加文本
-$('.classify-text').on('mousedown', function() {
+$('.classify-text').on('mousedown', function(e) {
+  e.stopPropagation()
   resetCss()
 
   ifMove = false;
-
   var textObj = {};
   for(var attr in textAttr){
     textObj[attr] = textAttr[attr];
@@ -446,6 +468,7 @@ $('.classify-text').on('mousedown', function() {
   tem.css({'width': textObj.width, 'height': textObj.height})
 
   $('.content').on('mousemove', function(e) {
+    e.stopPropagation();
     ifMove = true;
 
     mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
@@ -519,7 +542,10 @@ $('.classify-text').on('mousedown', function() {
     $('.scroll').append(div)
 
     if(!ifMove && maxHeight){
-      textObj.top = maxHeight+20 + 'px';
+      textObj.top = (maxHeight+20) + 'px';
+    }
+
+    if(parseInt(textObj.top) + parseInt(textObj.height) > maxHeight){
       maxHeight = parseInt(textObj.top) + parseInt(textObj.height)
     }
 
@@ -531,6 +557,7 @@ $('.classify-text').on('mousedown', function() {
     tier('text-box-'+idNum)
 
     idNum++;
+    ifMove = false;
     $('.content').off('mouseup')
 
     data.attrs.push(textObj)
@@ -572,23 +599,51 @@ function edit(e, className) {
   }
 
   var val = $(e.currentTarget).children('.pre').text();
-  
+
   $(e.currentTarget).children('.pre').hide();
   $(e.currentTarget).children('.ipt-text').show().val(val).focus();
 
-  var align = $('.attr-4').hasClass('active');
-  if(align){
-    var index = $('.attr-4.active').index(),
-        aligns = ['justify','left','right','center'];
-    
-    editObj['text-align'] = aligns[index];
+  $('.colorBlock').css('background-color', editObj.color)
+  $('.colorIpt').val(' ')
+
+  if(editObj['font-size']){
+    $('.font-size').text(parseInt(editObj['font-size']))
+  }else{
+    $('.font-size').text(12)
   }
 
-  editObj['color'] = $('.colorBlock').css('backgroundColor');
-  editObj['font-size'] = $('.font-size').text()+'px';
-  editObj['font-weight'] = $('.attr-bold').hasClass('active') ? 'bold' : '';
-  editObj['font-style'] = $('.attr-i').hasClass('active') ? 'italic' : '';
-  editObj['text-decoration'] = $('.attr-underline').hasClass('active') ? 'underline' : '';
+  if(editObj['font-weight']){
+    $('.attr-bold').addClass('active')
+  }else{
+    $('.attr-bold').removeClass('active')
+  }
+
+  if(editObj['font-style']){
+    $('.attr-i').addClass('active')
+  }else{
+    $('.attr-i').removeClass('active')
+  }
+
+  if(editObj['text-decoration']){
+    $('.attr-underline').addClass('active')
+  }else{
+    $('.attr-underline').removeClass('active')
+  }
+
+  var align = editObj['text-align'],idx;
+
+  switch (align) {
+    case 'justify': idx = 0; break;
+    case 'left': idx = 1; break;
+    case 'right': idx = 2; break;
+    case 'center': idx = 3; break;
+  }
+
+  $('.content-r .attr-4').eq(idx).addClass('active')
+
+  $('.control-text').show().siblings().hide();
+  $('.del').hide()
+  $('.control-text .del').show()
 
   $(e.currentTarget).css({'font-size': editObj['font-size'],'font-weight': editObj['font-weight'],'font-style': editObj['font-style'],'text-decoration': editObj['text-decoration'],'text-align': editObj['text-align'],'color': editObj['color']});
 }
@@ -722,6 +777,9 @@ $('.classify-img').on('mousedown', function() {
 
     if(!ifMove && maxHeight){
       imgObj.top = maxHeight+20 + 'px';
+    }
+
+    if(parseInt(imgObj.top) + parseInt(imgObj.height) > maxHeight){
       maxHeight = parseInt(imgObj.top) + parseInt(imgObj.height)
     }
 
@@ -733,6 +791,7 @@ $('.classify-img').on('mousedown', function() {
     tier('img-box-'+idNum)
 
     idNum++;
+    ifMove = false;
     $('.content').off('mouseup')
 
     data.attrs.push(imgObj)
@@ -848,6 +907,9 @@ $('.classify-video').on('mousedown', function() {
 
     if(!ifMove && maxHeight){
       videoObj.top = maxHeight+20 + 'px';
+    }
+
+    if(parseInt(videoObj.top) + parseInt(videoObj.height) > maxHeight){
       maxHeight = parseInt(videoObj.top) + parseInt(videoObj.height)
     }
 
@@ -859,9 +921,11 @@ $('.classify-video').on('mousedown', function() {
     tier('video-box-'+idNum)
 
     idNum++;
+    ifMove = false;
     $('.content').off('mouseup')
 
     data.attrs.push(videoObj)
+    console.log(88,data)
     return false
   })
 })
@@ -870,6 +934,7 @@ $('.classify-video').on('mousedown', function() {
 function addMove(e, className) {
   e.stopPropagation();
 
+  ifMove = false;
   tier(className)
   
   clearTimeout(timer);
@@ -888,6 +953,9 @@ function addMove(e, className) {
         editObj[q] = data.attrs[editIndex][q]
       }
     }
+
+    editObj.left = parseInt(contentWidth * (editObj.left.slice(0,-1)/100)) + 'px';
+    console.log(114,editObj.left)
 
     $('.content-r .link').val(editObj.link)
 
@@ -1002,15 +1070,19 @@ function moveImg(e, className) {
       //   editObj.top = parseInt(contentHeight) - parseInt(editObj.height)
       // }
 
-      editObj.left = (editObj.left/contentWidth*100).toFixed(2) + '%';
+      editObj.left = editObj.left + 'px';
       editObj.top = editObj.top + 'px';
 
       box.css({'left':editObj.left, 'top':editObj.top})
     })
 
     $(content).mouseup(function () {
-      data.attrs[editIndex].left = editObj.left;
+      data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
       data.attrs[editIndex].top = editObj.top;
+
+      if(parseInt(editObj.top) + parseInt(editObj.height) > maxHeight){
+        maxHeight = parseInt(editObj.top) + parseInt(editObj.height)
+      }
 
       $(content).off('mousemove')
     })
@@ -1025,14 +1097,15 @@ function move(e, direction, className) {
       posY = parseInt(box.css('top')),
       posW = parseInt(box.css('width')),
       posH = parseInt(box.css('height')),
-      // posYH = posY + parseInt(posH/2),
-      // posXW = posX + parseInt(posW/2),
+      // posHrefYH = posY + parseInt(posH/2),
+      // posHrefXW = posX + parseInt(posW/2),
       posYH = posY + posH,
       posXW = posX + posW,
       type = className.split('-box-')[0],
-      rate = (posW/posH).toFixed(3);
+      rate = (posW/posH).toFixed(3),
+      widthK,heightk,topK,mouseXK,mouseYK;
 
-  if(0) {
+  if(type == 'text') {
     switch (direction) {
       case 'top':
         $('.content').mousemove(function(e) {
@@ -1093,17 +1166,12 @@ function move(e, direction, className) {
           if(parseInt(editObj.width) > (contentWidth - parseInt(editObj.left))){
             editObj.width = (contentWidth - parseInt(editObj.left))+'px';
           }
-          editObj.height = (posXW-parseInt(editObj.left))*2/rate+'px';
-          editObj.top = (posYH-parseInt(editObj.height)/2)+'px';
+
           if(parseInt(editObj.top) < 0){
             editObj.top = 0
           }
-
-          // if(parseInt(editObj.left) parseInt(editObj.width)) >= contentWidth){
-          //   editObj.left = (contentWidth-parseInt(editObj.width)) + 'px'
-          // }
   
-          box.css({'left':editObj.left,'width':editObj.width, 'height':editObj.height, 'top':editObj.top})
+          box.css({'left':editObj.left,'width':editObj.width})
         })
   
         $('.content').mouseup(function () {
@@ -1254,7 +1322,7 @@ function move(e, direction, className) {
       case 'top':
         $('.content').mousemove(function(e) {
           mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-  
+          console.log(121,editObj.left)
           editObj.top = mouseY;
           
           if(editObj.top < 0){
@@ -1263,90 +1331,133 @@ function move(e, direction, className) {
           if(editObj.top > posYH){
             editObj.top = posYH
           }
-  
-          editObj.height = (posYH-editObj.top)+'px';
-          editObj.width = (posYH-editObj.top)*rate+'px';
-          editObj.top = editObj.top+'px';
+
+          // topK = editObj.top+'px';
+          editObj.top = editObj.top + 'px';
+          editObj.height = (posYH - parseInt(editObj.top)) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
+
+          if((posYH - editObj.top)*rate >= (contentWidth-posX)){
+            editObj.width = (contentWidth-posX)+'px';
+            editObj.height = parseInt((contentWidth-posX)*rate)+'px';
+          }
+
+          // if(!widthK){
+          //   editObj.height = (posYH-editObj.top)+'px';
+          //   editObj.width = (posYH-editObj.top)*rate+'px';
+          //   editObj.left = posHrefXW-(posYH-editObj.top)*rate/2+'px';
+          //   editObj.top = editObj.top+'px';
+          // }
+
+          // if(posHrefXW <= contentWidth/2){
+          //   if(parseInt(editObj.left) <= 0){
+          //     editObj.left = 0;
+
+          //     if(!editObj.left && !widthK && !topK){
+          //       widthK = parseInt(box.css('width'))+'px';
+          //       topK = parseInt(box.css('top'))+'px';
+          //       editObj.width = widthK;
+          //       editObj.top = topK;
+
+          //       editObj.height = (widthK)*rate+'px';
+          //     }
+          //   }
+
+          //   if(widthK){
+          //     editObj.width = widthK;
+          //     editObj.top = topK;
+          //   }
+          // }else{
+          //   console.log(2222)
+          // }
 
           // if(editObj.width >= ())
-  
+
           box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
-  
+
         break;
-  
+
       case 'down':
         $('.content').mousemove(function(e) {
           mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
           editObj.height = (mouseY-parseInt(editObj.top))+'px';
-  
-          box.css({'height':editObj.height})
+          editObj.width = parseInt((mouseY-parseInt(editObj.top))*rate)+'px';
+
+          if((mouseY-parseInt(editObj.top))*rate >= (contentWidth-posX)){
+            editObj.width = (contentWidth-posX)+'px';
+            editObj.height = parseInt((contentWidth-posX)*rate)+'px';
+          }
+
+          box.css({'width':editObj.width,'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
-  
+
         break;
-  
+
       case 'left':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
-  
+
           editObj.left = mouseX;
-  
+
           if(editObj.left < 0){
             editObj.left = 0
           }
           if(editObj.left > posXW){
             editObj.left = posXW
           }
-  
+
           editObj.left = editObj.left + 'px';
           editObj.width = (posXW-parseInt(editObj.left))+'px';
-          // console.log(box.find('.img').css('height'))
+
           editObj.height = box.find('.img').css('height');
-  
+
           box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
-  
+
         break;
-  
-        case 'right':
+
+      case 'right':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
-  
+
           editObj.width = (mouseX-parseInt(posX)) + 'px';
           if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
             editObj.width = (contentWidth - parseInt(posX)) + 'px'
           }
-          
-          box.css({'width':editObj.width})
+
+          editObj.height = box.find('.img').css('height');
+
+          box.css({'width':editObj.width,'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
-  
+
         break;
-  
+
       case 'topLeft':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
           // mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-  
+
           editObj.left = mouseX;
           // editObj.top = mouseY;
           
@@ -1357,7 +1468,7 @@ function move(e, direction, className) {
           // if(editObj.top > posYH){
           //   editObj.top = posYH
           // }
-  
+
           if(editObj.left < 0){
             editObj.left = 0
           }
@@ -1365,27 +1476,27 @@ function move(e, direction, className) {
           if(editObj.left > posXW){
             editObj.left = posXW
           }
-  
+
           editObj.width = (posXW-parseInt(editObj.left))+'px';
-          editObj.height = parseInt(box.find('.img').css('height'));
+          editObj.height = parseInt((posXW-parseInt(editObj.left))*rate)+'px';
           editObj.left = editObj.left + 'px';
-  
+
           box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
-  
+
         break;
-  
+
       case 'topRight':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
           mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-  
-          editObj.top = mouseY;
+
+          editObj.top = posY;
           
           if(editObj.top < 0){
             editObj.top = 0
@@ -1395,23 +1506,25 @@ function move(e, direction, className) {
           }
           
           editObj.width = (mouseX-parseInt(posX)) + 'px';
+          editObj.height = parseInt((mouseX-parseInt(posX))*rate) + 'px';
+
           if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
             editObj.width = (contentWidth - parseInt(posX)) + 'px'
+            editObj.height = parseInt((contentWidth - parseInt(posX))*rate) + 'px';
           }
-  
-          editObj.height = (posYH-editObj.top)+'px';
+
           editObj.top = editObj.top + 'px';
-  
+
           box.css({'top':editObj.top,'width':editObj.width,'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
-  
+
         break;
-  
+
       case 'downLeft':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
@@ -1426,39 +1539,45 @@ function move(e, direction, className) {
             editObj.left = posXW
           }
           
-          var width = (posXW-parseInt(editObj.left))+'px';
-          var height = (mouseY-parseInt(editObj.top))+'px';
-          editObj.left = editObj.left + 'px';
-  
-          box.css({'left':editObj.left,'width':width,'height':height})
+          editObj.left = editObj.left+'px';
+          editObj.width = (posXW-parseInt(editObj.left))+'px';
+          editObj.height = parseInt(parseInt(editObj.width)/rate)+'px';
+
+          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
-  
+
         break;
-  
+
       case 'downRight':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
           mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-  
+
+          if(!mouseXK){
+            mouseXK = mouseX;
+            mouseYK = mouseYK;
+          }
+
           editObj.width = (mouseX-parseInt(posX)) + 'px';
           if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
             editObj.width = (contentWidth - parseInt(posX)) + 'px'
           }
-  
-          editObj.height = (mouseY-parseInt(editObj.top))+'px';
-  
+          editObj.height = parseInt(parseInt(editObj.width)*rate) + 'px';
+
           box.css({'width':editObj.width,'height':editObj.height})
         })
-  
+
         $('.content').mouseup(function () {
           returnData()
           $('.content').off('mousemove')
         })
+
+        break;
     }
   }
 
@@ -1658,6 +1777,7 @@ function amend(cl,val) {
       
       if(cl == 'color' || cl == 'font-size' || 'text-align'){
         $('.'+elementActive+ ' pre').css(cl, val)
+        console.log(1211,$('.'+elementActive+ ' pre'),cl,val)
       }
     }
   }else{
@@ -1704,6 +1824,8 @@ function openTdk() {
 
 // 预览
 function preview() {
+  alert('稍等，页面制作中。。。')
+  return
   $('.popup').show()
   $('.popup .clone-content').append($('.scroll').clone(true))
 }
@@ -1722,6 +1844,10 @@ function save() {
   if(!$('#special-url').val()){
     alert('保存失败，URL不能为空')
     return
+  }
+
+  if(!data['attrs'].length){
+    data['attrs'] = null;
   }
 
   var id = $('#special-id').val();
