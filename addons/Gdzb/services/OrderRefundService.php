@@ -84,6 +84,7 @@ class OrderRefundService extends Service
         $goods_sns = array_values(array_column($refund_goods,'goods_sn'));
         Goods::updateAll(['goods_status' => GoodsStatusEnum::IN_STOCK],['goods_sn'=>$goods_sns]);
 
+        //重新统计
         Yii::$app->gdzbService->order->orderSummary($model->order_id);
 
     }
@@ -104,7 +105,9 @@ class OrderRefundService extends Service
         //更改订单明细
         $refund_goods = RefundGoods::find()->where(['refund_id'=>$model->id])->select(['goods_sn'])->asArray()->all();
         $goods_sns = array_values(array_column($refund_goods,'goods_sn'));
-        OrderGoods::updateAll(['is_return' => ConfirmEnum::NO],['order_id'=>$model->order_id,'goods_sn'=>$goods_sns]);
+        OrderGoods::updateAll(['is_return' => ConfirmEnum::NO, 'refund_price' => 0],['order_id'=>$model->order_id,'goods_sn'=>$goods_sns]);
+        //重新统计
+        Yii::$app->gdzbService->order->orderSummary($model->order_id);
     }
 
 

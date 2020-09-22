@@ -61,7 +61,6 @@ class OrderGoodsController extends BaseController
                 return ResultHelper::json(422, $e->getMessage());
             }
         }
-
         return $this->render($this->action->id, [
             'model' => $model,
         ]);

@@ -6,6 +6,7 @@ use addons\Gdzb\common\models\Customer;
 use addons\Gdzb\common\models\Goods;
 use addons\Gdzb\common\models\Order;
 use addons\Gdzb\common\models\OrderGoods;
+use addons\Sales\common\enums\RefundStatusEnum;
 use addons\Warehouse\common\enums\GoodsStatusEnum;
 use common\enums\ConfirmEnum;
 use Yii;
@@ -183,11 +184,15 @@ class OrderService extends Service
     public function orderSummary($order_id)
     {
         $sum = OrderGoods::find()
-            ->select(['sum(1) as total_num','sum(goods_price) as order_amount', 'sum(cost_price) as cost_price'])
-            ->where(['order_id'=>$order_id,'is_return' => ConfirmEnum::NO])
+            ->select(['sum(1) as total_num','sum(goods_price) as order_amount', 'sum(cost_price) as cost_price',
+                'sum(if(is_return =1,1,0)) as refund_num','sum(refund_price) as refund_amount'])
+            ->where(['order_id'=>$order_id])
             ->asArray()->one();
         if($sum) {
-            Order::updateAll(['goods_num'=>$sum['total_num'], 'order_amount'=>$sum['order_amount'], 'cost_price'=>$sum['cost_price']],['id'=>$order_id]);
+            $refund_status = $sum['total_num'] > $sum['refund_num'] ? RefundStatusEnum::PART_RETURN : RefundStatusEnum::HAS_RETURN;
+            Order::updateAll(['goods_num'=>$sum['total_num'] ?? 0, 'order_amount'=>$sum['order_amount'] ?? 0,
+                'cost_price'=>$sum['cost_price'] ?? 0,'refund_num' => $sum['refund_num'] ?? 0,
+                'refund_amount'=> $sum['refund_amount'] ?? 0, 'refund_status'=>$refund_status],['id'=>$order_id]);
         }
     }
 

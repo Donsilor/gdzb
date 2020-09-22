@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                  <tr>
                                      <td class="col-xs-3 text-right"><?= $model->getAttributeLabel('wechat') ?>：</td>
-                                     <td><?= $model->qq ?></td>
+                                     <td><?= $model->wechat ?></td>
                                  </tr>
                                  <tr>
                                      <td class="col-xs-3 text-right"><?= $model->getAttributeLabel('country_id') ?>：</td>

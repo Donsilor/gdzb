@@ -133,7 +133,7 @@ class OrderGoodsService extends Service
             //更新订单明细信息
             $model->is_return = ConfirmEnum::YES;
             $model->refund_price = $model->goods_price;
-            if($model->save(true,['is_return','goods_price']) === false){
+            if($model->save(true,['is_return','refund_price']) === false){
                 throw new \Exception($this->getError($model));
             }
         }
@@ -148,19 +148,8 @@ class OrderGoodsService extends Service
         ];
 
 
-        //更新订单信息
-        $order->refund_amount += $refund_price_sum;
-        $order->refund_num += $refund_num;
-        $order->refund_status = $order->goods_num > $order->refund_num ? RefundStatusEnum::PART_RETURN : RefundStatusEnum::HAS_RETURN;
-        if($order->save(true,['refund_amount','refund_num','refund_status']) === false){
-            throw new \Exception($this->getError($order));
-        }
-
-//        //更新库存商品状态
-//        $res = Goods::updateAll(['goods_status'=>GoodsStatusEnum::IN_REFUND],['goods_sn' => $goods_sns]);
-//        if(!$res){
-//            throw new \Exception('更新商品状态失败');
-//        }
+        //重新统计
+        Yii::$app->gdzbService->order->orderSummary($model->order_id);
 
 
         $return = \Yii::$app->gdzbService->orderRefund->createSyncRefund($refund,$refund_goods);

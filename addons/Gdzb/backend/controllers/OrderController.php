@@ -341,7 +341,7 @@ class OrderController extends BaseController
                     return $this->message($this->getError($model), $this->redirect(\Yii::$app->request->referrer), 'error');
                 }
                 //同步商品信息
-                $orderGoods = OrderGoods::find()->where(['order_id' => $id])->all();
+                $orderGoods = OrderGoods::find()->where(['order_id' => $id, 'is_return'=>ConfirmEnum::NO])->all();
                 foreach ($orderGoods as $good){
                     //如果货号已在库存，则还原
                     Yii::$app->gdzbService->orderGoods->syncGoods($good,'delivery');
@@ -441,60 +441,6 @@ class OrderController extends BaseController
             'model' => $model,
         ]);
     }
-
-    /**
-     * 退款
-     * @var SalesReturn $model
-     * @throws
-     * @return mixed
-     */
-    public function actionReturn()
-    {
-        $this->layout = '@backend/views/layouts/iframe';
-        $id = Yii::$app->request->get('id');
-        $ids = Yii::$app->request->post('ids');
-        $model = new ReturnForm();
-        $model->ids = $ids;
-        $order = $this->findModel($id) ?? new Order();
-        if ($model->load(Yii::$app->request->post())) {
-            if(!$model->validate()) {
-                //return ResultHelper::json(422, $this->getError($model));
-            }
-            try{
-                $trans = Yii::$app->trans->beginTransaction();
-
-                \Yii::$app->salesService->return->createReturn($model, $order);
-                $trans->commit();
-                Yii::$app->getSession()->setFlash('success','保存成功');
-                return ResultHelper::json(200, '保存成功');
-            }catch (\Exception $e){
-                $trans->rollBack();
-                return ResultHelper::json(422, $e->getMessage());
-            }
-        }
-        $dataProvider = null;
-        if (!is_null($id)) {
-            $searchModel = new SearchModel([
-                'model' => OrderGoodsForm::class,
-                'scenario' => 'default',
-                'partialMatchAttributes' => [], // 模糊查询
-                'defaultOrder' => [
-                    'id' => SORT_DESC
-                ],
-                'pageSize' => 1000,
-            ]);
-            $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-            $dataProvider->query->andWhere(['=', 'order_id', $id]);
-            $dataProvider->query->andWhere(['=', 'is_return', IsReturnEnum::SAVE]);
-            $dataProvider->setSort(false);
-        }
-        $model->is_quick_refund = ConfirmEnum::NO;
-        $model->return_type = ReturnTypeEnum::CARD;
-        return $this->render($this->action->id, [
-            'model' => $model,
-            'order' => $order,
-            'dataProvider' => $dataProvider,
-        ]);
-    }
+    
 }
 

@@ -137,7 +137,59 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
 
 
+                [
+                    'attribute' => 'pay_status',
+                    'value' => function ($model){
+                        return \addons\Sales\common\enums\PayStatusEnum::getValue($model->pay_status);
+                    },
+                    'filter' => Html::activeDropDownList($searchModel, 'pay_status',\addons\Sales\common\enums\PayStatusEnum::getMap(), [
+                        'prompt' => '全部',
+                        'class' => 'form-control',
+                        'style' =>'width:80px'
+                    ]),
+                    'format' => 'raw',
+                    'headerOptions' => ['width'=>'100'],
+                ],
 
+                [
+                    'attribute' => 'delivery_status',
+                    'value' => function ($model){
+                        return \addons\Sales\common\enums\DeliveryStatusEnum::getValue($model->delivery_status);
+                    },
+                    'filter' => Html::activeDropDownList($searchModel, 'delivery_status',\addons\Sales\common\enums\DeliveryStatusEnum::getMap(), [
+                        'prompt' => '全部',
+                        'class' => 'form-control',
+                        'style' =>'width:80px'
+                    ]),
+                    'format' => 'raw',
+                    'headerOptions' => ['width'=>'100'],
+                ],
+                [
+                    'attribute' => 'order_status',
+                    'value' => function ($model){
+                        return \addons\Sales\common\enums\OrderStatusEnum::getValue($model->order_status);
+                    },
+                    'filter' => Html::activeDropDownList($searchModel, 'order_status',\addons\Sales\common\enums\OrderStatusEnum::getMap(), [
+                        'prompt' => '全部',
+                        'class' => 'form-control',
+                        'style' =>'width:80px'
+                    ]),
+                    'format' => 'raw',
+                    'headerOptions' => ['width'=>'100'],
+                ],
+                [
+                    'attribute' => 'refund_status',
+                    'value' => function ($model){
+                        return \addons\Sales\common\enums\RefundStatusEnum::getValue($model->refund_status);
+                    },
+                    'filter' => Html::activeDropDownList($searchModel, 'refund_status',\addons\Sales\common\enums\RefundStatusEnum::getMap(), [
+                        'prompt' => '全部',
+                        'class' => 'form-control',
+                        'style' =>'width:80px'
+                    ]),
+                    'format' => 'raw',
+                    'headerOptions' => ['width'=>'100'],
+                ],
 
 
                 [

@@ -142,7 +142,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                     <?php
-                    if ($model->delivery_status == \addons\Sales\common\enums\DeliveryStatusEnum::TO_SEND) {
+                    if ($model->delivery_status == \addons\Sales\common\enums\DeliveryStatusEnum::TO_SEND
+                        && $model->refund_status != \addons\Sales\common\enums\RefundStatusEnum::HAS_RETURN) {
                         echo Html::edit(['ajax-delivery', 'id' => $model->id], '发货', [
                             'class' => 'btn btn-primary btn-ms',
                             'data-toggle' => 'modal',
