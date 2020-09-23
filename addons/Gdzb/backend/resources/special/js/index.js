@@ -729,10 +729,11 @@ $('.classify-img').on('mousedown', function() {
     if(imgObj.top < 0){
       imgObj.top = 0
     }
-    console.log(12213,imgObj.left)
+    
     // if(imgObj.top > (parseInt(contentHeight) - parseInt(imgObj.height))){
       // imgObj.top = parseInt(contentHeight) - parseInt(imgObj.height)
     // }
+
     if(mouseX > 0){
       tem.show()
     }
@@ -963,7 +964,7 @@ function addMove(e, className) {
       }
     }
 
-    editObj.left = parseInt(contentWidth * (editObj.left.slice(0,-1)/100)) + 'px';
+    editObj.left = parseInt(contentWidth * ((editObj.left).slice(0,-1)/100)) + 'px';
 
     $('.content-r .link').val(editObj.link)
 
@@ -1111,9 +1112,18 @@ function move(e, direction, className) {
       posXW = posX + posW,
       type = className.split('-box-')[0],
       rate = (posW/posH).toFixed(3),
-      widthK,heightk,topK,mouseXK,mouseYK;
+      widthK,heightk,topK,mouseXK,mouseYK,zoomType = 1;
 
-  if(type == 'text') {
+  if(type == 'img' && data.attrs[editIndex].url){
+    zoomType = 2
+  }
+
+  if(type == 'video' && data.attrs[editIndex].url){
+    zoomType = 2
+  }
+  
+
+  if(zoomType == 1) {
     switch (direction) {
       case 'top':
         $('.content').mousemove(function(e) {
@@ -1189,7 +1199,7 @@ function move(e, direction, className) {
   
         break;
   
-        case 'right':
+      case 'right':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
   
@@ -1330,7 +1340,6 @@ function move(e, direction, className) {
       case 'top':
         $('.content').mousemove(function(e) {
           mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-          console.log(121,editObj.left)
           editObj.top = mouseY;
           
           if(editObj.top < 0){
@@ -1785,7 +1794,6 @@ function amend(cl,val) {
       
       if(cl == 'color' || cl == 'font-size' || 'text-align'){
         $('.'+elementActive+ ' pre').css(cl, val)
-        console.log(1211,$('.'+elementActive+ ' pre'),cl,val)
       }
     }
   }else{
