@@ -32,12 +32,12 @@ class Special extends BaseModel
     public function rules()
     {
         return [
-//            [['id'], 'required'],
+            [['url'], 'required'],
             [['id', 'creator_id', 'status', 'created_at', 'updated_at'], 'integer'],
             [['name', 'title', 'keywords', 'description'], 'string', 'max' => 120],
             [['url'], 'string', 'max' => 255],
             [['data'], 'safe'],
-            ['url', 'unique'],
+            [['url'], 'unique'],
         ];
     }
 
