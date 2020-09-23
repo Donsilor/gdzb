@@ -37,6 +37,7 @@ class Special extends BaseModel
             [['name', 'title', 'keywords', 'description'], 'string', 'max' => 120],
             [['url'], 'string', 'max' => 255],
             [['data'], 'safe'],
+            ['url', 'unique'],
         ];
     }
 
