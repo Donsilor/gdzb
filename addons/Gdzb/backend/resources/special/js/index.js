@@ -184,10 +184,10 @@ function iptBlur(e, t) {
         break;
     }
 
-    for(var i in data.attrs){
-      if(data.attrs[i].element == elementActive){
-        data.attrs[i].width = width+'px';
-        data.attrs[i].height = height+'px';
+    for(var t in data.attrs){
+      if(data.attrs[t].element == elementActive){
+        data.attrs[t].width = width+'px';
+        data.attrs[t].height = height+'px';
         break
       }
     }
@@ -300,6 +300,7 @@ maxHeight = 0,
 
 // 判断是否拖拽
 ifMove = false,
+ifMoveTwo = false,
 
 // 鼠标位置
 mouseX = '',
@@ -339,26 +340,26 @@ function showAttrs() {
     }
 
     var divStyle = {},div;
-    for(var i in editAttrs){
-      data.attrs[i] = editAttrs[i];
-      idNum = (editAttrs[i]['z-index']-0) > idNum ? editAttrs[i]['z-index']-0 : idNum;
-      maxHeight = parseInt(editAttrs[i].top)+parseInt(editAttrs[i].height) > maxHeight ? parseInt(editAttrs[i].top)+parseInt(editAttrs[i].height) : maxHeight;
+    for(var k in editAttrs){
+      data.attrs[k] = editAttrs[k];
+      idNum = (editAttrs[k]['z-index']-0) > idNum ? editAttrs[k]['z-index']-0 : idNum;
+      maxHeight = parseInt(editAttrs[k].top)+parseInt(editAttrs[k].height) > maxHeight ? parseInt(editAttrs[k].top)+parseInt(editAttrs[k].height) : maxHeight;
       
-      if(editAttrs[i].type == 'text'){
+      if(editAttrs[k].type == 'text'){
         divStyle ='position:'+'absolute'
-              +';top:'+editAttrs[i].top
-              +';left:'+editAttrs[i].left
-              +';z-index:'+editAttrs[i]['z-index']
-              +';width:'+editAttrs[i].width
-              +';height:'+editAttrs[i].height
-              +';font-size:'+editAttrs[i]['font-size']
-              +';font-style:'+editAttrs[i]['font-style']
-              +';font-face:'+editAttrs[i]['font-face']
-              +';font-weight:'+editAttrs[i]['font-weight']
-              +';text-align:'+editAttrs[i]['text-align']
-              +';text-decoration:'+editAttrs[i]['text-decoration']
-              +';color:'+editAttrs[i].color
-              +';link:'+editAttrs[i].link;
+              +';top:'+editAttrs[k].top
+              +';left:'+editAttrs[k].left
+              +';z-index:'+editAttrs[k]['z-index']
+              +';width:'+editAttrs[k].width
+              +';height:'+editAttrs[k].height
+              +';font-size:'+editAttrs[k]['font-size']
+              +';font-style:'+editAttrs[k]['font-style']
+              +';font-face:'+editAttrs[k]['font-face']
+              +';font-weight:'+editAttrs[k]['font-weight']
+              +';text-align:'+editAttrs[k]['text-align']
+              +';text-decoration:'+editAttrs[k]['text-decoration']
+              +';color:'+editAttrs[k].color
+              +';link:'+editAttrs[k].link;
 
         div = `<div style='${divStyle}' class='text-box text-box-${idNum}' ondblclick='edit(event, "text-box-${idNum}")'>
                   <div class='direction-box' onmousedown='moveImg(event, "text-box-${idNum}")'>
@@ -376,23 +377,23 @@ function showAttrs() {
                   <pre class='pre' onclick='addMove(event, "text-box-${idNum}")' ></pre>
               </div>`;
         content.append(div)
-        $('.text-box-'+idNum+ ' .pre').text(editAttrs[i].content)
+        $('.text-box-'+idNum+ ' .pre').text(editAttrs[k].content)
 
-        if(editAttrs[i].content){
+        if(editAttrs[k].content){
           $('.text-box-'+idNum + ' .pre').addClass('no-border')
         }
 
-        var heig = parseInt(editAttrs[i].top) + parseInt(editAttrs[i].height);
+        var heig = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
         aotuScroll(heig)
 
-      }else if(editAttrs[i].type == 'img'){
+      }else if(editAttrs[k].type == 'img'){
         divStyle ='position:'+'absolute'
-              +';top:'+editAttrs[i].top
-              +';left:'+editAttrs[i].left
-              +';z-index:'+editAttrs[i]['z-index']
-              +';width:'+editAttrs[i].width
-              +';height:'+editAttrs[i].height
-              +';link:'+editAttrs[i].link;
+              +';top:'+editAttrs[k].top
+              +';left:'+editAttrs[k].left
+              +';z-index:'+editAttrs[k]['z-index']
+              +';width:'+editAttrs[k].width
+              +';height:'+editAttrs[k].height
+              +';link:'+editAttrs[k].link;
 
         div = `<div style='${divStyle}' class='img-box img-box-${idNum}'>
                 <div class='direction-box' onmousedown='moveImg(event)' ondblclick='loadImg(event, "img-box-${idNum}")'>
@@ -412,41 +413,41 @@ function showAttrs() {
               </div>`;
         content.append(div)
 
-        if(editAttrs[i].url){
-          $('.img-box-'+idNum+ ' .img').show().attr('src', editAttrs[i].url)
+        if(editAttrs[k].url){
+          $('.img-box-'+idNum+ ' .img').show().attr('src', editAttrs[k].url)
           $('.img-box-'+idNum+ ' .ele-box').addClass('no-bg')
         }
 
-        var heig = parseInt(editAttrs[i].top) + parseInt(editAttrs[i].height);
+        var heig = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
         aotuScroll(heig)
 
-      }else if(editAttrs[i].type == 'video'){
+      }else if(editAttrs[k].type == 'video'){
         divStyle ='position:'+'absolute'
-              +';top:'+editAttrs[i].top
-              +';left:'+editAttrs[i].left
-              +';z-index:'+editAttrs[i]['z-index']
-              +';width:'+editAttrs[i].width
-              +';height:'+editAttrs[i].height
-              +';link:'+editAttrs[i].link;
+              +';top:'+editAttrs[k].top
+              +';left:'+editAttrs[k].left
+              +';z-index:'+editAttrs[k]['z-index']
+              +';width:'+editAttrs[k].width
+              +';height:'+editAttrs[k].height
+              +';link:'+editAttrs[k].link;
 
         div = `<div style='${divStyle}' class='video-box video-box-${idNum}'>
                 <div class='direction-box' onmousedown='moveImg(event)' ondblclick='loadImg(event, "video-box-${idNum}")'>
-                  <div class='direction top' onmousedown='move(event, "top")'></div>
-                  <div class='direction down' onmousedown='move(event, "down")'></div>
-                  <div class='direction left' onmousedown='move(event, "left")'></div>
-                  <div class='direction right' onmousedown='move(event, "right")'></div>
-                  <div class='direction topLeft' onmousedown='move(event, "topLeft")'></div>
-                  <div class='direction topRight' onmousedown='move(event, "topRight")'></div>
-                  <div class='direction downLeft' onmousedown='move(event, "downLeft")'></div>
-                  <div class='direction downRight' onmousedown='move(event, "downRight")'></div>
+                  <div class='direction top' onmousedown='move(event, "top", "video-box-${idNum}")'></div>
+                  <div class='direction down' onmousedown='move(event, "down", "video-box-${idNum}")'></div>
+                  <div class='direction left' onmousedown='move(event, "left", "video-box-${idNum}")'></div>
+                  <div class='direction right' onmousedown='move(event, "right", "video-box-${idNum}")'></div>
+                  <div class='direction topLeft' onmousedown='move(event, "topLeft", "video-box-${idNum}")'></div>
+                  <div class='direction topRight' onmousedown='move(event, "topRight", "video-box-${idNum}")'></div>
+                  <div class='direction downLeft' onmousedown='move(event, "downLeft", "video-box-${idNum}")'></div>
+                  <div class='direction downRight' onmousedown='move(event, "downRight", "video-box-${idNum}")'></div>
                 </div>
                 <input type='file' class='ipt-img' accept='video/*' onchange='changeFile(event, "video-box-${idNum}")'/>
                 <video class='video' src='' width="100%" height="100%" controls="controls" autoplay="autoplay"  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
               </div>`;
         content.append(div)
-        $('.video-box-'+idNum+ ' .video').attr('src', editAttrs[i].url)
+        $('.video-box-'+idNum+ ' .video').attr('src', editAttrs[k].url)
 
-        var heig = parseInt(editAttrs[i].top) + parseInt(editAttrs[i].height);
+        var heig = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
         aotuScroll(heig)
       }
     }
@@ -501,7 +502,7 @@ $('.classify-text').on('mousedown', function(e) {
       tem.show()
     }
 
-    textObj.left = (textObj.left/contentWidth*100).toFixed(2) + '%';
+    textObj.left = textObj.left + 'px';
     textObj.top = textObj.top + 'px';
 
     tem.css({'left': textObj.left, 'top': textObj.top})
@@ -568,6 +569,8 @@ $('.classify-text').on('mousedown', function(e) {
     ifMove = false;
     $('.content').off('mouseup')
 
+    textObj.left = (parseInt(textObj.left)/contentWidth*100).toFixed(2) + '%';
+
     data.attrs.push(textObj)
     console.log(66,data)
     return false
@@ -580,6 +583,7 @@ function edit(e, className) {
   clearTimeout(timer);
 
   $('.direction-box').hide()
+  editObj = {};
 
   if(!elementActive){
     elementActive = className;
@@ -592,17 +596,15 @@ function edit(e, className) {
     $('.'+className).css('z-index', 9999)
   }
 
-  var clas = className;
-
-  for(var at in data.attrs){
-    if(data.attrs[at].element == clas){
-      editIndex = at;
+  for(var ay in data.attrs){
+    if(data.attrs[ay].element == className){
+      editIndex = ay;
     }
   }
 
   if(editIndex){
-    for(var q in data.attrs[editIndex]){
-      editObj[q] = data.attrs[editIndex][q]
+    for(var w in data.attrs[editIndex]){
+      editObj[w] = data.attrs[editIndex][w]
     }
   }
 
@@ -817,7 +819,6 @@ $('.classify-video').on('mousedown', function() {
 
   ifMove = false;
 
-  // return
   var videoObj = {};
   for(var attr in videoAttr){
     videoObj[attr] = videoAttr[attr];
@@ -826,8 +827,8 @@ $('.classify-video').on('mousedown', function() {
   $(this).addClass('active').siblings().removeClass('active')
   $('.control-video').show().siblings('.content-r-child').hide();
 
-  videoObj.width = '140px';
-  videoObj.height = '140px';
+  videoObj.width = '375px';
+  videoObj.height = '120px';
 
   var vidWidth = $('.video-width').val(),vidHeight = $('.video-height').val();
   if(vidWidth && vidWidth>0){
@@ -945,10 +946,13 @@ function addMove(e, className) {
   e.stopPropagation();
 
   ifMove = false;
+  ifMoveTwo = false;
   tier(className)
   
   clearTimeout(timer);
   timer = setTimeout(function () {
+    e.stopPropagation();
+    
     $('.direction-box').hide()
     $('.'+className).find('.direction-box').show()
     
@@ -963,8 +967,6 @@ function addMove(e, className) {
         editObj[q] = data.attrs[editIndex][q]
       }
     }
-
-    editObj.left = parseInt(contentWidth * ((editObj.left).slice(0,-1)/100)) + 'px';
 
     $('.content-r .link').val(editObj.link)
 
@@ -1043,23 +1045,26 @@ function closeMove(e) {
 // 拖拽移动
 function moveImg(e, className) {
   if($(e.target).hasClass('direction-box')){
+    ifMoveTwo = false;
+
     for(var at in data.attrs){
       if(data.attrs[at].element == className){
         editIndex = at;
       }
     }
-
+    
     if(editIndex){
       for(var q in data.attrs[editIndex]){
         editObj[q] = data.attrs[editIndex][q]
       }
     }
-
+    
     var box = $(e.target).parent(),
-        clientX = parseInt(e.pageX - box.offset().left);
-        clientY = parseInt(e.pageY - box.offset().top);
-        
+    clientX = parseInt(e.pageX - box.offset().left);
+    clientY = parseInt(e.pageY - box.offset().top);
+    
     $(content).mousemove(function (e) {
+      ifMoveTwo = true;
       mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
       mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
@@ -1085,8 +1090,13 @@ function moveImg(e, className) {
       box.css({'left':editObj.left, 'top':editObj.top})
     })
 
-    $(content).mouseup(function () {
-      data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
+    $(content).mouseup(function () {  
+      if(ifMoveTwo){
+        data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
+      }else{
+        data.attrs[editIndex].left = editObj.left;
+      }
+      
       data.attrs[editIndex].top = editObj.top;
 
       if(parseInt(editObj.top) + parseInt(editObj.height) > maxHeight){
@@ -1113,6 +1123,7 @@ function move(e, direction, className) {
       type = className.split('-box-')[0],
       rate = (posW/posH).toFixed(3),
       widthK,heightk,topK,mouseXK,mouseYK,zoomType = 1;
+      console.log(666,rate)
 
   if(type == 'img' && data.attrs[editIndex].url){
     zoomType = 2
@@ -1141,7 +1152,7 @@ function move(e, direction, className) {
           editObj.height = (posYH-editObj.top)+'px';
           editObj.top = editObj.top + 'px';
   
-          box.css({'top':editObj.top,'height':editObj.height})
+          box.css({'top':editObj.top, 'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1180,16 +1191,13 @@ function move(e, direction, className) {
           }
   
           editObj.left = editObj.left + 'px';
-          editObj.width = (posXW-parseInt(editObj.left))*2+'px';
-          if(parseInt(editObj.width) > (contentWidth - parseInt(editObj.left))){
-            editObj.width = (contentWidth - parseInt(editObj.left))+'px';
-          }
+          editObj.width = (posXW-parseInt(editObj.left))+'px';
 
           if(parseInt(editObj.top) < 0){
             editObj.top = 0
           }
   
-          box.css({'left':editObj.left,'width':editObj.width})
+          box.css({'left':editObj.left, 'width':editObj.width})
         })
   
         $('.content').mouseup(function () {
@@ -1245,7 +1253,7 @@ function move(e, direction, className) {
           editObj.top = editObj.top + 'px';
           editObj.left = editObj.left + 'px';
   
-          box.css({'left':editObj.left,'top':editObj.top,'width':editObj.width,'height':editObj.height})
+          box.css({'left':editObj.left, 'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1277,7 +1285,7 @@ function move(e, direction, className) {
           editObj.height = (posYH-editObj.top)+'px';
           editObj.top = editObj.top + 'px';
   
-          box.css({'top':editObj.top,'width':editObj.width,'height':editObj.height})
+          box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1301,11 +1309,11 @@ function move(e, direction, className) {
             editObj.left = posXW
           }
           
-          var width = (posXW-parseInt(editObj.left))+'px';
-          var height = (mouseY-parseInt(editObj.top))+'px';
+          editObj.width = (posXW-parseInt(editObj.left))+'px';
+          editObj.height = (mouseY-parseInt(editObj.top))+'px';
           editObj.left = editObj.left + 'px';
   
-          box.css({'left':editObj.left,'width':width,'height':height})
+          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1327,7 +1335,7 @@ function move(e, direction, className) {
   
           editObj.height = (mouseY-parseInt(editObj.top))+'px';
   
-          box.css({'width':editObj.width,'height':editObj.height})
+          box.css({'width':editObj.width, 'height':editObj.height})
         })
   
         $('.content').mouseup(function () {
@@ -1411,7 +1419,7 @@ function move(e, direction, className) {
             editObj.height = parseInt((contentWidth-posX)*rate)+'px';
           }
 
-          box.css({'width':editObj.width,'height':editObj.height})
+          box.css({'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1439,7 +1447,7 @@ function move(e, direction, className) {
 
           editObj.height = box.find('.img').css('height');
 
-          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
+          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1460,7 +1468,7 @@ function move(e, direction, className) {
 
           editObj.height = box.find('.img').css('height');
 
-          box.css({'width':editObj.width,'height':editObj.height})
+          box.css({'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1498,7 +1506,7 @@ function move(e, direction, className) {
           editObj.height = parseInt((posXW-parseInt(editObj.left))*rate)+'px';
           editObj.left = editObj.left + 'px';
 
-          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
+          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1532,7 +1540,7 @@ function move(e, direction, className) {
 
           editObj.top = editObj.top + 'px';
 
-          box.css({'top':editObj.top,'width':editObj.width,'height':editObj.height})
+          box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1560,7 +1568,7 @@ function move(e, direction, className) {
           editObj.width = (posXW-parseInt(editObj.left))+'px';
           editObj.height = parseInt(parseInt(editObj.width)/rate)+'px';
 
-          box.css({'left':editObj.left,'width':editObj.width,'height':editObj.height})
+          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1586,7 +1594,7 @@ function move(e, direction, className) {
           }
           editObj.height = parseInt(parseInt(editObj.width)*rate) + 'px';
 
-          box.css({'width':editObj.width,'height':editObj.height})
+          box.css({'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1600,7 +1608,12 @@ function move(e, direction, className) {
 
   // 返回结果
   function returnData() {
-    data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
+    if((editObj.left).indexOf('%') == -1){
+      data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
+    }else{
+      data.attrs[editIndex].left = editObj.left;
+    }
+
     data.attrs[editIndex].top = editObj.top;
     data.attrs[editIndex].width = editObj.width;
     data.attrs[editIndex].height = editObj.height;
@@ -1743,7 +1756,19 @@ function changeFile(obj,className) {
 
             $('.'+className).children('.video').attr('src', videoUrl)
             $('.'+className).addClass('no-bg')
+            $('.'+className).css('height', 'auto')
             data.attrs[editIndex].url = videoUrl;
+
+            // var img = new Image();
+            // img.src = imgUrl;
+            // img.onload = function() {
+            //   ratio = img.width/img.height
+            //   data.attrs[editIndex].width = $('.'+className).css('width');
+            //   data.attrs[editIndex].height = parseInt(parseInt($('.'+className).css('width'))/ratio)+'px';
+              
+            //   var heig = parseInt($('.'+className).css('top')) + parseInt(data.attrs[editIndex].height);
+            //   aotuScroll(heig)
+            // }
   　　　　},
   　　　　error: function(err) {
             console.log('err',err)
@@ -1884,8 +1909,15 @@ function save() {
     data: {'Special': param, '_csrf-backend': $('meta[name=csrf-token]').attr("content")},
 
     success: function(msg) {
-      // console.log(msg)
-      alert('保存成功')
+      console.log(msg)
+      if(msg.code==422){
+        alert(msg.message)
+      }else{
+        alert('保存成功')
+      }
+    },
+    error: function(err) {
+      console.log(err)
     }
   })
 }
