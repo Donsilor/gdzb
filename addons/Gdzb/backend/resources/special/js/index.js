@@ -2161,10 +2161,10 @@ function save() {
 
     success: function(msg) {
       console.log(msg)
-      if(msg.code==422){
-        alert(msg.message)
-      }else{
+      if(msg.code==200){
         alert('保存成功')
+      }else{
+        alert(msg.message)
       }
     },
     error: function(err) {
