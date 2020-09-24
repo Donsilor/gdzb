@@ -268,13 +268,13 @@ $this->beginPage()
                 <div class="align">
                   <div class="attr clf">
                     <div class="text fl">长</div>
-                    <input type="number" class="ipt video-width fl" onblur="iptBlur('video-width')">
+                    <input type="number" class="ipt video-width fl" onblur="iptBlur(event, 'video-width')">
                     <div class="px fl">px</div>
                   </div>
 
                   <div class="attr clf">
                     <div class="text fl">宽</div>
-                    <input type="number" class="ipt video-height fl" onblur="iptBlur('video-height')">
+                    <input type="number" class="ipt video-height fl" onblur="iptBlur(event, 'video-height')">
                     <div class="px fl">px</div>
                   </div>
 
@@ -318,7 +318,9 @@ $this->beginPage()
             <span class="close" onclick="closeClone()">x</span>
         </div>
 
-        <div class="clone-content"></div>
+        <div class="clone-content">
+            <div class="shelter"></div>
+        </div>
     </div>
 </div>
 

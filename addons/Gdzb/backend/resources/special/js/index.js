@@ -588,12 +588,12 @@ function edit(e, className) {
   if(!elementActive){
     elementActive = className;
     elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', 9999);
+    $('.'+className).css('z-index', 999);
   }else{
     $('.'+elementActive).css('z-index', elementActiveZIndex)
     elementActive = className;
     elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', 9999)
+    $('.'+className).css('z-index', 999)
   }
 
   for(var ay in data.attrs){
@@ -827,7 +827,7 @@ $('.classify-video').on('mousedown', function() {
   $(this).addClass('active').siblings().removeClass('active')
   $('.control-video').show().siblings('.content-r-child').hide();
 
-  videoObj.width = '375px';
+  videoObj.width = '180px';
   videoObj.height = '120px';
 
   var vidWidth = $('.video-width').val(),vidHeight = $('.video-height').val();
@@ -1017,7 +1017,7 @@ function addMove(e, className) {
       $('.img-height').val(parseInt(editObj.height))
       // $('.img-link').val(parseInt(editObj.link))
 
-      ratio = (parseInt(editObj.width)/parseInt(editObj.height)).toFixed(3)
+      ratio = (parseInt(editObj.width)/parseInt(editObj.height)).toFixed(4)
 
       $('.control-img').show().siblings().hide();
       $('.del').hide()
@@ -1028,10 +1028,11 @@ function addMove(e, className) {
       $('.video-width').val(parseInt(editObj.width))
       $('.video-height').val(parseInt(editObj.height))
 
+      ratio = (parseInt(editObj.width)/parseInt(editObj.height)).toFixed(4)
+
       $('.control-video').show().siblings().hide();
       $('.del').hide()
       $('.control-video .del').show()
-
       $('.video-url').val(editObj.url)
     }
   }, 300);
@@ -1121,16 +1122,21 @@ function move(e, direction, className) {
       posYH = posY + posH,
       posXW = posX + posW,
       type = className.split('-box-')[0],
-      rate = (posW/posH).toFixed(3),
+      rate = (posW/posH).toFixed(4),
       widthK,heightk,topK,mouseXK,mouseYK,zoomType = 1;
-      console.log(666,rate)
+
 
   if(type == 'img' && data.attrs[editIndex].url){
     zoomType = 2
   }
 
   if(type == 'video' && data.attrs[editIndex].url){
-    zoomType = 2
+    zoomType = 3;
+    posW = parseInt(box.children('video').css('width'));
+    posH = parseInt(box.children('video').css('height'));
+    posYH = posY + posH,
+    posXW = posX + posW,
+    rate = (posW/posH).toFixed(4);
   }
   
 
@@ -1171,7 +1177,7 @@ function move(e, direction, className) {
         })
   
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
   
@@ -1201,7 +1207,7 @@ function move(e, direction, className) {
         })
   
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
   
@@ -1220,7 +1226,7 @@ function move(e, direction, className) {
         })
   
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
   
@@ -1257,7 +1263,7 @@ function move(e, direction, className) {
         })
   
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
   
@@ -1289,7 +1295,7 @@ function move(e, direction, className) {
         })
   
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
   
@@ -1317,7 +1323,7 @@ function move(e, direction, className) {
         })
   
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
   
@@ -1339,11 +1345,11 @@ function move(e, direction, className) {
         })
   
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
     }
-  } else {
+  } else if(zoomType == 2) {
     switch (direction) {
       case 'top':
         $('.content').mousemove(function(e) {
@@ -1360,11 +1366,17 @@ function move(e, direction, className) {
           // topK = editObj.top+'px';
           editObj.top = editObj.top + 'px';
           editObj.height = (posYH - parseInt(editObj.top)) + 'px';
-          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))/rate) + 'px';
 
           if((posYH - editObj.top)*rate >= (contentWidth-posX)){
             editObj.width = (contentWidth-posX)+'px';
-            editObj.height = parseInt((contentWidth-posX)*rate)+'px';
+            editObj.height = parseInt((contentWidth-posX)/rate)+'px';
+          }
+
+          if(parseInt(editObj.width) >= (contentWidth - parseInt(posX))){
+            editObj.width = (contentWidth - parseInt(posX)) + 'px';
+            editObj.height = parseInt(editObj.width)/rate + 'px';
+            editObj.top = (posYH - parseInt(editObj.height)) + 'px';
           }
 
           // if(!widthK){
@@ -1402,7 +1414,7 @@ function move(e, direction, className) {
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1416,14 +1428,14 @@ function move(e, direction, className) {
 
           if((mouseY-parseInt(editObj.top))*rate >= (contentWidth-posX)){
             editObj.width = (contentWidth-posX)+'px';
-            editObj.height = parseInt((contentWidth-posX)*rate)+'px';
+            editObj.height = parseInt((contentWidth-posX)/rate)+'px';
           }
 
           box.css({'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1451,7 +1463,7 @@ function move(e, direction, className) {
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1472,7 +1484,7 @@ function move(e, direction, className) {
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1503,14 +1515,14 @@ function move(e, direction, className) {
           }
 
           editObj.width = (posXW-parseInt(editObj.left))+'px';
-          editObj.height = parseInt((posXW-parseInt(editObj.left))*rate)+'px';
+          editObj.height = parseInt((posXW-parseInt(editObj.left))/rate)+'px';
           editObj.left = editObj.left + 'px';
 
           box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1531,11 +1543,11 @@ function move(e, direction, className) {
           }
           
           editObj.width = (mouseX-parseInt(posX)) + 'px';
-          editObj.height = parseInt((mouseX-parseInt(posX))*rate) + 'px';
+          editObj.height = parseInt((mouseX-parseInt(posX))/rate) + 'px';
 
           if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
             editObj.width = (contentWidth - parseInt(posX)) + 'px'
-            editObj.height = parseInt((contentWidth - parseInt(posX))*rate) + 'px';
+            editObj.height = parseInt((contentWidth - parseInt(posX))/rate) + 'px';
           }
 
           editObj.top = editObj.top + 'px';
@@ -1544,7 +1556,7 @@ function move(e, direction, className) {
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1572,7 +1584,7 @@ function move(e, direction, className) {
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1592,13 +1604,248 @@ function move(e, direction, className) {
           if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
             editObj.width = (contentWidth - parseInt(posX)) + 'px'
           }
-          editObj.height = parseInt(parseInt(editObj.width)*rate) + 'px';
+          editObj.height = parseInt(parseInt(editObj.width)/rate) + 'px';
 
           box.css({'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
-          returnData()
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+    }
+  } else {
+    switch (direction) {
+      case 'top':
+        $('.content').mousemove(function(e) {
+          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+          editObj.top = mouseY;
+          
+          if(editObj.top < 0){
+            editObj.top = 0
+          }
+          if(editObj.top > posYH){
+            editObj.top = posYH
+          }
+
+          // topK = editObj.top+'px';
+          editObj.top = editObj.top + 'px';
+          editObj.height = (posYH - parseInt(editObj.top)) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
+
+          if((posYH - editObj.top)*rate >= (contentWidth-posX)){
+            editObj.width = (contentWidth-posX)+'px';
+            editObj.height = parseInt((contentWidth-posX)/rate)+'px';
+          }
+
+          if(parseInt(editObj.width) >= (contentWidth - parseInt(posX))){
+            editObj.width = (contentWidth - parseInt(posX)) + 'px';
+            editObj.height = parseInt(editObj.width)/rate + 'px';
+            editObj.top = (posYH - parseInt(editObj.height)) + 'px';
+          }
+
+          box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+
+      case 'down':
+        $('.content').mousemove(function(e) {
+          mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+          editObj.height = (mouseY-parseInt(editObj.top))+'px';
+          editObj.width = parseInt((mouseY-parseInt(editObj.top))*rate)+'px';
+
+          if((mouseY-parseInt(editObj.top))*rate >= (contentWidth-posX)){
+            editObj.width = (contentWidth-posX)+'px';
+            editObj.height = parseInt((contentWidth-posX)/rate)+'px';
+          }
+
+          box.css({'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+
+      case 'left':
+        $('.content').mousemove(function(e) {
+          mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+
+          editObj.left = mouseX;
+
+          if(editObj.left < 0){
+            editObj.left = 0
+          }
+          if(editObj.left > posXW){
+            editObj.left = posXW
+          }
+
+          editObj.left = editObj.left + 'px';
+          editObj.width = (posXW-parseInt(editObj.left))+'px';
+          editObj.height = parseInt(parseInt(editObj.width)/rate)+'px';
+
+          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+
+      case 'right':
+        $('.content').mousemove(function(e) {
+          mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+
+          editObj.width = (mouseX-parseInt(posX)) + 'px';
+          if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
+            editObj.width = (contentWidth - parseInt(posX)) + 'px'
+          }
+
+          editObj.height = parseInt(parseInt(editObj.width)/rate) + 'px';
+
+          box.css({'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+
+      case 'topLeft':
+        $('.content').mousemove(function(e) {
+          mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+          // mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+          editObj.left = mouseX;
+          // editObj.top = mouseY;
+          
+          // if(editObj.top < 0){
+          //   editObj.top = 0
+          // }
+
+          // if(editObj.top > posYH){
+          //   editObj.top = posYH
+          // }
+
+          if(editObj.left < 0){
+            editObj.left = 0
+          }
+
+          if(editObj.left > posXW){
+            editObj.left = posXW
+          }
+
+          editObj.width = (posXW-parseInt(editObj.left))+'px';
+          editObj.height = parseInt((posXW-parseInt(editObj.left))/rate)+'px';
+          editObj.left = editObj.left + 'px';
+
+          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+
+      case 'topRight':
+        $('.content').mousemove(function(e) {
+          mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+          editObj.top = posY;
+          
+          if(editObj.top < 0){
+            editObj.top = 0
+          }
+          if(editObj.top > posYH){
+            editObj.top = posYH
+          }
+          
+          editObj.width = (mouseX-parseInt(posX)) + 'px';
+          editObj.height = parseInt((mouseX-parseInt(posX))/rate) + 'px';
+
+          if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
+            editObj.width = (contentWidth - parseInt(posX)) + 'px'
+            editObj.height = parseInt((contentWidth - parseInt(posX))/rate) + 'px';
+          }
+
+          editObj.top = editObj.top + 'px';
+
+          box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+
+      case 'downLeft':
+        $('.content').mousemove(function(e) {
+          mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+          
+          editObj.left = mouseX;
+          
+          if(editObj.left < 0){
+            editObj.left = 0
+          }
+          if(editObj.left > posXW){
+            editObj.left = posXW
+          }
+          
+          editObj.left = editObj.left+'px';
+          editObj.width = (posXW-parseInt(editObj.left))+'px';
+          editObj.height = parseInt(parseInt(editObj.width)/rate)+'px';
+
+          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
+          $('.content').off('mousemove')
+        })
+
+        break;
+
+      case 'downRight':
+        $('.content').mousemove(function(e) {
+          mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+          if(!mouseXK){
+            mouseXK = mouseX;
+            mouseYK = mouseYK;
+          }
+
+          editObj.width = (mouseX-parseInt(posX)) + 'px';
+          if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
+            editObj.width = (contentWidth - parseInt(posX)) + 'px'
+          }
+          editObj.height = parseInt(parseInt(editObj.width)/rate) + 'px';
+
+          box.css({'width':editObj.width, 'height':editObj.height})
+        })
+
+        $('.content').mouseup(function () {
+          returnData(type)
           $('.content').off('mousemove')
         })
 
@@ -1607,7 +1854,7 @@ function move(e, direction, className) {
   }
 
   // 返回结果
-  function returnData() {
+  function returnData(type) {
     if((editObj.left).indexOf('%') == -1){
       data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
     }else{
@@ -1618,8 +1865,15 @@ function move(e, direction, className) {
     data.attrs[editIndex].width = editObj.width;
     data.attrs[editIndex].height = editObj.height;
 
-    $('.img-width').val(parseInt(editObj.width))
-    $('.img-height').val(parseInt(editObj.height))
+    if(type == 'img'){
+      $('.img-width').val(parseInt(editObj.width))
+      $('.img-height').val(parseInt(editObj.height))
+    }
+
+    if(type == 'video'){ 
+      $('.video-width').val(parseInt(editObj.width))
+      $('.video-height').val(parseInt(editObj.height))
+    }
 
     return
   }
@@ -1758,6 +2012,7 @@ function changeFile(obj,className) {
             $('.'+className).addClass('no-bg')
             $('.'+className).css('height', 'auto')
             data.attrs[editIndex].url = videoUrl;
+            $('.video-url').val(videoUrl)
 
             // var img = new Image();
             // img.src = imgUrl;
@@ -1832,12 +2087,12 @@ function tier(ele) {
   if(!elementActive){
     elementActive = ele;
     elementActiveZIndex = $('.'+ele).css('z-index');
-    $('.'+ele).css('z-index', 9999);
+    $('.'+ele).css('z-index', 999);
   }else{
     $('.'+elementActive).css('z-index', elementActiveZIndex)
     elementActive = ele;
     elementActiveZIndex = $('.'+ele).css('z-index');
-    $('.'+ele).css('z-index', 9999)
+    $('.'+ele).css('z-index', 999)
   }
 }
 
@@ -1865,14 +2120,15 @@ function openTdk() {
 
 // 预览
 function preview() {
-  alert('稍等，页面制作中。。。')
-  return
+  // alert('稍等，页面制作中。。。')
+  // return
   $('.popup').show()
-  $('.popup .clone-content').append($('.scroll').clone(true))
+  $('.popup .clone-content').append($('.scroll').clone(false))
 }
 
 // 关闭预览
 function closeClone() {
+  $('.popup .clone-content .scroll').remove()
   $('.popup').hide()
 }
 
