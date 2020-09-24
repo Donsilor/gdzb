@@ -967,7 +967,7 @@ function addMove(e, className) {
 
     if(editObj.type == 'text'){
       $('.colorBlock').css('background-color', editObj.color)
-      $('.colorIpt').val(' ')
+      $('.colorIpt').val(editObj.color)
 
       if(editObj['font-size']){
         $('.font-size').text(parseInt(editObj['font-size']))
