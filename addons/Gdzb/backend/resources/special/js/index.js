@@ -300,7 +300,6 @@ maxHeight = 0,
 
 // 判断是否拖拽
 ifMove = false,
-ifMoveTwo = false,
 
 // 鼠标位置
 mouseX = '',
@@ -442,7 +441,7 @@ function showAttrs() {
                   <div class='direction downRight' onmousedown='move(event, "downRight", "video-box-${idNum}")'></div>
                 </div>
                 <input type='file' class='ipt-img' accept='video/*' onchange='changeFile(event, "video-box-${idNum}")'/>
-                <video class='video' src='' width="100%" height="100%" controls="controls" autoplay="autoplay"  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
+                <video class='video' src='' width="100%" height="auto" controls="controls" autoplay="autoplay"  onclick='addMove(event, "video-box-${idNum}")' ondblclick='loadImg(event, "video-box-${idNum}")'></video>
               </div>`;
         content.append(div)
         $('.video-box-'+idNum+ ' .video').attr('src', editAttrs[k].url)
@@ -463,7 +462,6 @@ $('.classify-text').on('mousedown', function(e) {
   e.stopPropagation()
   resetCss()
 
-  ifMove = false;
   var textObj = {};
   for(var attr in textAttr){
     textObj[attr] = textAttr[attr];
@@ -478,14 +476,13 @@ $('.classify-text').on('mousedown', function(e) {
 
   $('.content').on('mousemove', function(e) {
     e.stopPropagation();
-    ifMove = true;
-
+    
     mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
     mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
     
     textObj.left=mouseX - parseInt(textObj.width)/2;
     textObj.top=mouseY - parseInt(textObj.height)/2;
-
+    
     if(textObj.left < 0){
       textObj.left = 0
     }
@@ -550,7 +547,10 @@ $('.classify-text').on('mousedown', function(e) {
       
     $('.scroll').append(div)
 
-    if(!ifMove && maxHeight){
+    mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+    mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+    if((mouseX < 0 || mouseX > 375 || mouseY < 0) && maxHeight){
       textObj.top = (maxHeight+20) + 'px';
     }
 
@@ -566,7 +566,7 @@ $('.classify-text').on('mousedown', function(e) {
     tier('text-box-'+idNum)
 
     idNum++;
-    ifMove = false;
+
     $('.content').off('mouseup')
 
     textObj.left = (parseInt(textObj.left)/contentWidth*100).toFixed(2) + '%';
@@ -685,9 +685,6 @@ function onBlur(e,className) {
 // 增加图片
 $('.classify-img').on('mousedown', function() {
   resetCss()
-
-  ifMove = false;
-
   var imgObj = {};
   for(var attr in imgAttr){
     imgObj[attr] = imgAttr[attr];
@@ -714,8 +711,6 @@ $('.classify-img').on('mousedown', function() {
   tem.css({'width': imgObj.width, 'height': imgObj.height})
 
   $('.content').on('mousemove', function(e) {
-    ifMove = true;
-
     mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
     mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
@@ -787,8 +782,11 @@ $('.classify-img').on('mousedown', function() {
           </div>`;
     $('.scroll').append(div)
 
-    if(!ifMove && maxHeight){
-      imgObj.top = maxHeight+20 + 'px';
+    mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+    mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+    if((mouseX < 0 || mouseX > 375 || mouseY < 0) && maxHeight){
+      imgObj.top = (maxHeight+20) + 'px';
     }
 
     if(parseInt(imgObj.top) + parseInt(imgObj.height) > maxHeight){
@@ -803,7 +801,7 @@ $('.classify-img').on('mousedown', function() {
     tier('img-box-'+idNum)
 
     idNum++;
-    ifMove = false;
+
     $('.content').off('mouseup')
 
     data.attrs.push(imgObj)
@@ -816,9 +814,6 @@ $('.classify-img').on('mousedown', function() {
 // 增加视频
 $('.classify-video').on('mousedown', function() {
   resetCss()
-
-  ifMove = false;
-
   var videoObj = {};
   for(var attr in videoAttr){
     videoObj[attr] = videoAttr[attr];
@@ -842,8 +837,6 @@ $('.classify-video').on('mousedown', function() {
   tem.css({'width': videoObj.width, 'height': videoObj.height})
 
   $('.content').on('mousemove', function(e) {
-    ifMove = true;
-
     mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
     mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
@@ -916,8 +909,11 @@ $('.classify-video').on('mousedown', function() {
 
     $('.scroll').append(div)
 
-    if(!ifMove && maxHeight){
-      videoObj.top = maxHeight+20 + 'px';
+    mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
+    mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+
+    if((mouseX < 0 || mouseX > 375 || mouseY < 0) && maxHeight){
+      videoObj.top = (maxHeight+20) + 'px';
     }
 
     if(parseInt(videoObj.top) + parseInt(videoObj.height) > maxHeight){
@@ -932,7 +928,7 @@ $('.classify-video').on('mousedown', function() {
     tier('video-box-'+idNum)
 
     idNum++;
-    ifMove = false;
+
     $('.content').off('mouseup')
 
     data.attrs.push(videoObj)
@@ -946,7 +942,6 @@ function addMove(e, className) {
   e.stopPropagation();
 
   ifMove = false;
-  ifMoveTwo = false;
   tier(className)
   
   clearTimeout(timer);
@@ -1046,7 +1041,7 @@ function closeMove(e) {
 // 拖拽移动
 function moveImg(e, className) {
   if($(e.target).hasClass('direction-box')){
-    ifMoveTwo = false;
+    ifMove = false;
 
     for(var at in data.attrs){
       if(data.attrs[at].element == className){
@@ -1065,7 +1060,7 @@ function moveImg(e, className) {
     clientY = parseInt(e.pageY - box.offset().top);
     
     $(content).mousemove(function (e) {
-      ifMoveTwo = true;
+      ifMove = true;
       mouseX=parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
       mouseY=parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
@@ -1092,7 +1087,7 @@ function moveImg(e, className) {
     })
 
     $(content).mouseup(function () {  
-      if(ifMoveTwo){
+      if(ifMove){
         data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
       }else{
         data.attrs[editIndex].left = editObj.left;
