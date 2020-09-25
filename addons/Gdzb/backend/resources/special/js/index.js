@@ -2117,6 +2117,7 @@ function openTdk() {
 function preview() {
   // alert('稍等，页面制作中。。。')
   // return
+  $('.direction-box').hide()
   $('.popup').show()
   $('.popup .clone-content').append($('.scroll').clone(false))
 }

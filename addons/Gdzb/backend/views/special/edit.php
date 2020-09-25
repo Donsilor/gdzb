@@ -278,14 +278,14 @@ $this->beginPage()
                     <div class="px fl">px</div>
                   </div>
 
-                  <div class="attr clf">
+                  <!-- <div class="attr clf">
                     <div class="text fl">链接</div>
                     <input type="text" class="ipt fl link width video-link" onblur="addLink(event)">
-                  </div>
+                  </div> -->
 
                   <div class="attr clf">
                     <div class="text fl width50">视频链接</div>
-                    <input type="text" class="ipt fl width video-url">
+                    <input type="text" class="ipt fl width video-url" readonly>
                   </div>
 
                   <div class="attr">

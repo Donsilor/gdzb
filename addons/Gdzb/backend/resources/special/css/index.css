@@ -771,6 +771,10 @@ html{
   display: none;
 }
 
+.clone-content .img-box .ele-box{
+  border: none;
+}
+
 .shelter{
   position: absolute;
   top: 0;
