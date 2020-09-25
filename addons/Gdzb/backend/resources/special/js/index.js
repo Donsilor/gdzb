@@ -1116,10 +1116,10 @@ function move(e, direction, className) {
       // posHrefXW = posX + parseInt(posW/2),
       posYH = posY + posH,
       posXW = posX + posW,
-      type = className.split('-box-')[0],
-      rate = (posW/posH).toFixed(4),
-      widthK,heightk,topK,mouseXK,mouseYK,zoomType = 1;
-
+      type = className.split('-box-')[0],   //元素类型，文本，图片，视频
+      rate = (posW/posH).toFixed(4),        //宽高比
+      widthK,heightk,topK,mouseXK,mouseYK,
+      zoomType = 1;   //缩放类型，1为自然缩放，2为图片，3为视频; 
 
   if(type == 'img' && data.attrs[editIndex].url){
     zoomType = 2
@@ -1370,7 +1370,7 @@ function move(e, direction, className) {
 
           if(parseInt(editObj.width) >= (contentWidth - parseInt(posX))){
             editObj.width = (contentWidth - parseInt(posX)) + 'px';
-            editObj.height = parseInt(editObj.width)/rate + 'px';
+            editObj.height = parseInt(parseInt(editObj.width)/rate) + 'px';
             editObj.top = (posYH - parseInt(editObj.height)) + 'px';
           }
 
@@ -1488,32 +1488,34 @@ function move(e, direction, className) {
       case 'topLeft':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
-          // mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
-          editObj.left = mouseX;
-          // editObj.top = mouseY;
+          editObj.top = mouseY;
           
-          // if(editObj.top < 0){
-          //   editObj.top = 0
-          // }
+          if(editObj.top < 0){
+            editObj.top = 0
+          }
 
-          // if(editObj.top > posYH){
-          //   editObj.top = posYH
-          // }
-
-          if(editObj.left < 0){
-            editObj.left = 0
+          if(editObj.top > posYH){
+            editObj.top = posYH
           }
 
           if(editObj.left > posXW){
             editObj.left = posXW
           }
 
-          editObj.width = (posXW-parseInt(editObj.left))+'px';
-          editObj.height = parseInt((posXW-parseInt(editObj.left))/rate)+'px';
-          editObj.left = editObj.left + 'px';
+          editObj.height = (posYH - parseInt(editObj.top)) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
+          editObj.left = (posXW - parseInt(editObj.width)) + 'px';
 
-          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
+          if(parseInt(editObj.left) < 0){
+            editObj.left = 0;
+            editObj.width = posXW + 'px';
+            editObj.height = parseInt(posXW/rate) + 'px';
+            editObj.top = (posYH - parseInt(editObj.height)) + 'px';
+          }
+
+          box.css({'left':editObj.left, 'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
 
         $('.content').mouseup(function () {
@@ -1527,8 +1529,8 @@ function move(e, direction, className) {
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
           mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-
-          editObj.top = posY;
+          
+          editObj.top = mouseY;
           
           if(editObj.top < 0){
             editObj.top = 0
@@ -1536,17 +1538,22 @@ function move(e, direction, className) {
           if(editObj.top > posYH){
             editObj.top = posYH
           }
+
+          editObj.height = (posYH - parseInt(editObj.top)) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
           
-          editObj.width = (mouseX-parseInt(posX)) + 'px';
-          editObj.height = parseInt((mouseX-parseInt(posX))/rate) + 'px';
-
-          if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
-            editObj.width = (contentWidth - parseInt(posX)) + 'px'
-            editObj.height = parseInt((contentWidth - parseInt(posX))/rate) + 'px';
+          if((posYH - editObj.top)*rate >= (contentWidth-posX)){
+            editObj.width = (contentWidth-posX)+'px';
+            editObj.height = parseInt((contentWidth-posX)/rate)+'px';
           }
-
-          editObj.top = editObj.top + 'px';
-
+          
+          if(parseInt(editObj.width) >= (contentWidth - parseInt(posX))){
+            editObj.width = (contentWidth - parseInt(posX)) + 'px';
+            editObj.height = parseInt(parseInt(editObj.width)/rate) + 'px';
+            editObj.top = (posYH - parseInt(editObj.height)) + 'px';
+          }
+          
+          editObj.top = parseInt(editObj.top) + 'px';
           box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
 
@@ -1723,32 +1730,35 @@ function move(e, direction, className) {
       case 'topLeft':
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
-          // mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
+          mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
 
-          editObj.left = mouseX;
-          // editObj.top = mouseY;
+          editObj.top = mouseY;
           
-          // if(editObj.top < 0){
-          //   editObj.top = 0
-          // }
+          if(editObj.top < 0){
+            editObj.top = 0
+          }
 
-          // if(editObj.top > posYH){
-          //   editObj.top = posYH
-          // }
-
-          if(editObj.left < 0){
-            editObj.left = 0
+          if(editObj.top > posYH){
+            editObj.top = posYH
           }
 
           if(editObj.left > posXW){
             editObj.left = posXW
           }
 
-          editObj.width = (posXW-parseInt(editObj.left))+'px';
-          editObj.height = parseInt((posXW-parseInt(editObj.left))/rate)+'px';
-          editObj.left = editObj.left + 'px';
+          editObj.height = (posYH - parseInt(editObj.top)) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
+          editObj.left = (posXW - parseInt(editObj.width)) + 'px';
 
-          box.css({'left':editObj.left, 'width':editObj.width, 'height':editObj.height})
+          if(parseInt(editObj.left) < 0){
+            editObj.left = 0;
+            editObj.width = posXW + 'px';
+            editObj.height = parseInt(posXW/rate) + 'px';
+            editObj.top = (posYH - parseInt(editObj.height)) + 'px';
+          }
+
+          box.css({'left':editObj.left, 'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
+
         })
 
         $('.content').mouseup(function () {
@@ -1762,8 +1772,8 @@ function move(e, direction, className) {
         $('.content').mousemove(function(e) {
           mouseX = parseInt(e.pageX-content.offset().left); //获取当前鼠标相对content的X坐标
           mouseY = parseInt(e.pageY-content.offset().top); //获取当前鼠标相对img的Y坐标
-
-          editObj.top = posY;
+          
+          editObj.top = mouseY;
           
           if(editObj.top < 0){
             editObj.top = 0
@@ -1771,17 +1781,22 @@ function move(e, direction, className) {
           if(editObj.top > posYH){
             editObj.top = posYH
           }
+
+          editObj.height = (posYH - parseInt(editObj.top)) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
           
-          editObj.width = (mouseX-parseInt(posX)) + 'px';
-          editObj.height = parseInt((mouseX-parseInt(posX))/rate) + 'px';
-
-          if(parseInt(editObj.width) > (contentWidth - parseInt(posX))){
-            editObj.width = (contentWidth - parseInt(posX)) + 'px'
-            editObj.height = parseInt((contentWidth - parseInt(posX))/rate) + 'px';
+          if((posYH - editObj.top)*rate >= (contentWidth-posX)){
+            editObj.width = (contentWidth-posX)+'px';
+            editObj.height = parseInt((contentWidth-posX)/rate)+'px';
           }
-
-          editObj.top = editObj.top + 'px';
-
+          
+          if(parseInt(editObj.width) >= (contentWidth - parseInt(posX))){
+            editObj.width = (contentWidth - parseInt(posX)) + 'px';
+            editObj.height = parseInt(parseInt(editObj.width)/rate) + 'px';
+            editObj.top = (posYH - parseInt(editObj.height)) + 'px';
+          }
+          
+          editObj.top = parseInt(editObj.top) + 'px';
           box.css({'top':editObj.top, 'width':editObj.width, 'height':editObj.height})
         })
 
@@ -2117,6 +2132,7 @@ function openTdk() {
 function preview() {
   // alert('稍等，页面制作中。。。')
   // return
+
   $('.direction-box').hide()
   $('.popup').show()
   $('.popup .clone-content').append($('.scroll').clone(false))
