@@ -204,13 +204,10 @@ function iptBlur(e, t) {
       }
     }
 
-    console.log(1231,t,data.attrs)
     if(t != -1){
       data.attrs[t].width = width+'px';
       data.attrs[t].height = height+'px';
     }
-
-    console.log(121,data.attrs)
   }
 }
 
@@ -1934,7 +1931,8 @@ function move(e, direction, className) {
       $('.video-width').val(parseInt(editObj.width))
       $('.video-height').val(parseInt(editObj.height))
     }
-    console.log(33,data.attrs)
+
+    $('.content').off('mouseup');
     return
   }
 }
