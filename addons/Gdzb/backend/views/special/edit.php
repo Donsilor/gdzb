@@ -102,7 +102,12 @@ $this->beginPage()
                 <span class="fl switchPc" onclick="togglePc()">pc</span>
               </div>
             </div> -->
+
+            <!-- 返回 -->
             <div class="go-back"></div>
+            
+            <!-- 辅助线开关 -->
+            <div class="line-switch">辅助线</div>
 
             <div class="middle-layer mobile">
                 <div class="scroll-box" style="position: absolute;top:0;left:0;width:100%;height:100%;overflow:scroll">
@@ -111,6 +116,7 @@ $this->beginPage()
                         <div class="template-text"></div>
                     </div>
                 </div>
+                <div class="subline"></div>
                 <div class="area"><span onclick="addArea()">+ 增加区域</span></div>
             </div>
         </div>
@@ -126,7 +132,7 @@ $this->beginPage()
                                     <div class="default clf">
                                         <div class="value fl">
                                             <div class="a fl">A</div>
-                                            <div class="colorBlock fl"></div>
+                                            <div class="color-block fl"></div>
                                         </div>
                                         <i class="icon fl" onclick="select(event)"></i>
                                     </div>
@@ -139,12 +145,12 @@ $this->beginPage()
 
                             <div class="attr-child clf">
                                 <div class="text fl"></div>
-                                <div class="select fl fontSize">
-                                    <input type="text" class="colorIpt" onblur=colorOnBlur(event) maxlength="9">
+                                <div class="select fl">
+                                    <input type="text" class="color-ipt" onblur=colorOnBlur(event) maxlength="9">
                                 </div>
                             </div>
 
-                            <div class="attr-child clf">
+                            <div class="attr-child clf font-family">
                                 <div class="text fl">文字字体</div>
                                 <div class="select fl">
                                     <div class="default clf">
@@ -153,16 +159,16 @@ $this->beginPage()
                                     </div>
 
                                     <div class="option-box">
-                                        <div class="option">微软雅黑</div>
+                                        <!-- <div class="option">微软雅黑</div> -->
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="attr-child clf">
+                            <div class="attr-child clf font-size">
                                 <div class="text fl">文字大小</div>
                                 <div class="select fl">
                                     <div class="default clf">
-                                        <div class="value fl font-size">12</div>
+                                        <div class="value fl">12</div>
                                         <i class="icon fl" onclick="select(event)"></i>
                                     </div>
 

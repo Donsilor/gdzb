@@ -6,22 +6,23 @@ $('.go-back').click(function() {
 // 颜色
 var colors = ['#333333','#ffffff','#169BD5','#cccccc','#ff0000','#79AF42','#ffff00','#800080'];
 for(var c=0; c<colors.length; c++){
-  var div = document.createElement('div');
-  div.className = 'option';
-  div.style.backgroundColor = colors[c]; 
-  $('.text-color .option-box').append(div)
+  var divColor = document.createElement('div');
+  divColor.className = 'option';
+  divColor.style.backgroundColor = colors[c];
+  $('.text-color .option-box').append(divColor)
 }
 
-$('.colorIpt').val(colors[0])
+$('.color-ipt').val(colors[0])
 
 // 字体
-// var typeface = [''];
-// for(var c=0; t<typeface.length; c++){
-//   var div = document.createElement('div');
-//   div.className = 'option';
-//   div.style.backgroundColor = color[c]; 
-//   $('.text-color .option-box').append(div)
-// }
+var typeface = ['默认字体','Frutiger','Helvetica'];
+for(var c=0; c<typeface.length; c++){
+  var divFont = document.createElement('div');
+  divFont.className = 'option';
+  divFont.innerText = typeface[c];
+  $('.font-family .option-box').append(divFont)
+}
+$('.font-family .value').text(typeface[0])
 
 // 下拉框选项
 function select(e){
@@ -34,11 +35,22 @@ function select(e){
 // 选择颜色
 $('.text-color .option').click(function() {
   var idc = $(this).index();
-  $('.colorBlock').css('backgroundColor', colors[idc])
+  $('.color-block').css('backgroundColor', colors[idc])
   $(this).parent().slideUp().hide()
-  $('.colorIpt').val(colors[idc])
+  $('.color-ipt').val(colors[idc])
 
   amend('color', colors[idc])
+})
+
+// 选择字体
+$('.font-family .option').click(function() {
+  var idd = $(this).index(),fontFamily;
+  $(this).parent().slideUp().hide()
+  $('.font-family .value').text(typeface[idd])
+
+  fontFamily = idd == 0 ? '' : typeface[idd];
+
+  amend('font-family', fontFamily)
 })
 
 // 颜色输入框
@@ -53,13 +65,13 @@ function colorOnBlur(e) {
   }
 
   if(val && reg.test(val)){
-    $('.colorBlock').css('background-color', val)
+    $('.color-block').css('background-color', val)
     amend('color', val)
   }
 }
 
 // 选择字体大小
-$('.option-box .option').not('.text-color .option').click(function() {
+$('.font-size .option').not('.text-color .option').click(function() {
   $(this).parent().prev().children('.value').text($(this).text())
   $(this).parent().slideUp().hide()
   amend('font-size', $(this).text()+'px')
@@ -184,13 +196,21 @@ function iptBlur(e, t) {
         break;
     }
 
-    for(var t in data.attrs){
-      if(data.attrs[t].element == elementActive){
-        data.attrs[t].width = width+'px';
-        data.attrs[t].height = height+'px';
+    var t = -1;
+    for(var n in data.attrs){
+      if(data.attrs[n].element == elementActive){
+        t = n;
         break
       }
     }
+
+    console.log(1231,t,data.attrs)
+    if(t != -1){
+      data.attrs[t].width = width+'px';
+      data.attrs[t].height = height+'px';
+    }
+
+    console.log(121,data.attrs)
   }
 }
 
@@ -246,7 +266,7 @@ textAttr = {
   'z-index': 0,
   width: 0,
   height: 0,
-  'font-face': '',
+  'font-family': '',
   'font-size': '',
   'font-weight': '',
   'font-style': '',
@@ -321,9 +341,10 @@ timer;
 
 // 重置富文本样式
 function resetCss() {
-  $('.colorBlock').css('background-color', colors[0])
-  $('.colorIpt').val(colors[0])
-  $('.font-size').text($(this).text())
+  $('.color-block').css('background-color', colors[0])
+  $('.color-ipt .value').val(colors[0])
+  $('.font-box .value').val(typeface[0])
+  $('.font-size .value').text($(this).text())
   $('.attr-2').removeClass('active')
   $('.attr-4').removeClass('active')
   $('.link').val('')
@@ -353,7 +374,7 @@ function showAttrs() {
               +';height:'+editAttrs[k].height
               +';font-size:'+editAttrs[k]['font-size']
               +';font-style:'+editAttrs[k]['font-style']
-              +';font-face:'+editAttrs[k]['font-face']
+              +';font-family:'+editAttrs[k]['font-family']
               +';font-weight:'+editAttrs[k]['font-weight']
               +';text-align:'+editAttrs[k]['text-align']
               +';text-decoration:'+editAttrs[k]['text-decoration']
@@ -522,7 +543,7 @@ $('.classify-text').on('mousedown', function(e) {
             +';height:'+textObj.height
             +';font-size:'+textObj['font-size']
             +';font-style:'+textObj['font-style']
-            +';font-face:'+textObj['font-face']
+            +';font-family:'+textObj['font-family']
             +';font-weight:'+textObj['font-weight']
             +';text-align:'+textObj['text-align']
             +';text-decoration:'+textObj['text-decoration']
@@ -588,12 +609,12 @@ function edit(e, className) {
   if(!elementActive){
     elementActive = className;
     elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', 999);
+    $('.'+className).css('z-index', 900);
   }else{
     $('.'+elementActive).css('z-index', elementActiveZIndex)
     elementActive = className;
     elementActiveZIndex = $('.'+className).css('z-index');
-    $('.'+className).css('z-index', 999)
+    $('.'+className).css('z-index', 900)
   }
 
   for(var ay in data.attrs){
@@ -613,13 +634,13 @@ function edit(e, className) {
   $(e.currentTarget).children('.pre').hide();
   $(e.currentTarget).children('.ipt-text').show().val(val).focus();
 
-  $('.colorBlock').css('background-color', editObj.color)
-  $('.colorIpt').val(' ')
+  $('.color-block').css('background-color', editObj.color)
+  $('.color-ipt').val(editObj.color)
 
   if(editObj['font-size']){
-    $('.font-size').text(parseInt(editObj['font-size']))
+    $('.font-size .value').text(parseInt(editObj['font-size']))
   }else{
-    $('.font-size').text(12)
+    $('.font-size .value').text(12)
   }
 
   if(editObj['font-weight']){
@@ -638,6 +659,21 @@ function edit(e, className) {
     $('.attr-underline').addClass('active')
   }else{
     $('.attr-underline').removeClass('active')
+  }
+
+  if(editObj['font-family']){
+    var idf;
+    for(var e=0; e<typeface.length; e++){
+      if(typeface[e] == editObj['font-family']){
+        idf = e;
+      }
+    }
+    
+    if(idf){
+      $('.font-family .value').text(typeface[idf])
+    }
+  }else{
+    $('.font-family .value').text(typeface[0])
   }
 
   var align = editObj['text-align'],idx;
@@ -946,8 +982,6 @@ function addMove(e, className) {
   
   clearTimeout(timer);
   timer = setTimeout(function () {
-    e.stopPropagation();
-    
     $('.direction-box').hide()
     $('.'+className).find('.direction-box').show()
     
@@ -966,11 +1000,11 @@ function addMove(e, className) {
     $('.content-r .link').val(editObj.link)
 
     if(editObj.type == 'text'){
-      $('.colorBlock').css('background-color', editObj.color)
-      $('.colorIpt').val(editObj.color)
+      $('.color-block').css('background-color', editObj.color)
+      $('.color-ipt').val(editObj.color)
 
       if(editObj['font-size']){
-        $('.font-size').text(parseInt(editObj['font-size']))
+        $('.font-size .value').text(parseInt(editObj['font-size']))
       }
 
       if(editObj['font-weight']){
@@ -989,6 +1023,21 @@ function addMove(e, className) {
         $('.attr-underline').addClass('active')
       }else{
         $('.attr-underline').removeClass('active')
+      }
+
+      if(editObj['font-family']){
+        var idf;
+        for(var e=0; e<typeface.length; e++){
+          if(typeface[e] == editObj['font-family']){
+            idf = e;
+          }
+        }
+        
+        if(idf){
+          $('.font-family .value').text(typeface[idf])
+        }
+      }else{
+        $('.font-family .value').text(typeface[0])
       }
 
       var align = editObj['text-align'],idx;
@@ -1156,9 +1205,8 @@ function move(e, direction, className) {
           box.css({'top':editObj.top, 'height':editObj.height})
         })
   
-        $('.content').mouseup(function () {
+        $('.scroll').mouseup(function () {
           returnData()
-          $('.content').off('mousemove')
         })
   
         break;
@@ -1865,6 +1913,8 @@ function move(e, direction, className) {
 
   // 返回结果
   function returnData(type) {
+    $('.content').off('mousemove');
+
     if((editObj.left).indexOf('%') == -1){
       data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
     }else{
@@ -1884,7 +1934,7 @@ function move(e, direction, className) {
       $('.video-width').val(parseInt(editObj.width))
       $('.video-height').val(parseInt(editObj.height))
     }
-
+    console.log(33,data.attrs)
     return
   }
 }
@@ -2054,6 +2104,12 @@ function addArea() {
   }
 }
 
+// 关闭辅助线
+$('.line-switch').click(function() {
+  $(this).toggleClass('active');
+  $('.subline').toggle();
+})
+
 // 添加元素时滚动
 function aotuScroll(heig) {
   var diff = parseInt($('.scroll').css('height'))-120;
@@ -2089,7 +2145,6 @@ function amend(cl,val) {
   }else{
     return
   }
-
 }
 
 // 切换层级
@@ -2097,18 +2152,20 @@ function tier(ele) {
   if(!elementActive){
     elementActive = ele;
     elementActiveZIndex = $('.'+ele).css('z-index');
-    $('.'+ele).css('z-index', 999);
+    $('.'+ele).css('z-index', 900);
   }else{
     $('.'+elementActive).css('z-index', elementActiveZIndex)
     elementActive = ele;
     elementActiveZIndex = $('.'+ele).css('z-index');
-    $('.'+ele).css('z-index', 999)
+    $('.'+ele).css('z-index', 900)
   }
 }
 
 // 去除层级和选中状态
 $('body').click(function (e) {
   $('.option-box').hide()
+  $(this).off('mousemove')
+
   if(!($(e.target).parents().hasClass('content-r') || $(e.target).parents().hasClass('content-m'))){
       $('.direction-box').hide()
       elementActive = '';
