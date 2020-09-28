@@ -1,3 +1,5 @@
+// 版本号  v5.1
+
 // 返回上一页
 $('.go-back').click(function() {
   history.back(-1)
