@@ -1,4 +1,4 @@
-// 版本号  v5.1
+// 版本号  v5.2
 
 // 返回上一页
 $('.go-back').click(function() {
@@ -316,6 +316,8 @@ ratio = 0,
 
 // 最大高度
 maxHeight = 0,
+// 当前位置高度
+siteHeight = 0,
 
 // 判断是否拖拽
 ifMove = false,
@@ -402,8 +404,8 @@ function showAttrs() {
           $('.text-box-'+idNum + ' .pre').addClass('no-border')
         }
 
-        var heig = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
-        aotuScroll(heig)
+        siteHeight = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
+        autoScroll(siteHeight)
 
       }else if(editAttrs[k].type == 'img'){
         divStyle ='position:'+'absolute'
@@ -437,8 +439,8 @@ function showAttrs() {
           $('.img-box-'+idNum+ ' .ele-box').addClass('no-bg')
         }
 
-        var heig = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
-        aotuScroll(heig)
+        siteHeight = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
+        autoScroll(siteHeight)
 
       }else if(editAttrs[k].type == 'video'){
         divStyle ='position:'+'absolute'
@@ -466,8 +468,8 @@ function showAttrs() {
         content.append(div)
         $('.video-box-'+idNum+ ' .video').attr('src', editAttrs[k].url)
 
-        var heig = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
-        aotuScroll(heig)
+        siteHeight = parseInt(editAttrs[k].top) + parseInt(editAttrs[k].height);
+        autoScroll(siteHeight)
       }
     }
 
@@ -574,14 +576,10 @@ $('.classify-text').on('mousedown', function(e) {
       textObj.top = (maxHeight+20) + 'px';
     }
 
-    if(parseInt(textObj.top) + parseInt(textObj.height) > maxHeight){
-      maxHeight = parseInt(textObj.top) + parseInt(textObj.height)
-    }
-
     $('.text-box-'+idNum).css('top',textObj.top)
     
-    var site = parseInt(textObj.top) + parseInt(textObj.height);
-    aotuScroll(site)
+    siteHeight = parseInt(textObj.top) + parseInt(textObj.height);
+    autoScroll(siteHeight)
 
     tier('text-box-'+idNum)
 
@@ -824,14 +822,10 @@ $('.classify-img').on('mousedown', function() {
       imgObj.top = (maxHeight+20) + 'px';
     }
 
-    if(parseInt(imgObj.top) + parseInt(imgObj.height) > maxHeight){
-      maxHeight = parseInt(imgObj.top) + parseInt(imgObj.height)
-    }
-
     $('.img-box-'+idNum).css('top',imgObj.top)
     
-    var site = parseInt(imgObj.top) + parseInt(imgObj.height);
-    aotuScroll(site)
+    siteHeight = parseInt(imgObj.top) + parseInt(imgObj.height);
+    autoScroll(siteHeight)
 
     tier('img-box-'+idNum)
 
@@ -951,14 +945,10 @@ $('.classify-video').on('mousedown', function() {
       videoObj.top = (maxHeight+20) + 'px';
     }
 
-    if(parseInt(videoObj.top) + parseInt(videoObj.height) > maxHeight){
-      maxHeight = parseInt(videoObj.top) + parseInt(videoObj.height)
-    }
-
     $('.video-box-'+idNum).css('top',videoObj.top)
     
-    var site = parseInt(videoObj.top) + parseInt(videoObj.height);
-    aotuScroll(site)
+    siteHeight = parseInt(videoObj.top) + parseInt(videoObj.height);
+    autoScroll(siteHeight)
 
     tier('video-box-'+idNum)
 
@@ -1143,9 +1133,8 @@ function moveImg(e, className) {
       
       data.attrs[editIndex].top = editObj.top;
 
-      if(parseInt(editObj.top) + parseInt(editObj.height) > maxHeight){
-        maxHeight = parseInt(editObj.top) + parseInt(editObj.height)
-      }
+      siteHeight = parseInt(editObj.top) + parseInt(editObj.height);
+      autoScroll(siteHeight)
 
       $(content).off('mousemove')
     })
@@ -1408,7 +1397,7 @@ function move(e, direction, className) {
           // topK = editObj.top+'px';
           editObj.top = editObj.top + 'px';
           editObj.height = (posYH - parseInt(editObj.top)) + 'px';
-          editObj.width = parseInt((posYH - parseInt(editObj.top))/rate) + 'px';
+          editObj.width = parseInt((posYH - parseInt(editObj.top))*rate) + 'px';
 
           if((posYH - editObj.top)*rate >= (contentWidth-posX)){
             editObj.width = (contentWidth-posX)+'px';
@@ -1447,7 +1436,7 @@ function move(e, direction, className) {
           //     editObj.top = topK;
           //   }
           // }else{
-          //   console.log(2222)
+          //
           // }
 
           // if(editObj.width >= ())
@@ -1457,7 +1446,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1478,7 +1466,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1506,7 +1493,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1527,7 +1513,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1567,7 +1552,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1606,7 +1590,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1634,7 +1617,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1660,7 +1642,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1700,7 +1681,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1721,7 +1701,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1748,7 +1727,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1769,7 +1747,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1810,7 +1787,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1849,7 +1825,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1877,7 +1852,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1903,7 +1877,6 @@ function move(e, direction, className) {
 
         $('.content').mouseup(function () {
           returnData(type)
-          $('.content').off('mousemove')
         })
 
         break;
@@ -1914,7 +1887,7 @@ function move(e, direction, className) {
   function returnData(type) {
     $('.content').off('mousemove');
 
-    if((editObj.left).indexOf('%') == -1){
+    if((editObj.left+'').indexOf('%') == -1){
       data.attrs[editIndex].left = (parseInt(editObj.left)/contentWidth*100).toFixed(2) + '%';
     }else{
       data.attrs[editIndex].left = editObj.left;
@@ -1933,6 +1906,9 @@ function move(e, direction, className) {
       $('.video-width').val(parseInt(editObj.width))
       $('.video-height').val(parseInt(editObj.height))
     }
+
+    siteHeight = parseInt(editObj.top) + parseInt(editObj.height);
+    autoScroll(siteHeight)
 
     $('.content').off('mouseup');
     return
@@ -2026,8 +2002,8 @@ function changeFile(obj,className) {
               data.attrs[editIndex].width = $('.'+className).css('width');
               data.attrs[editIndex].height = parseInt(parseInt($('.'+className).css('width'))/ratio)+'px';
               
-              var heig = parseInt($('.'+className).css('top')) + parseInt(data.attrs[editIndex].height);
-              aotuScroll(heig)
+              siteHeight = parseInt($('.'+className).css('top')) + parseInt(data.attrs[editIndex].height);
+              autoScroll(siteHeight)
             }
 
   　　　　},
@@ -2081,8 +2057,8 @@ function changeFile(obj,className) {
             //   data.attrs[editIndex].width = $('.'+className).css('width');
             //   data.attrs[editIndex].height = parseInt(parseInt($('.'+className).css('width'))/ratio)+'px';
               
-            //   var heig = parseInt($('.'+className).css('top')) + parseInt(data.attrs[editIndex].height);
-            //   aotuScroll(heig)
+            //   siteHeight = parseInt($('.'+className).css('top')) + parseInt(data.attrs[editIndex].height);
+            //   autoScroll(siteHeight)
             // }
   　　　　},
   　　　　error: function(err) {
@@ -2111,7 +2087,8 @@ $('.line-switch').click(function() {
 })
 
 // 添加元素时滚动
-function aotuScroll(heig) {
+function autoScroll(heig) {
+  maxHeight = heig;
   var diff = parseInt($('.scroll').css('height'))-120;
   if(heig >= diff){
     var height = heig+150;
