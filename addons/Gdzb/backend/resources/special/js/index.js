@@ -1,4 +1,4 @@
-// 版本号  v5.2
+// 版本号  v5.4
 
 // 返回上一页
 $('.go-back').click(function() {
@@ -492,7 +492,7 @@ $('.classify-text').on('mousedown', function(e) {
   $(this).addClass('active').siblings().removeClass('active')
   $('.control-text').show().siblings().hide();
   
-  textObj.width = '180px';
+  textObj.width = '375px';
   textObj.height = '30px';
   tem.css({'width': textObj.width, 'height': textObj.height})
 
@@ -597,10 +597,11 @@ $('.classify-text').on('mousedown', function(e) {
 
 // 编辑文本
 function edit(e, className) {
-  e.stopPropagation();
-  clearTimeout(timer);
+  e.stopPropagation()
+  clearTimeout(timer)
 
   $('.direction-box').hide()
+  resetCss()
   editObj = {};
 
   if(!elementActive){
@@ -683,6 +684,8 @@ function edit(e, className) {
   }
 
   $('.content-r .attr-4').eq(idx).addClass('active')
+
+  $('.text-link').val(editObj.url)
 
   $('.control-text').show().siblings().hide();
   $('.del').hide()
@@ -968,6 +971,7 @@ function addMove(e, className) {
 
   ifMove = false;
   tier(className)
+  resetCss()
   
   clearTimeout(timer);
   timer = setTimeout(function () {
@@ -2168,8 +2172,45 @@ function preview() {
   // return
 
   $('.direction-box').hide()
-  $('.popup').show()
-  $('.popup .clone-content').append($('.scroll').clone(false))
+  // $('.popup').show()
+  // $('.popup .clone-content').append($('.scroll').clone(false))
+
+  String.prototype.format=function(){
+    if(arguments.length==0) return this;
+    for(var s=this, i=0; i<arguments.length; i++)
+      s=s.replace(new RegExp("\\{"+i+"\\}","g"), arguments[i]);
+    return s;
+  };
+
+  function openPostWindow(url, params) {
+
+    var newWin = window.open(),
+          formStr = '';
+     //设置样式为隐藏，打开新标签再跳转页面前，如果有可现实的表单选项，用户会看到表单内容数据
+     formStr = '<form style="visibility:hidden;" method="POST" action="' + url + '">' +
+          "<input type='hidden' name='params' value='{0}' />".format(params) +
+          '</form>';
+
+    newWin.document.body.innerHTML = formStr;
+    newWin.document.forms[0].submit();
+
+    return newWin;
+  }
+
+  var previewUrl = $('#special-url').val(),previewHost = "https://wap-gdzb.bddco.cn/",host = location.host;
+
+  if((host.indexOf('localhost') != -1) || (host.indexOf('192.168') != -1)){
+    // 本地环境
+    previewHost = "http://192.168.2.151:806/"
+  }else if((host.indexOf('gdzb.bddco') != -1)){
+    // 测试环境
+    previewHost = "https://wap-gdzb.bddco.cn/"
+  }else if(host == '...'){
+    // 正式环境
+    previewHost = "......"
+  }
+
+  openPostWindow(previewHost + 'pages/topic.php?url=' + previewUrl +'&preview', JSON.stringify(data))
 }
 
 // 关闭预览

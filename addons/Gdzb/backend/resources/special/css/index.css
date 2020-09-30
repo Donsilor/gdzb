@@ -162,6 +162,10 @@ html{
 
 .save{}
 
+#content-main{
+  height: 60px !important;
+}
+
 .container{
   width: 1200px;
   margin: 0 auto;
@@ -367,7 +371,7 @@ html{
   border: 1px solid #ccc;
   background-color: #fff;
   display: none;
-  z-index: 99;
+  z-index: 992;
 }
 
 .middle-layer .text-box .no-border{
