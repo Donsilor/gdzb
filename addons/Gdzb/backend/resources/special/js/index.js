@@ -5,6 +5,8 @@ $('.go-back').click(function() {
   history.back(-1)
 })
 
+sessionStorage.removeItem('pageData')
+
 // 颜色
 var colors = ['#333333','#ffffff','#169BD5','#cccccc','#ff0000','#79AF42','#ffff00','#800080'];
 for(var c=0; c<colors.length; c++){
@@ -2022,7 +2024,7 @@ function changeFile(obj,className) {
       file.type == 'video/mp4'||
       file.type == 'video/raw'
 
-    const isLt2M = file.size / 1024 / 1024 < 2;
+    const isLt2M = file.size / 1024 / 1024 < 5;
 
     // if (!isJPG) {
       // this.$message.error(this.$t(`${lang}.imgFomat`));
@@ -2201,43 +2203,29 @@ function preview() {
   // $('.popup').show()
   // $('.popup .clone-content').append($('.scroll').clone(false))
 
-  String.prototype.format=function(){
-    if(arguments.length==0) return this;
-    for(var s=this, i=0; i<arguments.length; i++)
-      s=s.replace(new RegExp("\\{"+i+"\\}","g"), arguments[i]);
-    return s;
-  };
+  // String.prototype.format=function(){
+  //   if(arguments.length==0) return this;
+  //   for(var s=this, i=0; i<arguments.length; i++)
+  //     s=s.replace(new RegExp("\\{"+i+"\\}","g"), arguments[i]);
+  //   return s;
+  // };
 
-  function openPostWindow(url, params) {
+  // function openPostWindow(url, params) {
 
-    var newWin = window.open(),
-          formStr = '';
-     //设置样式为隐藏，打开新标签再跳转页面前，如果有可现实的表单选项，用户会看到表单内容数据
-     formStr = '<form style="visibility:hidden;" method="POST" action="' + url + '">' +
-          "<input type='hidden' name='params' value='{0}' />".format(params) +
-          '</form>';
+  //   var newWin = window.open(),
+  //         formStr = '';
+  //    //设置样式为隐藏，打开新标签再跳转页面前，如果有可现实的表单选项，用户会看到表单内容数据
+  //    formStr = '<form style="visibility:hidden;" method="POST" action="' + url + '">' +
+  //         "<input type='hidden' name='params' value='{0}' />".format(params) +
+  //         '</form>';
 
-    newWin.document.body.innerHTML = formStr;
-    newWin.document.forms[0].submit();
+  //   newWin.document.body.innerHTML = formStr;
+  //   newWin.document.forms[0].submit();
 
-    return newWin;
-  }
-
-  // var previewUrl = $('#special-url').val(),previewHost = "https://wap-gdzb.bddco.cn/",host = location.host;
-
-  // if((host.indexOf('localhost') != -1) || (host.indexOf('192.168') != -1)){
-  //   // 本地环境
-  //   // previewHost = "http://192.168.1.5:806/"
-  //   previewHost = "http://192.168.2.151:806/"
-  // }else if((host.indexOf('gdzb.bddco') != -1)){
-  //   // 测试环境
-  //   previewHost = "https://wap-gdzb.bddco.cn/"
-  // }else if(host == '...'){
-  //   // 正式环境
-  //   previewHost = "......"
+  //   return newWin;
   // }
 
-  // openPostWindow(previewHost + 'pages/topic.php?url=' + previewUrl +'&preview', JSON.stringify(data))
+  sessionStorage.setItem('pageData', JSON.stringify(data))
 
   var previewUrl=$('#special-url').val(), host=location.host, href=location.href, protocol='https://';
 
@@ -2247,8 +2235,9 @@ function preview() {
 
   var dataUrl = protocol + host + '/backend/gdzb/special/topic?url=' + previewUrl + '&preview';
 
-  openPostWindow(dataUrl, JSON.stringify(data))
-  
+  // openPostWindow(dataUrl, JSON.stringify(data))
+  window.open(dataUrl)
+
 }
 
 // 关闭预览

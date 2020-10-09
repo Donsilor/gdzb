@@ -69,7 +69,7 @@
     </style>
   </head>
   <body>
-    <!-- 版本号：5.76 -->
+    <!-- 版本号：6.0 -->
     <div id="container"></div>
 
     <script>
@@ -105,20 +105,27 @@
             }
           })
         }else{
-          // return
           // 预览数据
-          var postData = '';
-              postData = <?php echo (isset($_POST['params']) ? $_POST['params'] : '{}'); ?>;
+          try {
+            var postDatas = {};
+                eval('postDatas = <?php echo sprintf("%s", isset($_POST["params"]) ? $_POST["params"] : "{}"); ?>');
+          } catch(err) {
+            postDatas = {};
+          }
 
-              console.log('postData',postData)
+          var postData = JSON.parse(sessionStorage.getItem('pageData'));
+
+          console.log('postData',postData)
 
           if(postData){
             var re = {data:{title:'',description:'',keywords:'',data:[]}};
-
-            re.data.title = postData.tdk.title;
-            re.data.description = postData.tdk.description;
-            re.data.keywords = postData.tdk.keywords;
-
+            
+            if(postData.hasOwnProperty('tdk')){ 
+              re.data.title = postData.tdk.title;
+              re.data.description = postData.tdk.description;
+              re.data.keywords = postData.tdk.keywords;
+            }
+              
             for(var s in postData.attrs){
               (re.data.data).push(postData.attrs[s])
             }
