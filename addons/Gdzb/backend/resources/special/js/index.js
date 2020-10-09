@@ -1,4 +1,4 @@
-// 版本号  v5.5
+// 版本号  v5.78
 
 // 返回上一页
 $('.go-back').click(function() {
@@ -130,7 +130,7 @@ function alignType(e) {
 // 链接
 function addLink(e) {
   var val = $(e.target).val();
-  
+
   if(elementActive){
     for(var at in data.attrs){
       if(data.attrs[at].element == elementActive){
@@ -2198,21 +2198,32 @@ function preview() {
     return newWin;
   }
 
-  var previewUrl = $('#special-url').val(),previewHost = "https://wap-gdzb.bddco.cn/",host = location.host;
+  // var previewUrl = $('#special-url').val(),previewHost = "https://wap-gdzb.bddco.cn/",host = location.host;
 
-  if((host.indexOf('localhost') != -1) || (host.indexOf('192.168') != -1)){
-    // 本地环境
-    // previewHost = "http://192.168.1.5:806/"
-    previewHost = "http://192.168.2.151:806/"
-  }else if((host.indexOf('gdzb.bddco') != -1)){
-    // 测试环境
-    previewHost = "https://wap-gdzb.bddco.cn/"
-  }else if(host == '...'){
-    // 正式环境
-    previewHost = "......"
+  // if((host.indexOf('localhost') != -1) || (host.indexOf('192.168') != -1)){
+  //   // 本地环境
+  //   // previewHost = "http://192.168.1.5:806/"
+  //   previewHost = "http://192.168.2.151:806/"
+  // }else if((host.indexOf('gdzb.bddco') != -1)){
+  //   // 测试环境
+  //   previewHost = "https://wap-gdzb.bddco.cn/"
+  // }else if(host == '...'){
+  //   // 正式环境
+  //   previewHost = "......"
+  // }
+
+  // openPostWindow(previewHost + 'pages/topic.php?url=' + previewUrl +'&preview', JSON.stringify(data))
+
+  var previewUrl=$('#special-url').val(), host=location.host, href=location.href, protocol='https://';
+
+  if((href.indexOf('localhost') != -1) || (href.indexOf('192.168') != -1)){
+    protocol = 'http://';
   }
 
-  openPostWindow(previewHost + 'pages/topic.php?url=' + previewUrl +'&preview', JSON.stringify(data))
+  var dataUrl = protocol + host + '/backend/gdzb/special/topic?url=' + previewUrl + '&preview';
+
+  openPostWindow(dataUrl, JSON.stringify(data))
+  
 }
 
 // 关闭预览

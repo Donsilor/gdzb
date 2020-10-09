@@ -23,6 +23,9 @@ use yii\db\Exception;
  */
 class SpecialController extends BaseController
 {
+
+    public $enableCsrfValidation = false;
+
     use Curd;
 
     /**
@@ -160,5 +163,16 @@ class SpecialController extends BaseController
             'tabList'=>\Yii::$app->salesService->customer->menuTabList($customer_id, $returnUrl),
             'returnUrl'=>$returnUrl,
         ]);
+    }
+
+    /**
+     * 详情展示页
+     * @return string
+     * @throws
+     */
+    public function actionTopic()
+    {
+        $this->layout = false;
+        return $this->render($this->action->id);
     }
 }
