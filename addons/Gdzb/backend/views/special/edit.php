@@ -208,13 +208,13 @@ $this->beginPage()
                         <div class="attr">
                             <div class="align clf">
                                 <div class="attr-4 fl" onclick="alignType(event)">
-                                    <div class="icon align-justify"></div>
-                                    <div class="text">两端</div>
+                                    <div class="icon align-left"></div>
+                                    <div class="text">居左</div>
                                 </div>
 
                                 <div class="attr-4 fl" onclick="alignType(event)">
-                                    <div class="icon align-left"></div>
-                                    <div class="text">居左</div>
+                                    <div class="icon align-center"></div>
+                                    <div class="text">居中</div>
                                 </div>
 
                                 <div class="attr-4 fl" onclick="alignType(event)">
@@ -223,8 +223,8 @@ $this->beginPage()
                                 </div>
 
                                 <div class="attr-4 fl" onclick="alignType(event)">
-                                    <div class="icon align-center"></div>
-                                    <div class="text">居中</div>
+                                    <div class="icon align-justify"></div>
+                                    <div class="text">两端</div>
                                 </div>
                             </div>
                         </div>

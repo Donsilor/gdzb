@@ -1,4 +1,4 @@
-// 版本号  v5.4
+// 版本号  v5.5
 
 // 返回上一页
 $('.go-back').click(function() {
@@ -119,7 +119,7 @@ function alignType(e) {
   var align = $('.attr-4').hasClass('active');
   if(align){
     var index = $('.attr-4.active').index(),
-    aligns = ['justify','left','right','center'];
+    aligns = ['left','center','right','justify'];
     
     amend('text-align', aligns[index])
   }else{
@@ -130,21 +130,20 @@ function alignType(e) {
 // 链接
 function addLink(e) {
   var val = $(e.target).val();
-  if(val){
-    if(elementActive){
-      for(var at in data.attrs){
-        if(data.attrs[at].element == elementActive){
-          editIndex = at;
-          break
-        }
-      }
   
-      if(editIndex != -1){
-        data.attrs[editIndex].link = val;
+  if(elementActive){
+    for(var at in data.attrs){
+      if(data.attrs[at].element == elementActive){
+        editIndex = at;
+        break
       }
-    }else{
-      return
     }
+
+    if(editIndex != -1){
+      data.attrs[editIndex].link = val;
+    }
+  }else{
+    return
   }
 }
 
@@ -597,6 +596,7 @@ $('.classify-text').on('mousedown', function(e) {
 
 // 编辑文本
 function edit(e, className) {
+  console.log(777)
   e.stopPropagation()
   clearTimeout(timer)
 
@@ -686,6 +686,7 @@ function edit(e, className) {
   $('.content-r .attr-4').eq(idx).addClass('active')
 
   $('.text-link').val(editObj.url)
+  $('.content-r .link').val(editObj.link)
 
   $('.control-text').show().siblings().hide();
   $('.del').hide()
@@ -2201,6 +2202,7 @@ function preview() {
 
   if((host.indexOf('localhost') != -1) || (host.indexOf('192.168') != -1)){
     // 本地环境
+    // previewHost = "http://192.168.1.5:806/"
     previewHost = "http://192.168.2.151:806/"
   }else if((host.indexOf('gdzb.bddco') != -1)){
     // 测试环境
