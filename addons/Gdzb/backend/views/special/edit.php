@@ -45,7 +45,7 @@ $this->beginPage()
                     <div class="tdk-t clf">
                         <div class="title fl">Title</div>
                         <div class="value fl">
-                            <textarea name="" id="title" maxlength="120" placeholder="限120字符以内"><?= $model->title ?></textarea>
+                            <textarea name="" id="title" onkeydown="tab(event, 'title')" maxlength="120" placeholder="限120字符以内"><?= $model->title ?></textarea>
                         </div>
                     </div>
 
@@ -61,7 +61,7 @@ $this->beginPage()
                     <div class="tdk-d clf">
                         <div class="title fl">Description</div>
                         <div class="value fl">
-                            <textarea name="" id="description" maxlength="120" placeholder="限120字符以内"><?= $model->description ?></textarea>
+                            <textarea name="" id="description" onkeydown="tab(event, 'description')" maxlength="120" placeholder="限120字符以内"><?= $model->description ?></textarea>
                         </div>
                     </div>
                 </div>

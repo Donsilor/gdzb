@@ -1,4 +1,4 @@
-// 版本号  v5.78
+// 版本号  v6.0
 
 // 返回上一页
 $('.go-back').click(function() {
@@ -596,7 +596,6 @@ $('.classify-text').on('mousedown', function(e) {
 
 // 编辑文本
 function edit(e, className) {
-  console.log(777)
   e.stopPropagation()
   clearTimeout(timer)
 
@@ -2160,6 +2159,32 @@ $('body').click(function (e) {
   //   elementActiveZIndex = 0;
   // }
 })
+
+// 修改Tab
+function tab(e, type) {
+  var code = e.keyCode || e.which || e.charCode;
+　if (code == 9) {
+    if(type == 'title'){
+      stopDefault(e)
+      $('#description').focus()
+    }
+
+    if(type == 'description'){
+      stopDefault(e)
+      $('#keyword').focus()
+    }
+  }
+
+  function stopDefault( e ) {
+    if ( e && e.preventDefault ){
+      //IE中阻止函数器默认动作的方式 
+      e.preventDefault(); 
+    }else{
+      window.event.returnValue = false; 
+      return false; 
+    }
+  }   
+}
 
 // 打开收起tdk
 function openTdk() {
