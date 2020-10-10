@@ -1,4 +1,4 @@
-// 版本号  v6.0
+// 版本号  v6.3
 
 // 返回上一页
 $('.go-back').click(function() {
@@ -678,10 +678,10 @@ function edit(e, className) {
   var align = editObj['text-align'],idx;
 
   switch (align) {
-    case 'justify': idx = 0; break;
-    case 'left': idx = 1; break;
+    case 'left': idx = 0; break;
+    case 'center': idx = 1; break;
     case 'right': idx = 2; break;
-    case 'center': idx = 3; break;
+    case 'justify': idx = 3; break;
   }
 
   $('.content-r .attr-4').eq(idx).addClass('active')
@@ -1038,10 +1038,10 @@ function addMove(e, className) {
       var align = editObj['text-align'],idx;
 
       switch (align) {
-        case 'justify': idx = 0; break;
-        case 'left': idx = 1; break;
+        case 'left': idx = 0; break;
+        case 'center': idx = 1; break;
         case 'right': idx = 2; break;
-        case 'center': idx = 3; break;
+        case 'justify': idx = 3; break;
       }
 
       $('.content-r .attr-4').eq(idx).addClass('active')

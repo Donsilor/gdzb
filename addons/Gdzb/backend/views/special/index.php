@@ -121,7 +121,7 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
                                     return Html::edit(['edit', 'id' => $model->id]);
                                 },
                                 'view' => function ($url, $model, $key) {
-                                    return Html::a('预览', ['view', 'id' => $model->id,'returnUrl'=>Url::getReturnUrl()], ['class' => 'btn btn-warning btn-sm']);
+                                    return Html::a('预览', ['topic', 'url' => $model->url], ['class' => 'btn btn-warning btn-sm', 'target' => '_blank']);
                                 },
                             ],
                         ],
